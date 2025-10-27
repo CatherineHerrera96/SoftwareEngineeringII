@@ -34,6 +34,9 @@ Contains all project-related documentation, including:
 📁 **Assignments**  
 Includes all course workshops and tasks delivered by the team.
 
+📁 **Workshops**  
+Includes workshops related to the course
+
 📁 **Project**  
 Contains the project source code.  
 > ⚙️ Structure may vary according to the technology selected — following Clean Architecture principles.
