@@ -48,7 +48,7 @@ Contains the project source code.
 | Phase | Progress |
 |-------|----------|
 | ✅ Initialization | Done |
-| 🔄 Requirements Analysis | In Progress |
+| 🔄 Requirements Analysis | Done |
 | ⏳ Development | Pending |
 | ⏳ Testing | Pending |
 | ⏳ Deployment | Pending |
