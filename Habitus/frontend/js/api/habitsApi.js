@@ -11,6 +11,8 @@ import { getToken } from "../state.js";
   - Usa una lista de hábitos "mockHabits" definida aquí mismo.
   - Guarda temporalmente los hábitos seleccionados usando localStorage.
   - Genera la Daily Checklist en el frontend a partir de esa selección.
+  - Guarda el estado Done/Missed del día en localStorage para que
+    no se reinicie al cambiar de vista.
 
   OBJETIVO:
     Permitir que el frontend se vea completo y demostrable
@@ -25,9 +27,9 @@ import { getToken } from "../state.js";
       - GET  /api/habits
       - POST /api/user-habits
       - GET  /api/daily-checklist
+      - POST /api/checkins
       - GET  /api/stats/weekly
       - GET  /api/achievements
-      - GET  /api/user-achievements
 
     En esa etapa se pueden ELIMINAR los mocks (mockHabits, localStorage)
     si ya no son necesarios.
@@ -188,6 +190,81 @@ function saveSelectedToStorage(ids) {
 }
 
 // ----------------------------------------------------------
+// Estado diario (Daily Checklist) guardado por día en localStorage
+// ----------------------------------------------------------
+//
+// Esto es solo para que, en modo demo, los cambios Done/Missed
+// no se pierdan al cambiar de vista. El backend real se encargará
+// de persistir los checkins en base de datos.
+//
+
+// Clave para guardar el estado diario de los hábitos.
+const DAILY_STATUS_KEY = "habitus_daily_status";
+
+/**
+ * Devuelve la fecha de hoy en formato YYYY-MM-DD.
+ * Se usa para que el estado Done/Missed se resetee cada día.
+ */
+function getTodayDateStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Lee de localStorage el estado diario de los hábitos SOLO si es del día de hoy.
+ *
+ * Estructura almacenada:
+ * {
+ *   date: "2025-11-23",
+ *   statuses: {
+ *     "1": true,   // habit_id 1 completado
+ *     "2": false
+ *   }
+ * }
+ */
+function loadTodayDailyStatus() {
+  try {
+    const raw = localStorage.getItem(DAILY_STATUS_KEY);
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+
+    if (!data || data.date !== getTodayDateStr() || !data.statuses) {
+      return {};
+    }
+
+    return data.statuses;
+  } catch (e) {
+    console.warn("[MOCK] Error reading DAILY_STATUS from storage", e);
+    return {};
+  }
+}
+
+/**
+ * Actualiza en localStorage el estado diario de un hábito para el día de hoy.
+ */
+function saveTodayDailyStatus(habitId, completed) {
+  try {
+    const today = getTodayDateStr();
+    let data = {
+      date: today,
+      statuses: {},
+    };
+
+    const raw = localStorage.getItem(DAILY_STATUS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.date === today && parsed.statuses) {
+        data = parsed;
+      }
+    }
+
+    data.statuses[String(habitId)] = !!completed;
+    localStorage.setItem(DAILY_STATUS_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn("[MOCK] Error saving DAILY_STATUS to storage", e);
+  }
+}
+
+// ----------------------------------------------------------
 // Funciones expuestas al resto del frontend
 // ----------------------------------------------------------
 
@@ -260,7 +337,8 @@ export async function saveUserHabits(habitIds) {
  * MOCK ACTUAL:
  *   - Toma los ids guardados en localStorage.
  *   - Los cruza con "mockHabits".
- *   - Crea un ítem diario por hábito seleccionado, con completed = false.
+ *   - Crea un ítem diario por hábito seleccionado.
+ *   - Usa DAILY_STATUS_KEY para saber si hoy está marcado como completed.
  */
 export async function fetchDailyChecklist() {
   const token = getToken();
@@ -274,6 +352,9 @@ export async function fetchDailyChecklist() {
     return [];
   }
 
+  // Map de estados completados para HOY (localStorage)
+  const todayStatuses = loadTodayDailyStatus();
+
   // Para cada id seleccionado creamos un ítem diario
   const items = selectedHabitIds
     .map((id) => {
@@ -282,7 +363,8 @@ export async function fetchDailyChecklist() {
       return {
         id: habit.id,
         name: habit.name,
-        completed: false, // por defecto no completado (el estado se maneja en la vista por ahora)
+        // Si en el localStorage de hoy está marcado como true, lo tomamos como completed
+        completed: !!todayStatuses[String(habit.id)],
       };
     })
     .filter(Boolean); // limpia nulls si algún id no existe
@@ -297,22 +379,24 @@ export async function fetchDailyChecklist() {
  *   { "habit_id": 1, "date": "2025-11-23", "completed": true }
  *
  * MOCK ACTUAL:
- *   Solo muestra por consola qué se marcaría como done/missed.
+ *   - Actualiza localStorage para el día actual (para que no se
+ *     reinicie al cambiar de vista).
+ *   - Muestra por consola qué se marcaría como done/missed.
  */
 export async function saveDailyStatus(id, completed) {
   const token = getToken();
   if (!token) throw new Error("Not authenticated");
 
-  // MOCK FRONTEND
+  // MOCK FRONTEND: guardar estado para HOY
   console.log("[MOCK] saveDailyStatus -> id:", id, "completed:", completed);
+  saveTodayDailyStatus(id, completed);
 
   // Versión real (ejemplo):
   // const res = await fetch(`${PY_BASE_URL}/checkins`, {
   //   method: "POST",
   //   headers: {
   //     "Content-Type": "application/json",
-  //     Authorization: `Bearer ${token}`,
-  //   },
+  //     Authorization: `Bearer ${token}` },
   //   body: JSON.stringify({ habit_id: id, completed }),
   // });
   // if (!res.ok) throw new Error("Error saving daily status");
