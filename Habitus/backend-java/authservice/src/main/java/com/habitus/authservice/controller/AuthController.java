@@ -3,7 +3,10 @@ package com.habitus.authservice.controller;
 import com.habitus.authservice.dto.AuthResponse;
 import com.habitus.authservice.dto.LoginRequest;
 import com.habitus.authservice.dto.RegisterRequest;
+import com.habitus.authservice.entity.User;
 import com.habitus.authservice.service.AuthService;
+
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,5 +28,13 @@ public class AuthController {
     public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
     }
+
+    @GetMapping("/me")
+    public User me() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        var userDetails = (com.habitus.authservice.security.CustomUserDetails) auth.getPrincipal();
+        return userDetails.getUser();
+    }
+
 }
 
