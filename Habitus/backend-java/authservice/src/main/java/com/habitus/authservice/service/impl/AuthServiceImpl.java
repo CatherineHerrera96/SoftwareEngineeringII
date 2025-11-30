@@ -27,9 +27,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.findByEmail(request.getEmail()) != null) {
+        if (userRepository.findByEmail(request.getEmail().toLowerCase()).isPresent()) {
             throw new RuntimeException("Email already in use");
         }
+
 
         User user = new User();
         user.setEmail(request.getEmail().toLowerCase());
@@ -44,11 +45,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail().toLowerCase());
+        User user = userRepository.findByEmail(request.getEmail().toLowerCase())
+        .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid credentials");
