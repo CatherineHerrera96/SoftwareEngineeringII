@@ -4,10 +4,10 @@ from pydantic import BaseModel, Field, ConfigDict  # 👈 añadimos ConfigDict
 
 # ----- Habit -----
 class HabitBase(BaseModel):
-    code: str
     name: str
     category: str
-    default_frequency: str
+    description: str
+    frequency: str
 
 
 class HabitCreate(HabitBase):
@@ -25,15 +25,14 @@ class HabitRead(HabitBase):
 class UserHabitCreate(BaseModel):
     user_id: str
     habit_id: str
-    frequency: str = "daily"
 
 
 class UserHabitRead(BaseModel):
     id: str
     user_id: str
     habit_id: str
-    frequency: str
     is_active: bool
+    is_completed: bool
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -43,14 +42,14 @@ class CheckinCreate(BaseModel):
     user_habit_id: str
     # Usamos DateType (alias) para evitar choque nombre campo/tipo
     date: DateType = Field(default_factory=DateType.today)
-    status: str  # "completed" | "missed"
+    is_completed: bool
 
 
 class CheckinRead(BaseModel):
     id: str
     user_habit_id: str
     date: DateType
-    status: str
+    is_completed: bool
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -73,3 +72,9 @@ class WeeklySummary(BaseModel):
     streak_global: int
     checkins_total: int
     checkins_completed: int
+
+
+class AchievementRead(BaseModel):
+    id: str
+    title: str
+    description: str

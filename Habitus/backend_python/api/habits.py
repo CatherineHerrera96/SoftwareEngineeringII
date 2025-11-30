@@ -9,7 +9,10 @@ router = APIRouter(tags=["habits"])
 
 
 @router.post("/", response_model=schemas.HabitRead, status_code=201)
-def create_habit(habit_in: schemas.HabitCreate, db: Session = Depends(get_db)):
+def create_habit(
+    habit_in: schemas.HabitCreate,
+    db: Session = Depends(get_db)
+):
     return crud.create_habit(db, habit_in)
 
 

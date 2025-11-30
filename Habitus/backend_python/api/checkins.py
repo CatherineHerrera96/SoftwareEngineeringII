@@ -16,6 +16,11 @@ def create_checkin(
         db=db,
         user_habit_id=checkin_in.user_habit_id,
         date_=checkin_in.date,
-        status=checkin_in.status,
+        is_completed=checkin_in.is_completed,
     )
-    return checkin
+    return {
+        "id": checkin.id,
+        "user_habit_id": checkin.user_habit_id,
+        "date": checkin.log_date,
+        "is_completed": checkin.is_completed
+    }
