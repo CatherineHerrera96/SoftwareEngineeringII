@@ -6,7 +6,7 @@ from ..db import get_db
 from .. import schemas, crud
 from ..stats_service import recompute_weekly_stats
 
-router = APIRouter(prefix="/stats", tags=["stats"])
+router = APIRouter(tags=["stats"])
 
 
 @router.get("/weekly/{user_id}", response_model=schemas.WeeklySummary)

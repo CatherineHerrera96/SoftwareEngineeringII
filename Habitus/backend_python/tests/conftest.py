@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.db import Base, get_db
-from app.main import app
+from ..db import Base, get_db
+from ..main import app
 
 # Usamos SQLite en memoria compartida entre conexiones
 SQLALCHEMY_DATABASE_URL = "sqlite://"
@@ -42,7 +42,7 @@ def prepare_database():
     - Las vuelve a crear
     Así cada test arranca con una BD limpia.
     """
-    from app import models  # asegura que los modelos están registrados en Base.metadata
+    from backend_python import models  # asegura que los modelos están registrados en Base.metadata
 
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from ..db import get_db
 from .. import schemas, crud
 
-router = APIRouter(prefix="/user-habits", tags=["user-habits"])
+router = APIRouter(tags=["user-habits"])
 
 
 @router.post("/", response_model=schemas.UserHabitRead, status_code=201)

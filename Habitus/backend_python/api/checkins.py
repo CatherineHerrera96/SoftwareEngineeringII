@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from ..db import get_db
 from .. import schemas, crud
 
-router = APIRouter(prefix="/checkins", tags=["checkins"])
+router = APIRouter(tags=["checkins"])
 
 
 @router.post("/", response_model=schemas.CheckinRead, status_code=201)
