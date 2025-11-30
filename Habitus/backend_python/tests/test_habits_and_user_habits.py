@@ -1,14 +1,14 @@
 def test_create_and_list_habits(client):
     payload = {
-        "code": "drink_water",
+        "description": "Drink every day some water",
         "name": "Drink water",
         "category": "health",
-        "default_frequency": "daily",
+        "frequency": "daily",
     }
     resp = client.post("/habits/", json=payload)
     assert resp.status_code == 201
     data = resp.json()
-    assert data["code"] == "drink_water"
+    assert data["description"] == payload["description"]
 
     resp = client.get("/habits/")
     assert resp.status_code == 200
@@ -20,10 +20,10 @@ def test_create_and_list_habits(client):
 def test_assign_user_habit_and_list(client):
     # First create a habit
     payload = {
-        "code": "study_60",
+        "description": "Study once a day for one hour at least",
         "name": "Study 60 minutes",
         "category": "academic",
-        "default_frequency": "daily",
+        "frequency": "daily",
     }
     resp = client.post("/habits/", json=payload)
     habit = resp.json()
@@ -32,14 +32,13 @@ def test_assign_user_habit_and_list(client):
     user_id = "user-123"
     resp = client.post(
         "/user-habits/",
-        json={
+        json=[{
             "user_id": user_id,
             "habit_id": habit["id"],
-            "frequency": "daily",
-        },
+        }],
     )
     assert resp.status_code == 201
-    user_habit = resp.json()
+    user_habit = resp.json()[0]
     assert user_habit["user_id"] == user_id
     assert user_habit["habit_id"] == habit["id"]
 

@@ -3,7 +3,8 @@ from typing import Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
-from .models import Checkin, StatsWeekly, UserHabit
+from .models import Checkin, UserHabit
+from .schemas import WeeklySummary
 
 
 def get_week_bounds(week_start: date) -> Tuple[date, date]:
@@ -15,7 +16,7 @@ def get_week_bounds(week_start: date) -> Tuple[date, date]:
     return week_start, week_end
 
 
-def recompute_weekly_stats(db: Session, user_id: str, week_start: date) -> StatsWeekly:
+def compute_weekly_stats(db: Session, user_id: str, week_start: date) -> WeeklySummary:
     start, end = get_week_bounds(week_start)
 
     # All checkins for this user in the week
@@ -24,13 +25,13 @@ def recompute_weekly_stats(db: Session, user_id: str, week_start: date) -> Stats
         .join(UserHabit)
         .filter(
             UserHabit.user_id == user_id,
-            Checkin.date >= start,
-            Checkin.date < end,
+            Checkin.log_date >= start,
+            Checkin.log_date < end,
         )
     )
     checkins = q.all()
     total = len(checkins)
-    completed = sum(1 for c in checkins if c.status == "completed")
+    completed = sum(1 for checkin in checkins if checkin.is_completed)
 
     completion_rate = 0.0
     if total > 0:
@@ -42,8 +43,8 @@ def recompute_weekly_stats(db: Session, user_id: str, week_start: date) -> Stats
     if completed > 0:
         days_map = {}
         for c in checkins:
-            if c.status == "completed":
-                days_map[c.date] = True
+            if c.is_completed:
+                days_map[c.log_date] = True
 
         if days_map:
             current_day = max(days_map.keys())
@@ -51,27 +52,12 @@ def recompute_weekly_stats(db: Session, user_id: str, week_start: date) -> Stats
                 streak += 1
                 current_day = current_day - timedelta(days=1)
 
-    stats = (
-        db.query(StatsWeekly)
-        .filter(
-            StatsWeekly.user_id == user_id,
-            StatsWeekly.week_start == week_start,
-        )
-        .one_or_none()
+
+    return WeeklySummary(
+        user_id=user_id,
+        week_start=start,
+        completion_rate=completion_rate,
+        streak_global=streak,
+        checkins_total=total,
+        checkins_completed= completed,
     )
-
-    if stats is None:
-        stats = StatsWeekly(
-            user_id=user_id,
-            week_start=week_start,
-            completion_rate=completion_rate,
-            streak_global=streak,
-        )
-        db.add(stats)
-    else:
-        stats.completion_rate = completion_rate
-        stats.streak_global = streak
-
-    db.commit()
-    db.refresh(stats)
-    return stats
