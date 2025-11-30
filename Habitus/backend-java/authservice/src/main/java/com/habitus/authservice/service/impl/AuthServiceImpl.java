@@ -4,6 +4,9 @@ import com.habitus.authservice.dto.AuthResponse;
 import com.habitus.authservice.dto.LoginRequest;
 import com.habitus.authservice.dto.RegisterRequest;
 import com.habitus.authservice.entity.User;
+import com.habitus.authservice.exception.EmailAlreadyExistsException;
+import com.habitus.authservice.exception.InvalidCredentialsException;
+import com.habitus.authservice.exception.UserNotFoundException;
 import com.habitus.authservice.repository.UserRepository;
 import com.habitus.authservice.security.jwt.JwtService;
 import com.habitus.authservice.service.AuthService;
@@ -28,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail().toLowerCase()).isPresent()) {
-            throw new RuntimeException("Email already in use");
+            throw new EmailAlreadyExistsException("Email is already registered");
         }
 
 
@@ -46,11 +49,11 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail().toLowerCase())
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
 
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException("Incorrect password");
         }
 
         String token = jwtService.generateToken(user.getEmail());
