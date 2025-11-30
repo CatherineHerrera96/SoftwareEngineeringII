@@ -4,7 +4,7 @@ Desde la carpeta `frontend`:
 
 ```bash
 python -m http.server 5500
-
+```
 Luego abrir en el navegador:  http://localhost:5500/index.html
 
 
@@ -23,13 +23,13 @@ El frontend se comunica con dos servicios:
 2. Backend Python (hábitos y gamificación)
    - Base URL configurada en `js/api/habitsApi.js` como `PY_BASE_URL`.
    - Endpoints esperados:
-     - `GET /api/habits`
-     - `GET /api/user-habits`
-     - `POST /api/user-habits`
-     - `POST /api/checkins`
-     - `GET /api/stats/weekly`
-     - `GET /api/achievements`
-     - `GET /api/user-achievements`
+     - `GET /habits`
+     - `GET /user-habits`
+     - `POST /user-habits`
+     - `POST /checkins`
+     - `GET /stats/weekly`
+     - `GET /achievements`
+     - `GET /user-achievements`
 
 Para que el frontend funcione contra los servicios reales, el equipo de backend
 debe implementar esos endpoints respetando la estructura de JSON que aquí se espera.
