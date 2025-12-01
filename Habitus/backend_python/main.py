@@ -1,10 +1,18 @@
 from fastapi import FastAPI, APIRouter
 from .db import Base, engine
 from .api import habits, user_habits, checkins, stats, achievements
+from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Habitus API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 main_router = APIRouter()
 
