@@ -5,7 +5,7 @@ This folder contains the SQL and instructions to create, seed, and work with the
 **Overview**
 
 - **Purpose:** Create the schema and load sample data for the Habitus application.
-- **Files:** Schema and seed scripts plus notes for running them locally or via Docker.
+- **Files:** Schema and seed scripts plus notes for running them locally.
 
 **Files in this folder**
 
@@ -14,7 +14,7 @@ This folder contains the SQL and instructions to create, seed, and work with the
 
 **Prerequisites**
 
-- **PostgreSQL** installed and running (locally or in a container).
+- **PostgreSQL** installed and running.
 - A PostgreSQL database and user with privileges to create tables and insert data.
 
 **Quick setup (local psql)**
@@ -38,5 +38,3 @@ psql -d habitus_db -f path/to/Habitus/db/seed.sql
 ```
 
 Replace `path/to/Habitus/db/` with the actual path to this folder if you run commands from elsewhere.
-
-
