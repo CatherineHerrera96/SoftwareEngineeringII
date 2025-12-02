@@ -25,6 +25,7 @@ class HabitRead(HabitBase):
 class UserHabitCreate(BaseModel):
     user_id: str
     habit_id: str
+    is_active: bool
 
 
 class UserHabitRead(BaseModel):
@@ -32,10 +33,17 @@ class UserHabitRead(BaseModel):
     user_id: str
     habit_id: str
     is_active: bool
-    is_completed: bool
 
     model_config = ConfigDict(from_attributes=True)
 
+class UserActiveHabitRead(BaseModel):
+    id: str
+    user_id: str
+    habit_id: str
+    name: str
+    is_completed: bool
+    
+    model_config = ConfigDict(from_attributes=True)
 
 # ----- Checkin -----
 class CheckinCreate(BaseModel):

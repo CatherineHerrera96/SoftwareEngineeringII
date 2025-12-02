@@ -27,18 +27,34 @@ def assign_habit_to_user(
     db: Session,
     user_habit_in: schemas.UserHabitCreate,
 ) -> models.UserHabit:
-    user_habit = models.UserHabit(
-        user_id=user_habit_in.user_id,
-        habit_id=user_habit_in.habit_id,
-        is_active=True,
-    )
-    db.add(user_habit)
+    #find row with data if it exists
+    user_habit = db.query(models.UserHabit).filter(
+        models.UserHabit.user_id  == user_habit_in.user_id,
+        models.UserHabit.habit_id == user_habit_in.habit_id
+    ).first()
+    
+    #if it doesn't exist 
+    if user_habit is None:
+        user_habit = models.UserHabit(
+            user_id   = user_habit_in.user_id,
+            habit_id  = user_habit_in.habit_id,
+            is_active = user_habit_in.is_active,
+        )
+        db.add(user_habit)
+    else:
+        user_habit.is_active = user_habit_in.is_active
     db.commit()
     db.refresh(user_habit)
     return user_habit
 
 
 def list_user_habits(db: Session, user_id: str) -> List[tuple[models.UserHabit, bool]]:
+    return (
+        db.query(models.UserHabit)
+        .filter(models.UserHabit.user_id == user_id)   
+    ).all()
+
+def list_active_user_habits(db: Session, user_id: str) -> List[tuple[models.UserHabit, bool]]:
     latest_checkin = (
         db.query(models.Checkin.user_habit_id, models.Checkin.is_completed, func.max(models.Checkin.log_date).label("latest_date"))
         .join(models.UserHabit)
@@ -58,7 +74,8 @@ def list_user_habits(db: Session, user_id: str) -> List[tuple[models.UserHabit, 
     ).subquery()
     
     return (
-        db.query(models.UserHabit, func.coalesce(latest_checkin.c.is_completed, False))
+        db.query(models.UserHabit, models.Habit.name, func.coalesce(latest_checkin.c.is_completed, False))
+        .join(models.Habit)
         .outerjoin(latest_checkin, models.UserHabit.id == latest_checkin.c.user_habit_id)
         .filter(
             models.UserHabit.user_id == user_id,
@@ -103,9 +120,9 @@ def create_or_update_checkin(
         db.refresh(checkin)
 
     # Recompute stats for that user/week (SQLAlchemy 2.x style)
-    user_habit = db.get(models.UserHabit, user_habit_id)
-    week_start, _ = get_week_bounds(date_)
-    compute_weekly_stats(db, user_habit.user_id, week_start)
+    # user_habit = db.get(models.UserHabit, user_habit_id)
+    # week_start, _ = get_week_bounds(date_)
+    # compute_weekly_stats(db, user_habit.user_id, week_start)
     return checkin
 
 

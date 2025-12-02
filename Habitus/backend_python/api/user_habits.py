@@ -18,8 +18,7 @@ def assign_user_habit(
             id           = habit.id,
             user_id      = habit.user_id,
             habit_id     = habit.habit_id,
-            is_active    = habit.is_active,
-            is_completed = False
+            is_active    = habit.is_active
         )
         for habit in map(lambda h: crud.assign_habit_to_user(db, h),user_habits_in)
     ]
@@ -35,8 +34,24 @@ def list_user_habits(
             id           = habits_info.id,
             user_id      = habits_info.user_id,
             habit_id     = habits_info.habit_id,
-            is_active    = habits_info.is_active,
+            is_active    = habits_info.is_active
+        )
+        for habits_info in crud.list_user_habits(db, user_id=user_id)
+    ]
+
+
+@router.get("/active/{user_id}", response_model=List[schemas.UserActiveHabitRead])
+def list_user_habits(
+    user_id: str,
+    db: Session = Depends(get_db),
+):
+    return [
+        schemas.UserActiveHabitRead(
+            id           = habits_info.id,
+            user_id      = habits_info.user_id,
+            habit_id     = habits_info.habit_id,
+            name     = name,
             is_completed = completed
         )
-        for habits_info, completed in crud.list_user_habits(db, user_id=user_id)
+        for habits_info, name, completed in filter(lambda v: v[0].is_active, crud.list_active_user_habits(db, user_id=user_id))
     ]
