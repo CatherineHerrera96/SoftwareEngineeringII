@@ -1,5 +1,5 @@
 // api/habitsApi.js
-import { getToken } from "../state.js";
+import { getCurrentUser, getToken } from "../state.js";
 
 /*
   ==========================================================
@@ -35,8 +35,8 @@ import { getToken } from "../state.js";
     si ya no son necesarios.
 */
 
-// URL base esperada para el backend en Python (no usada aún en el mock)
-const PY_BASE_URL = "http://localhost:8000/api";
+// URL base esperada para el backend en Python
+const PY_BASE_URL = "http://localhost:8000/";
 
 // ----------------------------------------------------------
 // Datos de ejemplo: catálago de hábitos
@@ -221,21 +221,25 @@ function getTodayDateStr() {
  *   }
  * }
  */
-function loadTodayDailyStatus() {
-  try {
-    const raw = localStorage.getItem(DAILY_STATUS_KEY);
-    if (!raw) return {};
-    const data = JSON.parse(raw);
-
-    if (!data || data.date !== getTodayDateStr() || !data.statuses) {
-      return {};
+async function loadTodayDailyStatus() {
+  let habits = await fetch(`${PY_BASE_URL}user-habits/active/${getCurrentUser().id}`).then(
+    async (res) => {
+      if (!res.ok) {
+        console.error("Couldn't fetch user's active habits")
+        return [];
+      }
+      return (await res.json()).reduce((prev, cur)=> {
+        prev[cur.habit_id] = cur.is_completed;
+        return prev;
+      }, {})
+    },
+    (res) => {
+      console.error("Couldn't fetch user's active habits")
+      return [];  
     }
+  );
 
-    return data.statuses;
-  } catch (e) {
-    console.warn("[MOCK] Error reading DAILY_STATUS from storage", e);
-    return {};
-  }
+  return habits;
 }
 
 /**
@@ -287,7 +291,22 @@ export async function fetchHabits() {
   if (!token) return [];
 
   // MOCK FRONTEND: devolvemos la lista local "mockHabits"
+  let res = await fetch(`${PY_BASE_URL}habits/`);
+  if (res.ok) return res.json();
   return mockHabits;
+}
+
+let activeHabits = null;
+export async function fetchUserHabits() {
+  if (activeHabits !== null) return activeHabits;
+  const user_id = getCurrentUser().id;
+  
+  let res = await fetch(`${PY_BASE_URL}user-habits/${user_id}/`);
+  if (res.ok) {
+    activeHabits = await res.json();
+    return activeHabits;
+  }
+  throw new Error("Unexpected response");
 }
 
 /**
@@ -299,26 +318,31 @@ export async function fetchHabits() {
  * - El backend debe guardar la selección para el usuario autenticado.
  *   Posteriormente, /user-habits o /daily-checklist usarán esta info.
  */
-export async function saveUserHabits(habitIds) {
+export async function saveUserHabits(modifiedHabits) {
   const token = getToken();
   if (!token) throw new Error("Not authenticated");
+  const user = getCurrentUser().id;
 
   // MOCK FRONTEND: actualizamos selección en memoria y en localStorage
-  selectedHabitIds = habitIds || [];
-  saveSelectedToStorage(selectedHabitIds);
+  // selectedHabitIds = habitIds || [];
+  // saveSelectedToStorage(selectedHabitIds);
 
   // Aquí, en la versión real:
-  // const res = await fetch(`${PY_BASE_URL}/user-habits`, {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     Authorization: `Bearer ${token}`,
-  //   },
-  //   body: JSON.stringify({ habit_ids: habitIds }),
-  // });
-  // if (!res.ok) throw new Error("Error saving user habits");
+  let res = await fetch(`${PY_BASE_URL}user-habits/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(modifiedHabits.map((v) => ({ habit_id: v.id, user_id: `${user}`, is_active: v.active }))),
+  });
+  
+  if (!res.ok) {
+    throw new Error("Error saving user habits");
+  }
 
+  let data = await res.json();
   alert("Habits saved! (demo)");
+  return data;
 }
 
 /**
@@ -343,6 +367,7 @@ export async function saveUserHabits(habitIds) {
 export async function fetchDailyChecklist() {
   const token = getToken();
   if (!token) return [];
+  const user = getCurrentUser().id;
 
   // Asegurar que tenemos la selección cargada
   loadSelectedFromStorage();
@@ -352,24 +377,27 @@ export async function fetchDailyChecklist() {
     return [];
   }
 
-  // Map de estados completados para HOY (localStorage)
-  const todayStatuses = loadTodayDailyStatus();
+  selectedHabitIds = await fetch(`${PY_BASE_URL}user-habits/active/${user}`)
+    .then(
+      async (res) => {
+        if (!res.ok) {
+          console.error("Couldn't fetch user's active habits")
+          return [];
+        }
+        return (await res.json()).map((v)=> ({
+          id: v.habit_id,
+          name: v.name,
+          completed: v.is_completed,
+          userHabitId: v.id
+        }))
+      },
+      (res) => {
+        console.error("Couldn't fetch user's active habits")
+        return [];  
+      }
+    )
 
-  // Para cada id seleccionado creamos un ítem diario
-  const items = selectedHabitIds
-    .map((id) => {
-      const habit = mockHabits.find((h) => h.id === id);
-      if (!habit) return null;
-      return {
-        id: habit.id,
-        name: habit.name,
-        // Si en el localStorage de hoy está marcado como true, lo tomamos como completed
-        completed: !!todayStatuses[String(habit.id)],
-      };
-    })
-    .filter(Boolean); // limpia nulls si algún id no existe
-
-  return items;
+  return selectedHabitIds;
 }
 
 /**
@@ -388,18 +416,17 @@ export async function saveDailyStatus(id, completed) {
   if (!token) throw new Error("Not authenticated");
 
   // MOCK FRONTEND: guardar estado para HOY
-  console.log("[MOCK] saveDailyStatus -> id:", id, "completed:", completed);
-  saveTodayDailyStatus(id, completed);
+  // console.log("[MOCK] saveDailyStatus -> id:", id, "completed:", completed);
+  // saveTodayDailyStatus(id, completed);
 
   // Versión real (ejemplo):
-  // const res = await fetch(`${PY_BASE_URL}/checkins`, {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     Authorization: `Bearer ${token}` },
-  //   body: JSON.stringify({ habit_id: id, completed }),
-  // });
-  // if (!res.ok) throw new Error("Error saving daily status");
+  const res = await fetch(`${PY_BASE_URL}checkins/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_habit_id: id, date: getTodayDateStr(), is_completed: completed }),
+  });
+  if (!res.ok) throw new Error("Error saving daily status");
+  return await res.json()
 }
 
 /**
@@ -416,24 +443,46 @@ export async function saveDailyStatus(id, completed) {
 export async function fetchWeeklyStatsAndAchievements() {
   const token = getToken();
   if (!token) return { completion: 0, streak: 0, achievements: [] };
-
+  const user = getCurrentUser().id
   // MOCK FRONTEND: datos estáticos
-  return {
-    completion: 75,
-    streak: 14,
-    achievements: mockAchievements,
-  };
+  // return {
+  //   completion: 75,
+  //   streak: 14,
+  //   achievements: mockAchievements,
+  // };
 
-  // Versión real (ejemplo):
-  // const res = await fetch(`${PY_BASE_URL}/stats/weekly`, {
-  //   headers: { Authorization: `Bearer ${token}` },
-  // });
-  // const stats = await res.json();
-  //
-  // const resAch = await fetch(`${PY_BASE_URL}/achievements`, {
-  //   headers: { Authorization: `Bearer ${token}` },
-  // });
-  // const achievements = await resAch.json();
-  //
-  // return { ...stats, achievements };
+  let data = fetch(`${PY_BASE_URL}stats/weekly/${user}`)
+    .then(
+      async (res) => {
+        if (!res.ok) {
+          console.error("Couldn't fetch weekly stats");
+          return {};
+        }
+        let res_data =  await res.json();
+        return { completion: res_data.completion_rate, streak: res_data.streak_global }
+      },
+      (res) => {
+        console.error("Couldn't fetch weekly stats");
+        return {};
+
+      }
+    )
+  
+  data["achievements"] = await fetch(`${PY_BASE_URL}achievements/${user}`)
+    .then(
+      async (res) => {
+        if (!res.ok) {
+          console.error("Couldn't fetch achievements");
+          return {};
+        }
+        return await res.json();
+      },
+      (res) => {
+        if (!res.ok) {
+          console.error("Couldn't fetch achievements");
+          return {};
+        }
+      }
+    )
+  return data;
 }

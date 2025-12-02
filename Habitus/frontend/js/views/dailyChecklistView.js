@@ -113,7 +113,7 @@ export async function showDailyChecklistView() {
     // - Marcamos visualmente el ítem como completado.
     // - Recalculamos la barra de progreso.
     btnDone.onclick = async () => {
-      await saveDailyStatus(item.id, true);
+      await saveDailyStatus(item.userHabitId, true);
       item.completed = true;
       li.classList.add("completed");
       updateProgress();
@@ -125,7 +125,7 @@ export async function showDailyChecklistView() {
     // - Quitamos la marca visual de completado.
     // - Recalculamos la barra de progreso.
     btnMissed.onclick = async () => {
-      await saveDailyStatus(item.id, false);
+      await saveDailyStatus(item.userHabitId, false);
       item.completed = false;
       li.classList.remove("completed");
       updateProgress();

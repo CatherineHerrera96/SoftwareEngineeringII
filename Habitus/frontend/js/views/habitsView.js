@@ -35,9 +35,10 @@
 //   Esto se puede decidir al final del proyecto. Por ahora es útil para la demo.
 //
 
-import { fetchHabits, saveUserHabits } from "../api/habitsApi.js";
+import { fetchUserHabits, fetchHabits, saveUserHabits } from "../api/habitsApi.js";
 
 // ids de hábitos seleccionados (se usa en la sesión actual)
+let habitState = new Map();
 let selected = new Set();
 
 // lista completa de hábitos cargados desde fetchHabits()
@@ -52,6 +53,19 @@ let tabsInitialized = false;
 // Clave compartida con habitsApi.js para guardar selección en localStorage
 const STORAGE_KEY = "habitus_selected_habits";
 
+function loadHabitActivity(userHabits) {
+  //proces raw data from backend to list unpackable values 
+  let states = userHabits.map(
+    (habit) => [ habit.habit_id, habit.is_active ]
+  )
+  
+  //set user habit info into habitState
+  for (let habit_info of states) habitState.set(...habit_info)
+  //any not returned and not saved assume to not be active
+  for (let habit_id of (new Set(allHabits.map((v)=>v.id))).difference(new Set(habitState.keys())))
+    habitState.set(habit_id, false);
+}
+
 /**
  * Lee de localStorage los ids de hábitos seleccionados previamente
  * y los carga en el Set "selected".
@@ -63,21 +77,16 @@ const STORAGE_KEY = "habitus_selected_habits";
  * - Esto es un apoyo visual de frontend.
  * - El backend real podría proveer lo mismo vía un endpoint /user-habits.
  */
-function loadSelectedFromStorageToSet() {
+async function loadSelectedFromStorageToSet() {
   // Si ya tenemos algo en el Set, no volvemos a leer
-  if (selected.size > 0) return;
-
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) {
-        selected = new Set(arr);
-      }
+  if (habitState.size > 0) return;
+  let userHabits = await fetchUserHabits().catch(
+    (reason)=>{
+      console.error("Couldn't fetch active habits from user due to:\n", reason);
+      return []
     }
-  } catch (e) {
-    console.warn("Error reading selected habits from storage", e);
-  }
+  );
+  loadHabitActivity(userHabits);
 }
 
 /**
@@ -102,7 +111,7 @@ export async function showHabitsView() {
   }
 
   // 2) Cargar selección previa (si existe) en el Set "selected"
-  loadSelectedFromStorageToSet();
+  await loadSelectedFromStorageToSet();
 
   // 3) Inicializar tabs una sola vez
   if (!tabsInitialized) {
@@ -117,7 +126,10 @@ export async function showHabitsView() {
   if (btnSave) {
     btnSave.onclick = async () => {
       try {
-        await saveUserHabits(Array.from(selected));
+        let newHabitActivity = await saveUserHabits(
+          Array.from(selected).map((v)=>({id: v, active: !habitState.get(v)}))
+        );
+        loadHabitActivity(newHabitActivity);
       } catch (err) {
         alert("Error saving habits");
         console.error(err);
@@ -200,11 +212,11 @@ function renderHabits(grid) {
     toggle.className = "habit-toggle";
 
     // Si el id está en "selected", marcamos el checkbox al cargar
-    toggle.checked = selected.has(h.id);
+    toggle.checked = habitState.get(h.id);
 
     // Cuando el usuario marca o desmarca, se actualiza el Set
     toggle.addEventListener("change", () => {
-      if (toggle.checked) {
+      if (toggle.checked != habitState.get(h.id)) {
         selected.add(h.id);
       } else {
         selected.delete(h.id);

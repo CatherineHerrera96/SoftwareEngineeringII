@@ -7,7 +7,9 @@ python -m http.server 5500
 ```
 Luego abrir en el navegador:  http://localhost:5500/index.html
 
+### Al momento dedesarrollar
 
+Al abrir la página en el navegador, para deshabilitar que se guarden automaticamente archivos javascript en cache: ir  a Herramientas de Desarrollador (f12 o ctrl+Shift+i) -> Network-> Disable cache (checkbox que se encuentra en la parte superior). Esto evita que al recargar la página para revisar cambios hechos en el código, no recargue la información y use lo guardado en cache.
 
 ## Integración con los backends
 
