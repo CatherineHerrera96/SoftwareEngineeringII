@@ -93,7 +93,7 @@ const mockHabits = [
   {
     id: 8,
     name: "Read Book",
-    description: "Read a chapter or for 20 minutes.",
+    description: "Read a chapter for 20 minutes.",
     category: "academic",
   },
   {
@@ -451,7 +451,7 @@ export async function fetchWeeklyStatsAndAchievements() {
   //   achievements: mockAchievements,
   // };
 
-  let data = fetch(`${PY_BASE_URL}stats/weekly/${user}`)
+  let data = await fetch(`${PY_BASE_URL}stats/weekly/${user}`)
     .then(
       async (res) => {
         if (!res.ok) {
@@ -484,5 +484,6 @@ export async function fetchWeeklyStatsAndAchievements() {
         }
       }
     )
+  console.log(data)
   return data;
 }
