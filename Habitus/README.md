@@ -12,16 +12,16 @@ The project follows a microservices-inspired architecture with clear separation 
 - **Vanilla JS Frontend** - Single-page application with modular view architecture
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+┌─────────────┐     ┌──────────────┐      ┌─────────────┐
 │  Frontend   │────▶│ Java Auth    │────▶│ PostgreSQL  │
-│  (Port 8001)│     │ (Port 8080)  │     │ Database    │
-│             │     └──────────────┘     └─────────────┘
+│  (Port 8001)│     │ (Port 8080)  │      │ Database    │
+│             │     └──────────────┘      └─────────────┘
 │             │            │                     ▲
 │             │            │                     │
-│             │     ┌──────▼──────┐             │
+│             │      ┌──────▼──────┐             │
 │             │────▶│ Python API  │─────────────┘
-└─────────────┘     │ (Port 8000) │
-                    └─────────────┘
+└─────────────┘      │ (Port 8000) │
+                     └─────────────┘
 ```
 
 ## ✨ MVP Features
