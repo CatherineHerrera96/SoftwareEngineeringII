@@ -16,7 +16,8 @@ CREATE TABLE habits (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(100),
-    frequency VARCHAR(50),
+    frequency VARCHAR(50) NOT NULL,
+    description TEXT,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -24,7 +25,7 @@ CREATE TABLE user_habits (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     habit_id INT NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
-    is_active BOOLEAN DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
     activated_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(user_id, habit_id)
 );
@@ -42,8 +43,8 @@ CREATE TABLE achievements (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    condition_type VARCHAR(100),
-    threshold INT,
+    condition_type VARCHAR(100) NOT NULL,
+    threshold INT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 

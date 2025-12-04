@@ -26,14 +26,22 @@ INSERT INTO users (email, password_hash) VALUES
 -- ==========================================
 -- 2. SEED: habits (Common Examples)
 -- ==========================================
-INSERT INTO habits (name, category, frequency) VALUES
-('Drink 2L Water', 'Health', 'Daily'),
-('Read 30 Minutes', 'Personal Development', 'Daily'),
-('Gym / Workout', 'Fitness', '3x/Week'),
-('Meditate', 'Mindfulness', 'Daily'),
-('No Sugar', 'Diet', 'Daily'),
-('Code Practice', 'Skill', 'Daily'),
-('Journaling', 'Mindfulness', 'Weekly');
+INSERT INTO habits (name, category, frequency, description) VALUES
+('Drink Water', 'wellness', 'daily', 'Stay hydrated throughout the day.'),
+('Meditate', 'wellness', 'daily', 'Practice mindfulness for 10 minutes.'),
+('Walk Outdoors', 'wellness', 'weekly', 'Take a short walk in nature.'),
+-- HEALTH
+('Exercise', 'health', 'daily', 'Engage in physical activity for at least 30 minutes.'),
+('Eat Healthy', 'health', 'daily', 'Consume balanced and nutritious meals.'),
+('Meal Prep', 'health', 'weekly', 'Prepare healthy meals in advance.'),
+-- ACADEMIC
+('Study 45 min', 'academic', 'daily', 'Focus on a learning task without distractions.'),
+('Read Book', 'academic', 'daily', 'Read a chapter for 20 minutes.'),
+('Code Review', 'academic', 'weekly','Review code or learn new coding concepts.'),
+-- WORK
+('Plan my day', 'work', 'daily', 'Organize your tasks and priorities for the day.'),
+('Journal', 'work', 'daily','Write down thoughts and reflections.'),
+('Connect with Loved Ones', 'work', 'weekly','Spend quality time with family or friends.');
 
 -- ==========================================
 -- 3. SEED: user_habits (Assigning habits to users)
@@ -92,7 +100,7 @@ INSERT INTO achievements (name, description, condition_type, threshold) VALUES
 -- ==========================================
 -- 6. SEED: user_achievements (Awards)
 -- ==========================================
--- Granting "Starter" achievement to Alice (1) and Bob (2)
+-- Granting 'Starter' achievement to Alice (1) and Bob (2)
 INSERT INTO user_achievements (user_id, achievement_id) VALUES
 (1, 1),
 (2, 1);
