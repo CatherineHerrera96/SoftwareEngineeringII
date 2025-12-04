@@ -3,7 +3,7 @@ from typing import List
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_, or_, case
 
 from . import models, schemas
 from .stats_service import compute_weekly_stats, get_week_bounds
@@ -56,31 +56,49 @@ def list_user_habits(db: Session, user_id: str) -> List[tuple[models.UserHabit, 
 
 def list_active_user_habits(db: Session, user_id: str) -> List[tuple[models.UserHabit, bool]]:
     latest_checkin = (
-        db.query(models.Checkin.user_habit_id, models.Checkin.is_completed, func.max(models.Checkin.log_date).label("latest_date"))
+        db.query(
+            models.Checkin.user_habit_id,
+            func.max(case(
+                (or_(
+                    models.Checkin.log_date >= date.today(),
+                    and_(
+                        models.Habit.frequency == "weekly",
+                        models.Checkin.log_date >= date.today() - timedelta(days=7))
+                ), models.Checkin.log_date),
+                else_= None
+            )).label("latest_date"))
         .join(models.UserHabit)
         .join(models.Habit)
         .filter(
-            models.UserHabit.user_id == user_id,
-            models.UserHabit.is_active,
-            or_(
-                and_(
-                    models.Habit.frequency == "weekly",
-                    models.Checkin.log_date >= date.today() - timedelta(days=7)
-                ),
-                models.Checkin.log_date >= date.today()
-            )
+            models.UserHabit.is_active
         )
         .group_by(models.Checkin.user_habit_id)
     ).subquery()
     
-    return (
-        db.query(models.UserHabit, models.Habit.name, func.coalesce(latest_checkin.c.is_completed, False))
+    is_completed_q = (
+        db.query(models.Checkin.is_completed)
+        .filter(
+            models.Checkin.user_habit_id == latest_checkin.c.user_habit_id,
+            models.Checkin.log_date == latest_checkin.c.latest_date
+        )
+    ).scalar_subquery()
+    
+    
+    query = (
+        db.query(
+            models.UserHabit,
+            models.Habit.name,
+            case(
+                (latest_checkin.c.latest_date.is_(None), False),
+                else_= is_completed_q
+            ).label("is_completed")
+        )
         .join(models.Habit)
         .outerjoin(latest_checkin, models.UserHabit.id == latest_checkin.c.user_habit_id)
-        .filter(
-            models.UserHabit.user_id == user_id,
-        )   
-    ).all()
+        .filter(models.UserHabit.user_id == user_id)   
+    )
+    
+    return query.all()
 
 
 # ----- Checkin + Stats -----

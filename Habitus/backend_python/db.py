@@ -1,10 +1,20 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from dotenv import find_dotenv, load_dotenv
+
+#search for .env file and load it's values
+load_dotenv(find_dotenv())
+
+_DB_USER     = os.getenv("DB_USER")
+_DB_NAME     = os.getenv("DB_NAME")
+_DB_PASSWORD = os.getenv("DB_PASSWORD")
+_DB_HOST     = os.getenv("DB_HOST")
+_DB_EXTRAS   = os.getenv("DB_EXTRAS", "")
 
 # For production, set DATABASE_URL, e.g.:
-# DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/habitus
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./habitus.db")
+DATABASE_URL = f"postgresql+psycopg2://{_DB_USER}:{_DB_PASSWORD}@{_DB_HOST}/{_DB_NAME}{_DB_EXTRAS}"
+# DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./habitus.db")
 
 connect_args = {}
 if DATABASE_URL.startswith("sqlite"):

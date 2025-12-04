@@ -1,4 +1,3 @@
-import uuid
 from datetime import date
 from sqlalchemy import (
     Column,
@@ -13,11 +12,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from .db import Base
-
-
-def uuid_str() -> str:
-    return str(uuid.uuid4())
-
 
 class Habit(Base):
     __tablename__ = "habits"
