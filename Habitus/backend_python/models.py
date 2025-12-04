@@ -22,11 +22,11 @@ def uuid_str() -> str:
 class Habit(Base):
     __tablename__ = "habits"
 
-    id          = Column(String, primary_key=True, default=uuid_str)
+    id          = Column(Integer, primary_key=True, autoincrement=True)
     name        = Column(String, nullable=False)
-    category    = Column(String, nullable=False)        # wellness | health | academic | work
+    category    = Column(String)                        # wellness | health | academic | work
     frequency   = Column(String, nullable=False)        # daily | weekly
-    description = Column(String, nullable=False)        # not currently in database
+    description = Column(String)
 
     user_habits = relationship("UserHabit", back_populates="habits")
 
@@ -37,9 +37,9 @@ class UserHabit(Base):
         UniqueConstraint("user_id", "habit_id", name="uq_user_habit"),
     )
 
-    id          = Column(String, primary_key=True, default=uuid_str)
-    user_id     = Column(String, nullable=False)   # from Java auth (e.g., JWT subject)
-    habit_id    = Column(String, ForeignKey("habits.id"), nullable=False)
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    user_id     = Column(Integer, nullable=False)   # from Java auth (e.g., JWT subject)
+    habit_id    = Column(Integer, ForeignKey("habits.id"), nullable=False)
     is_active   = Column(Boolean, nullable=False, default=True)
 
     habits = relationship("Habit", back_populates="user_habits")
@@ -53,8 +53,8 @@ class Checkin(Base):
         UniqueConstraint("user_habit_id", "log_date", name="uq_checkin_day"),
     )
 
-    id              = Column(String, primary_key=True, default=uuid_str)
-    user_habit_id   = Column(String, ForeignKey("user_habits.id"), nullable=False)
+    id              = Column(Integer, primary_key=True, autoincrement=True)
+    user_habit_id   = Column(Integer, ForeignKey("user_habits.id"), nullable=False)
     log_date        = Column(Date, nullable=False, default=date.today)
     is_completed    = Column(Boolean, nullable=False)
 
@@ -64,7 +64,7 @@ class Checkin(Base):
 class Achievement(Base):
     __tablename__ = "achievements"
 
-    id              = Column(String, primary_key=True, default=uuid_str)
+    id              = Column(Integer, primary_key=True, autoincrement=True)
     name            = Column(String, nullable=False)
     description     = Column(String)
     condition_type  = Column(String, nullable=False)
@@ -74,14 +74,14 @@ class Achievement(Base):
 
 
 class UserAchievement(Base):
-    __tablename__ = "user_achivements"
+    __tablename__ = "user_achievements"
     __table_args__ = (
         UniqueConstraint("user_id", "achievement_id", name="uq_user_week"),
     )
     
-    id              = Column(String, primary_key=True, default=uuid_str)
-    user_id         = Column(String, ForeignKey("user_habits.id"), nullable=False)
-    achievement_id  = Column(String, ForeignKey("achievements.id"), nullable=False)
+    id              = Column(Integer, primary_key=True, autoincrement=True)
+    user_id         = Column(Integer, ForeignKey("user_habits.id"), nullable=False)
+    achievement_id  = Column(Integer, ForeignKey("achievements.id"), nullable=False)
     awarded_at      = Column(Date, nullable= False, default=date.today())
     
     user_habits = relationship("UserHabit", back_populates="usr_achievements")
