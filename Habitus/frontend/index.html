@@ -1,204 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>Habitus</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/base.css" />
+  <title>Habitus - Modern Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
-<body>
-  <div class="app-gradient-bg">
-    <!-- NAVBAR (solo visible cuando el usuario está logueado) -->
-    <header class="app-header" id="app-header">
+
+<body data-theme="light">
+
+  <!-- HEADER -->
+  <header class="app-header" id="app-header" style="display: none;">
+    <div class="header-content">
       <div class="logo-area">
-        <div class="logo-icon">H</div>
-        <span class="logo-text">Habitus</span>
+        <img src="favicon.svg" alt="Habitus" class="logo-icon" style="width: 32px; height: 32px;">
+        <span>Habitus</span>
       </div>
       <nav class="nav-links">
-        <button class="nav-link" data-nav="habits">Habit Catalog</button>
         <button class="nav-link" data-nav="profile">Profile</button>
+        <button class="nav-link" data-nav="habits">Habits</button>
+        <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Dark Mode">🌙</button>
+        <button id="logout-btn" class="logout-btn">Log Out</button>
       </nav>
-      
-      <button id="logout-btn" class="logout-btn">Log out</button>
+    </div>
+  </header>
 
-    </header>
+  <!-- MAIN -->
+  <main class="app-main">
+    <div id="notification-area" class="notification-area"></div>
 
-    <!-- CONTENEDOR PRINCIPAL -->
-    <main class="app-main">
+    <!-- LOGIN VIEW -->
+    <section class="view-card login-card" data-view="login">
+      <img src="favicon.svg" alt="Habitus" style="width: 64px; height: 64px; margin-bottom: 1rem;">
+      <h1 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Welcome Back</h1>
+      <p style="color: var(--text-muted); margin-bottom: 2rem;">Sign in to track your progress</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="your.email@example.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required />
+        </div>
+        <button type="submit" class="btn-primary" id="login-submit-btn">Sign In</button>
+      </form>
+      <p style="margin-top: 0.75rem; text-align: center;">
+        <a href="#" id="forgot-password-btn"
+          style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">Forgot your password?</a>
+      </p>
+      <p style="color: var(--text-muted); margin-top: 1.5rem;">
+        Don't have an account?
+        <button type="button" class="btn-secondary" style="margin-left: 0.5rem; padding: 0.4rem 1rem;"
+          id="go-to-register">Create one</button>
+      </p>
+    </section>
 
-      <!-- VISTA LOGIN -->
-<section class="view-card" data-view="login" style="display: block;">
-  <div class="card-brand">
-    <img
-      src="assets/habitus-logo.png"
-      alt="Habitus logo"
-      class="card-brand-logo"
-    />
-  </div>
+    <!-- FORGOT PASSWORD VIEW -->
+    <section class="view-card login-card" data-view="forgot-password" style="display: none;">
+      <img src="favicon.svg" alt="Habitus" style="width: 64px; height: 64px; margin-bottom: 1rem;">
+      <h1 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Reset Password</h1>
+      <p style="color: var(--text-muted); margin-bottom: 2rem;">Enter your email to receive a reset link</p>
+      <form id="forgot-password-form">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="forgot-email" class="form-input" placeholder="your.email@example.com" required />
+        </div>
+        <button type="submit" class="btn-primary" id="forgot-submit-btn">Send Reset Link</button>
+      </form>
+      <p style="margin-top: 1.5rem; text-align: center;">
+        <a href="#" id="back-to-login" style="color: var(--text-muted); font-size: 0.9rem; text-decoration: none;">←
+          Back to Sign In</a>
+      </p>
+    </section>
 
-  <h2 class="view-title">Welcome Back</h2>
-
-  <form id="login-form" class="form">
-    <label class="form-label">
-      <span>Email</span>
-      <input
-        type="email"
-        id="login-email"
-        placeholder="Enter your email"
-        required
-      />
-    </label>
-
-    <label class="form-label">
-      <span>Password</span>
-      <input
-        type="password"
-        id="login-password"
-        placeholder="Enter your password"
-        required
-      />
-    </label>
-
-    <button type="submit" class="btn-primary">Sign In</button>
-  </form>
-
-  <p class="form-footer">
-    Don’t have an account?
-    <button type="button" class="link-button" id="go-to-register">
-      Create one.
-    </button>
-  </p>
-</section>
-
-
-      <!-- VISTA REGISTRO -->
-      <section class="view-card" data-view="register" style="display: none;">
-        <h1 class="app-logo-text">Create Your Habitus Account</h1>
-        <p class="view-subtitle">Start building healthy routines today.</p>
-
-        <form id="register-form" class="form">
-          <label class="form-label">
-            <span>Email Address</span>
-            <input type="email" id="register-email" placeholder="your.email@example.com" required />
+    <!-- REGISTER VIEW -->
+    <section class="view-card login-card" data-view="register" style="display: none;">
+      <img src="favicon.svg" alt="Habitus" style="width: 64px; height: 64px; margin-bottom: 1rem;">
+      <h1 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Create Account</h1>
+      <p style="color: var(--text-muted); margin-bottom: 2rem;">Start building healthy routines today</p>
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="register-email" class="form-input" placeholder="your.email@example.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="register-password" class="form-input" placeholder="Enter your password" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" id="register-password-confirm" class="form-input" placeholder="Confirm your password"
+            required />
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="register-terms" required style="accent-color: var(--primary);" />
+            <span style="font-size: 0.85rem; color: var(--text-muted);">I agree to the Terms of Service and Privacy
+              Policy</span>
           </label>
+        </div>
+        <button type="submit" class="btn-primary" id="register-submit-btn">Create Account</button>
+      </form>
+      <p style="color: var(--text-muted); margin-top: 1.5rem;">
+        Already have an account?
+        <button type="button" class="btn-secondary" style="margin-left: 0.5rem; padding: 0.4rem 1rem;"
+          id="go-to-login">Sign in</button>
+      </p>
+    </section>
 
-          <label class="form-label">
-            <span>Password</span>
-            <input type="password" id="register-password" placeholder="Enter your password" required />
-          </label>
+    <!-- PROFILE VIEW -->
+    <section class="view-page" data-view="profile" style="display: none;">
+      <!-- Profile Header -->
+      <div
+        style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border);">
+        <div id="profile-avatar-display"
+          style="width: 80px; height: 80px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; overflow:hidden;">
+          D</div>
+        <div style="flex: 1;">
+          <h2 id="profile-name-display">Demo User</h2>
+          <p id="profile-email-display" style="color: var(--text-muted);">demo@habitus.com</p>
+        </div>
+        <button class="btn-secondary" id="toggle-edit-profile">Edit Profile</button>
+      </div>
 
-          <label class="form-label">
-            <span>Confirm Password</span>
-            <input type="password" id="register-password-confirm" placeholder="Confirm your password" required />
-          </label>
-
-          <label class="checkbox-row">
-            <input type="checkbox" id="register-terms" required />
-            <span>I agree to the Habitus Terms of Service and Privacy Policy.</span>
-          </label>
-
-          <button type="submit" class="btn-primary">Create Account</button>
+      <!-- Edit Profile Form -->
+      <div id="edit-profile-section" class="view-card" style="display: none; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Update Profile</h3>
+        <form id="profile-edit-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input type="text" id="edit-name" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Avatar URL</label>
+              <input type="text" id="edit-avatar" class="form-input" placeholder="https://..." />
+            </div>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <button type="button" class="btn-secondary" id="cancel-edit-profile">Cancel</button>
+            <button type="submit" class="btn-primary" style="width: auto;">Save Changes</button>
+          </div>
         </form>
+      </div>
 
-        <p class="form-footer">
-          Already have an account?
-          <button type="button" class="link-button" id="go-to-login">Sign in.</button>
+      <div class="tabs-container">
+        <button class="tab-btn active" id="tab-btn-daily" data-tab="daily">Daily Checklist</button>
+        <button class="tab-btn" id="tab-btn-stats" data-tab="stats">Achievements</button>
+      </div>
+
+      <!-- Daily Tab -->
+      <div id="tab-daily">
+        <div style="margin-bottom: 1.5rem;">
+          <h3 style="margin-bottom: 0.5rem;">Today's Progress</h3>
+          <div style="background: var(--bg-input); border-radius: 10px; height: 8px; overflow: hidden;">
+            <div id="daily-progress-bar"
+              style="width: 0%; height: 100%; background: var(--success); transition: width 0.5s;"></div>
+          </div>
+        </div>
+        <ul id="daily-list" class="daily-list"></ul>
+      </div>
+
+      <!-- Stats Tab (Achievements) -->
+      <div id="tab-stats" style="display: none;">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Completion Rate</div>
+            <div class="stat-value" id="stat-completion-rate">0%</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">This week</p>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Streak</div>
+            <div class="stat-value" id="stat-streak">0</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Days</p>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom: 1rem;">Unlocked Achievements</h3>
+        <div id="achievements-list" class="achievements-grid">
+          <!-- JS will populate -->
+        </div>
+      </div>
+    </section>
+
+    <!-- HABITS CATALOG VIEW -->
+    <section class="view-page" data-view="habits" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Habit Catalog</h2>
+        <button id="save-habits-btn" class="btn-primary" style="width: auto;">Save Selection</button>
+      </div>
+
+      <!-- Create Habit Form -->
+      <div class="create-habit-section">
+        <h3 style="margin-bottom:1rem; font-size:1rem;">Can't find your habit? Create it!</h3>
+        <form id="create-habit-form" class="create-habit-form">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Habit Name</label>
+            <input type="text" id="new-habit-name" class="form-input" placeholder="e.g. Read 5 pages" required />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Category</label>
+            <select id="new-habit-cat" class="form-input">
+              <option value="Wellness">Wellness</option>
+              <option value="Health">Health</option>
+              <option value="Academic">Academic</option>
+              <option value="Work">Work</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Description (optional)</label>
+            <textarea id="new-habit-desc" class="form-input" rows="2" placeholder="Describe your habit..."></textarea>
+          </div>
+          <button type="submit" class="btn-secondary">Create Habit</button>
+        </form>
+      </div>
+
+      <div class="tabs-container" id="category-tabs">
+        <button class="tab-btn active" data-filter="all">All</button>
+        <button class="tab-btn" data-filter="wellness">Wellness</button>
+        <button class="tab-btn" data-filter="health">Health</button>
+        <button class="tab-btn" data-filter="academic">Academic</button>
+        <button class="tab-btn" data-filter="work">Work</button>
+      </div>
+      <div id="habits-grid" class="habits-grid"></div>
+    </section>
+
+    <!-- Edit Habit Modal -->
+    <div id="edit-habit-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h3 style="margin-bottom: 1rem;">Edit Habit</h3>
+        <form id="edit-habit-form">
+          <input type="hidden" id="edit-habit-id" />
+          <div class="form-group">
+            <label class="form-label">Habit Name</label>
+            <input type="text" id="edit-habit-name" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="edit-habit-cat" class="form-input">
+              <option value="Wellness">Wellness</option>
+              <option value="Health">Health</option>
+              <option value="Academic">Academic</option>
+              <option value="Work">Work</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="edit-habit-desc" class="form-input" rows="2"></textarea>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <button type="button" class="btn-secondary" id="cancel-edit-habit">Cancel</button>
+            <button type="submit" class="btn-primary" style="width: auto;">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal" style="display: none;">
+      <div class="modal-content" style="text-align: center;">
+        <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚠️</div>
+        <h3 id="confirm-title" style="margin-bottom: 0.5rem;">Are you sure?</h3>
+        <p id="confirm-message" style="color: var(--text-muted); margin-bottom: 1.5rem;">This action cannot be undone.
         </p>
-      </section>
-
-      <!-- VISTA CATÁLOGO DE HÁBITOS -->
-      <section class="view-page" data-view="habits" style="display: none;">
-        <h2 class="page-title">Select Your Habits</h2>
-
-        <div class="tabs">
-          <button class="tab active" data-filter="all">All Habits</button>
-          <button class="tab" data-filter="wellness">Wellness</button>
-          <button class="tab" data-filter="health">Health</button>
-          <button class="tab" data-filter="academic">Academic</button>
-          <button class="tab" data-filter="work">Work</button>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <button type="button" class="btn-secondary" id="confirm-cancel">Cancel</button>
+          <button type="button" class="btn-primary" id="confirm-ok"
+            style="width: auto; background: var(--danger);">Delete</button>
         </div>
-
-
-        <div id="habits-grid" class="habits-grid">
-          <!-- Se llena con JS -->
-        </div>
-
-        <div class="page-footer">
-          <button id="save-habits-btn" class="btn-primary">Save My Habits</button>
-        </div>
-      </section>
-
-      <!-- VISTA PROFILE (Unified) -->
-      <section class="view-page" data-view="profile" style="display: none;">
-        <div class="profile-header">
-          <div class="profile-info">
-            <h2 class="page-title">My Profile</h2>
-            <p id="profile-email-display" class="view-subtitle">user@example.com</p>
-          </div>
-          <div class="profile-actions">
-            <!-- Settings Form (Collapsible or visible) -->
-            <div class="settings-form">
-                <label>Name: <input type="text" id="profile-name" /></label>
-                <label>Avatar URL: <input type="text" id="profile-avatar" /></label>
-                <label>Timezone: <input type="text" id="profile-timezone" /></label>
-                <button id="save-profile-btn" class="btn-secondary">Save Info</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="profile-tabs">
-            <button class="profile-tab active" data-tab="daily">Daily Checklist</button>
-            <button class="profile-tab" data-tab="weekly">Weekly Progress</button>
-        </div>
-
-        <div class="profile-content">
-            <!-- DAILY CHECKLIST SUB-VIEW -->
-            <div id="profile-content-daily" class="profile-tab-content">
-                <h3 class="section-title">Today's Habits</h3>
-                <div class="progress-bar-wrapper">
-                  <div class="progress-bar-track">
-                    <div class="progress-bar-fill" id="daily-progress-bar"></div>
-                  </div>
-                </div>
-                <ul id="daily-list" class="daily-list">
-                  <!-- Se llena con JS -->
-                </ul>
-            </div>
-
-            <!-- WEEKLY PROGRESS SUB-VIEW -->
-            <div id="profile-content-weekly" class="profile-tab-content" style="display: none;">
-                <h3 class="section-title">Weekly Stats</h3>
-                <div class="dashboard-grid">
-                  <div class="card">
-                    <h3>Weekly Completion</h3>
-                    <p class="big-number" id="weekly-completion">--</p>
-                    <p>Habits completed this week.</p>
-                  </div>
-        
-                  <div class="card">
-                    <h3>Current Streak</h3>
-                    <p class="big-number" id="current-streak">--</p>
-                    <p>Days in a row you’ve kept your habits.</p>
-                  </div>
-        
-                  <div class="card">
-                    <h3>7-Day Trend</h3>
-                    <p id="weekly-trend">Your habit completion is improving.</p>
-                  </div>
-                </div>
-        
-                <h3 class="section-title">Achievements</h3>
-                <div id="achievements-list" class="achievements-list">
-                  <!-- Se llena con JS -->
-                </div>
-            </div>
-        </div>
-      </section>
-
-
-    </main>
-  </div>
+      </div>
+    </div>
+  </main>
 
   <script type="module" src="js/main.js"></script>
 </body>
+
 </html>

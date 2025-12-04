@@ -44,6 +44,25 @@ public class JwtService {
     }
 
     /**
+     * Generates a short-lived token for password reset.
+     * Genera un token de corta duración para restablecer contraseña.
+     * 
+     * @param email User's email address / Correo electrónico del usuario
+     * @return JWT token string valid for 1 hour / Token JWT válido por 1 hora
+     */
+    public String generatePasswordResetToken(String email) {
+        long expirationMs = 1000 * 60 * 60; // 1 hour / 1 hora
+
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("purpose", "password_reset")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(key)
+                .compact();
+    }
+
+    /**
      * Extracts email from a JWT token.
      * Extrae el email de un token JWT.
      * 

@@ -1,5 +1,5 @@
 from datetime import date as DateType
-from pydantic import BaseModel, Field, ConfigDict  # 👈 añadimos ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # ----- User -----
@@ -25,6 +25,8 @@ class HabitBase(BaseModel):
     name: str
     category: str
     frequency: str
+    description: str | None = None
+    is_custom: bool = False
 
 
 class HabitCreate(HabitBase):
@@ -33,9 +35,16 @@ class HabitCreate(HabitBase):
 
 class HabitRead(HabitBase):
     id: int
+    user_id: int | None = None
 
-    # Pydantic v2: usar model_config en vez de class Config
     model_config = ConfigDict(from_attributes=True)
+
+
+class HabitUpdate(BaseModel):
+    name: str | None = None
+    category: str | None = None
+    frequency: str | None = None
+    description: str | None = None
 
 
 # ----- UserHabit -----
@@ -49,7 +58,9 @@ class UserHabitRead(BaseModel):
     user_id: int
     habit_id: int
     is_active: bool
-    is_completed: bool
+    current_streak: int = 0
+    longest_streak: int = 0
+    is_completed: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -57,7 +68,6 @@ class UserHabitRead(BaseModel):
 # ----- Checkin -----
 class CheckinCreate(BaseModel):
     user_habit_id: int
-    # Usamos DateType (alias) para evitar choque nombre campo/tipo
     date: DateType = Field(default_factory=DateType.today)
     is_completed: bool
 
@@ -65,7 +75,7 @@ class CheckinCreate(BaseModel):
 class CheckinRead(BaseModel):
     id: int
     user_habit_id: int
-    date: DateType
+    log_date: DateType
     is_completed: bool
 
     model_config = ConfigDict(from_attributes=True)
@@ -95,3 +105,5 @@ class AchievementRead(BaseModel):
     id: int
     title: str
     description: str
+
+    model_config = ConfigDict(from_attributes=True)

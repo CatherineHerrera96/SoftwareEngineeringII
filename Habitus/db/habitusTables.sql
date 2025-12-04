@@ -17,9 +17,12 @@ CREATE TABLE users (
 
 CREATE TABLE habits (
     id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE, -- Nullable for system habits
     name VARCHAR(255) NOT NULL,
+    description TEXT,
     category VARCHAR(100),
     frequency VARCHAR(50),
+    is_custom BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -28,6 +31,8 @@ CREATE TABLE user_habits (
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     habit_id INT NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
     is_active BOOLEAN DEFAULT TRUE,
+    current_streak INT DEFAULT 0,
+    longest_streak INT DEFAULT 0,
     activated_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(user_id, habit_id)
 );
@@ -57,6 +62,3 @@ CREATE TABLE user_achievements (
     awarded_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(user_id, achievement_id)
 );
-
-
-

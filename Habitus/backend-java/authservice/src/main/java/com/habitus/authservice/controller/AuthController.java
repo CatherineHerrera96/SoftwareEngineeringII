@@ -3,9 +3,11 @@ package com.habitus.authservice.controller;
 import com.habitus.authservice.dto.AuthResponse;
 import com.habitus.authservice.dto.LoginRequest;
 import com.habitus.authservice.dto.RegisterRequest;
+import com.habitus.authservice.dto.ForgotPasswordRequest;
 import com.habitus.authservice.entity.User;
 import com.habitus.authservice.service.AuthService;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,5 +38,11 @@ public class AuthController {
         return userDetails.getUser();
     }
 
-}
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.sendPasswordResetEmail(request.getEmail());
+        // Always return 200 for security (don't reveal if email exists)
+        return ResponseEntity.ok().build();
+    }
 
+}

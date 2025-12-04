@@ -3,8 +3,8 @@ from typing import Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
-from .models import Checkin, UserHabit
-from .schemas import WeeklySummary
+from models import Checkin, UserHabit
+from schemas import WeeklySummary
 
 
 def get_week_bounds(week_start: date) -> Tuple[date, date]:

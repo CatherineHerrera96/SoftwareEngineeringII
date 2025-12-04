@@ -163,3 +163,41 @@ export async function register(email, password) {
 
   return data;
 }
+
+/**
+ * Request password reset email.
+ *
+ * BACKEND TODO:
+ * - Implement endpoint:
+ *      POST /api/auth/forgot-password
+ *
+ * - Body (JSON):
+ *      { "email": string }
+ *
+ * - Expected response:
+ *   - 200 OK (email sent)
+ *   - 404 Not Found (email not registered)
+ *
+ * FRONTEND:
+ * - Shows success notification regardless of whether email exists
+ *   (for security reasons).
+ */
+export async function forgotPassword(email) {
+  const res = await fetch(`${JAVA_BASE_URL}/forgot-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!res.ok) {
+    // For security, don't reveal if email exists
+    // Still throw for network/server errors
+    if (res.status >= 500) {
+      throw new Error("Server error. Please try again later.");
+    }
+  }
+
+  return true; // Always show success message for security
+}

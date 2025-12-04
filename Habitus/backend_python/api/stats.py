@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from datetime import date, timedelta
 
-from ..db import get_db
-from .. import schemas
-from ..stats_service import compute_weekly_stats
-from ..auth_deps import get_current_user
-from ..models import User
+from db import get_db
+import schemas
+from stats_service import compute_weekly_stats
+from auth_deps import get_current_user
+from models import User
 
 router = APIRouter(tags=["stats"])
 

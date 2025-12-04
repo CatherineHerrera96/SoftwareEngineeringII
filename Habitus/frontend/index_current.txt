@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Habitus - Modern Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body data-theme="light">
+
+  <!-- HEADER -->
+  <header class="app-header" id="app-header" style="display: none;">
+    <div class="header-content">
+      <div class="logo-area">
+        <div class="logo-icon">H</div>
+        <span>Habitus</span>
+      </div>
+      <nav class="nav-links">
+        <button class="nav-link" data-nav="profile">Profile</button>
+        <button class="nav-link" data-nav="habits">Habits</button>
+        <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Dark Mode">🌙</button>
+        <button id="logout-btn" class="logout-btn">Log Out</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <div id="notification-area" class="notification-area"></div>
+
+    <!-- LOGIN VIEW -->
+    <section class="view-card login-card" data-view="login">
+      <div style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;">H</div>
+      <h1 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Welcome Back</h1>
+      <p style="color: var(--text-muted); margin-bottom: 2rem;">Sign in to track your progress</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="login-email" class="form-input" value="demo@habitus.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" value="password" required />
+        </div>
+        <button type="submit" class="btn-primary" id="login-submit-btn">Sign In</button>
+      </form>
+    </section>
+
+    <!-- PROFILE VIEW -->
+    <section class="view-page" data-view="profile" style="display: none;">
+      <!-- Profile Header -->
+      <div
+        style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border);">
+        <div id="profile-avatar-display"
+          style="width: 80px; height: 80px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; overflow:hidden;">
+          D</div>
+        <div style="flex: 1;">
+          <h2 id="profile-name-display">Demo User</h2>
+          <p id="profile-email-display" style="color: var(--text-muted);">demo@habitus.com</p>
+        </div>
+        <button class="btn-secondary" id="toggle-edit-profile">Edit Profile</button>
+      </div>
+
+      <!-- Edit Profile Form -->
+      <div id="edit-profile-section" class="view-card" style="display: none; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Update Profile</h3>
+        <form id="profile-edit-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input type="text" id="edit-name" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Avatar URL</label>
+              <input type="text" id="edit-avatar" class="form-input" placeholder="https://..." />
+            </div>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <button type="button" class="btn-secondary" id="cancel-edit-profile">Cancel</button>
+            <button type="submit" class="btn-primary" style="width: auto;">Save Changes</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="tabs-container">
+        <button class="tab-btn active" id="tab-btn-daily" data-tab="daily">Daily Checklist</button>
+        <button class="tab-btn" id="tab-btn-stats" data-tab="stats">Achievements</button>
+      </div>
+
+      <!-- Daily Tab -->
+      <div id="tab-daily">
+        <div style="margin-bottom: 1.5rem;">
+          <h3 style="margin-bottom: 0.5rem;">Today's Progress</h3>
+          <div style="background: var(--bg-input); border-radius: 10px; height: 8px; overflow: hidden;">
+            <div id="daily-progress-bar"
+              style="width: 0%; height: 100%; background: var(--success); transition: width 0.5s;"></div>
+          </div>
+        </div>
+        <ul id="daily-list" class="daily-list"></ul>
+      </div>
+
+      <!-- Stats Tab (Achievements) -->
+      <div id="tab-stats" style="display: none;">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Completion Rate</div>
+            <div class="stat-value">85%</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">This week</p>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Streak</div>
+            <div class="stat-value">12</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Days</p>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom: 1rem;">Unlocked Achievements</h3>
+        <div id="achievements-list" class="achievements-grid">
+          <!-- JS will populate -->
+        </div>
+      </div>
+    </section>
+
+    <!-- HABITS CATALOG VIEW -->
+    <section class="view-page" data-view="habits" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Habit Catalog</h2>
+        <button id="save-habits-btn" class="btn-primary" style="width: auto;">Save Selection</button>
+      </div>
+
+      <!-- Create Habit Form -->
+      <div class="create-habit-section">
+        <h3 style="margin-bottom:1rem; font-size:1rem;">Can't find your habit? Create it!</h3>
+        <form id="create-habit-form" class="create-habit-form">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Habit Name</label>
+            <input type="text" id="new-habit-name" class="form-input" placeholder="e.g. Read 5 pages" required />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Category</label>
+            <select id="new-habit-cat" class="form-input">
+              <option value="Wellness">Wellness</option>
+              <option value="Health">Health</option>
+              <option value="Academic">Academic</option>
+              <option value="Work">Work</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-secondary">Create Habit</button>
+        </form>
+      </div>
+
+      <div class="tabs-container" id="category-tabs">
+        <button class="tab-btn active" data-filter="all">All</button>
+        <button class="tab-btn" data-filter="wellness">Wellness</button>
+        <button class="tab-btn" data-filter="health">Health</button>
+        <button class="tab-btn" data-filter="academic">Academic</button>
+        <button class="tab-btn" data-filter="work">Work</button>
+      </div>
+      <div id="habits-grid" class="habits-grid"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

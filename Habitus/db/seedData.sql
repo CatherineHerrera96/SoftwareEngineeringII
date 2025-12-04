@@ -1,99 +1,41 @@
--- ==========================================
--- 1. SEED: users (20 Users)
--- ==========================================
-INSERT INTO users (email, password_hash) VALUES
-('alice.smith@example.com', 'hash_secret_1'),
-('bob.jones@example.com', 'hash_secret_2'),
-('charlie.brown@example.com', 'hash_secret_3'),
-('david.williams@example.com', 'hash_secret_4'),
-('eve.davis@example.com', 'hash_secret_5'),
-('frank.miller@example.com', 'hash_secret_6'),
-('grace.wilson@example.com', 'hash_secret_7'),
-('henry.moore@example.com', 'hash_secret_8'),
-('isabella.taylor@example.com', 'hash_secret_9'),
-('jack.anderson@example.com', 'hash_secret_10'),
-('karen.thomas@example.com', 'hash_secret_11'),
-('liam.jackson@example.com', 'hash_secret_12'),
-('mia.white@example.com', 'hash_secret_13'),
-('noah.harris@example.com', 'hash_secret_14'),
-('olivia.martin@example.com', 'hash_secret_15'),
-('peter.thompson@example.com', 'hash_secret_16'),
-('quinn.garcia@example.com', 'hash_secret_17'),
-('rachel.martinez@example.com', 'hash_secret_18'),
-('sam.robinson@example.com', 'hash_secret_19'),
-('tina.clark@example.com', 'hash_secret_20');
+-- Seed Habits (System Habits)
+-- Categories: Wellness, Health, Academic, Work
 
--- ==========================================
--- 2. SEED: habits (Common Examples)
--- ==========================================
-INSERT INTO habits (name, category, frequency) VALUES
-('Drink 2L Water', 'Health', 'Daily'),
-('Read 30 Minutes', 'Personal Development', 'Daily'),
-('Gym / Workout', 'Fitness', '3x/Week'),
-('Meditate', 'Mindfulness', 'Daily'),
-('No Sugar', 'Diet', 'Daily'),
-('Code Practice', 'Skill', 'Daily'),
-('Journaling', 'Mindfulness', 'Weekly'),
-('Use Habitus App', 'Productivity', 'Daily');
+-- Wellness
+INSERT INTO habits (name, description, category, frequency, is_custom) VALUES 
+('Meditate 10 mins', 'Take 10 minutes to breathe and center yourself.', 'Wellness', 'daily', false),
+('Read for pleasure', 'Read at least 10 pages of a book you enjoy.', 'Wellness', 'daily', false),
+('Journaling', 'Write down your thoughts or gratitude for the day.', 'Wellness', 'daily', false),
+('No screens before bed', 'Avoid screens 30 minutes before sleeping.', 'Wellness', 'daily', false);
 
--- ==========================================
--- 3. SEED: user_habits (Assigning habits to users)
--- ==========================================
--- Assigning generic habits to various users (Assumes IDs 1-20 exist)
-INSERT INTO user_habits (user_id, habit_id) VALUES
-(1, 1), (1, 2), -- Alice does Water and Reading
-(2, 1), (2, 3), -- Bob does Water and Gym
-(3, 4),         -- Charlie Meditates
-(4, 1), (4, 5), (4, 6), -- David is ambitious
-(5, 2),
-(6, 3), (6, 4),
-(7, 1),
-(8, 6),
-(9, 1), (9, 2), (9, 3),
-(10, 4),
-(11, 1),
-(12, 2),
-(13, 5),
-(14, 6),
-(15, 1), (15, 2),
-(16, 3),
-(17, 4),
-(18, 1),
-(19, 2),
-(20, 1), (20, 6);
+-- Health
+INSERT INTO habits (name, description, category, frequency, is_custom) VALUES 
+('Drink 2L Water', 'Stay hydrated throughout the day.', 'Health', 'daily', false),
+('Walk 20 mins', 'Go for a brisk walk outside.', 'Health', 'daily', false),
+('Eat a healthy breakfast', 'Start the day with nutritious food.', 'Health', 'daily', false),
+('7+ hours sleep', 'Get adequate rest for recovery.', 'Health', 'daily', false),
+('Gym / Workout', 'Exercise for at least 30 minutes.', 'Health', 'daily', false);
 
--- ==========================================
--- 4. SEED: habit_tracker (Logging progress)
--- ==========================================
--- Simulating some logs for User 1 (Alice) and User 2 (Bob)
-INSERT INTO habit_tracker (user_habit_id, log_date, is_completed) VALUES
--- User 1, Habit 1 (Water) - Streaks
-(1, CURRENT_DATE - INTERVAL '3 days', TRUE),
-(1, CURRENT_DATE - INTERVAL '2 days', TRUE),
-(1, CURRENT_DATE - INTERVAL '1 days', TRUE),
-(1, CURRENT_DATE, FALSE), -- Missed today
+-- Academic
+INSERT INTO habits (name, description, category, frequency, is_custom) VALUES 
+('Study 1 hour', 'Dedicated focused study time.', 'Academic', 'daily', false),
+('Review notes', 'Review notes from previous lectures.', 'Academic', 'daily', false),
+('Complete assignments', 'Work on pending homework or projects.', 'Academic', 'daily', false),
+('Read research paper', 'Read one academic article or paper.', 'Academic', 'weekly', false);
 
--- User 1, Habit 2 (Reading)
-(2, CURRENT_DATE - INTERVAL '2 days', TRUE),
-(2, CURRENT_DATE - INTERVAL '1 days', FALSE),
+-- Work
+INSERT INTO habits (name, description, category, frequency, is_custom) VALUES 
+('Plan tomorrow tasks', 'List top 3 priorities for the next day.', 'Work', 'daily', false),
+('Inbox Zero', 'Clear out email inbox.', 'Work', 'daily', false),
+('Deep Work Session', '90 minutes of uninterrupted work.', 'Work', 'daily', false),
+('Update documentation', 'Keep project docs up to date.', 'Work', 'weekly', false);
 
--- User 2, Habit 3 (Gym)
-(4, CURRENT_DATE - INTERVAL '3 days', TRUE),
-(4, CURRENT_DATE - INTERVAL '1 days', TRUE);
-
--- ==========================================
--- 5. SEED: achievements (Gamification definitions)
--- ==========================================
-INSERT INTO achievements (name, description, condition_type, threshold) VALUES
-('Starter', 'Completed your first habit', 'count', 1),
-('On Fire', 'Completed habits 7 days in a row', 'streak', 7),
-('Hydration Hero', 'Drank water 30 times', 'specific_habit_count', 30),
-('Master of Discipline', 'Completed 100 total habits', 'count', 100);
-
--- ==========================================
--- 6. SEED: user_achievements (Awards)
--- ==========================================
--- Granting "Starter" achievement to Alice (1) and Bob (2)
-INSERT INTO user_achievements (user_id, achievement_id) VALUES
-(1, 1),
-(2, 1);
+-- Seed Achievements
+INSERT INTO achievements (name, description, condition_type, threshold) VALUES 
+('First Step', 'Complete your first habit check-in.', 'checkins_count', 1),
+('Momentum Builder', 'Complete 10 total check-ins.', 'checkins_count', 10),
+('Habit Master', 'Complete 50 total check-ins.', 'checkins_count', 50),
+('Hat Trick', 'Reach a 3-day streak on any habit.', 'streak_days', 3),
+('Week Warrior', 'Reach a 7-day streak on any habit.', 'streak_days', 7),
+('Monthly Master', 'Reach a 30-day streak on any habit.', 'streak_days', 30),
+('Perfect Day', 'Complete all active habits in a single day.', 'perfect_day', 1);

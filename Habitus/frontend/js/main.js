@@ -1,6 +1,7 @@
 import { navigateTo } from "./router.js";
 import { initLoginView } from "./views/loginView.js";
 import { clearAuth, getToken } from "./state.js";
+import { initTheme } from "./ui.js";
 
 function initNav() {
   const buttons = document.querySelectorAll(".nav-link");
@@ -34,6 +35,7 @@ function initLogout() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   initLoginView(); // Sets up login form listeners
   initNav();
   initLogout();

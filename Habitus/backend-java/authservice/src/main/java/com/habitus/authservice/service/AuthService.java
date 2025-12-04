@@ -7,6 +7,8 @@ import com.habitus.authservice.dto.RegisterRequest;
 public interface AuthService {
 
     AuthResponse register(RegisterRequest request);
-    AuthResponse login(LoginRequest request);
-}
 
+    AuthResponse login(LoginRequest request);
+
+    void sendPasswordResetEmail(String email);
+}

@@ -1,38 +1,66 @@
-import { login, register } from "../api/authApi.js";
+import { login, register, forgotPassword } from "../api/authApi.js";
 import { navigateTo } from "../router.js";
 import { setAuth } from "../state.js";
-import { showError, showSuccess } from "../components/notifications.js";
-
-const USE_FAKE_LOGIN = false;
+import { showNotification } from "../ui.js";
 
 export function initLoginView() {
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
+  const forgotPasswordForm = document.getElementById("forgot-password-form");
+  const goToRegisterBtn = document.getElementById("go-to-register");
+  const goToLoginBtn = document.getElementById("go-to-login");
+  const forgotPasswordBtn = document.getElementById("forgot-password-btn");
+  const backToLoginBtn = document.getElementById("back-to-login");
+
+  // Navigation between login and register
+  if (goToRegisterBtn) {
+    goToRegisterBtn.addEventListener("click", () => {
+      navigateTo("register");
+    });
+  }
+  if (goToLoginBtn) {
+    goToLoginBtn.addEventListener("click", () => {
+      navigateTo("login");
+    });
+  }
+
+  // Navigation to forgot password
+  if (forgotPasswordBtn) {
+    forgotPasswordBtn.addEventListener("click", () => {
+      navigateTo("forgot-password");
+    });
+  }
+  if (backToLoginBtn) {
+    backToLoginBtn.addEventListener("click", () => {
+      navigateTo("login");
+    });
+  }
 
   // LOGIN
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      console.log("Login form submitted"); // DEBUG
+      const btn = document.getElementById('login-submit-btn');
+      if (btn) {
+        btn.innerHTML = '<span class="loading-spinner"></span>';
+        btn.disabled = true;
+      }
 
       const email = document.getElementById("login-email").value;
       const password = document.getElementById("login-password").value;
 
-      if (USE_FAKE_LOGIN) {
-        setAuth("fake-token", { id: 1, email });
-        navigateTo("profile");
-        return;
-      }
-
       try {
-        console.log(`Attempting login for ${email}`); // DEBUG
         await login(email, password);
-        console.log("Login success!"); // DEBUG
-        showSuccess("Login successful! Welcome back.");
+        showNotification("Login successful! Welcome back.");
         navigateTo("profile");
       } catch (err) {
-        showError(err.message || "Login failed");
+        showNotification(err.message || "Login failed", "error");
         console.error(err);
+      } finally {
+        if (btn) {
+          btn.innerHTML = 'Sign In';
+          btn.disabled = false;
+        }
       }
     });
   }
@@ -41,27 +69,74 @@ export function initLoginView() {
   if (registerForm) {
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const btn = document.getElementById('register-submit-btn');
+      if (btn) {
+        btn.innerHTML = '<span class="loading-spinner"></span>';
+        btn.disabled = true;
+      }
+
       const email = document.getElementById("register-email").value;
       const password = document.getElementById("register-password").value;
       const confirm = document.getElementById("register-password-confirm").value;
       const terms = document.getElementById("register-terms").checked;
 
       if (password !== confirm) {
-        showError("Passwords do not match");
+        showNotification("Passwords do not match", "error");
+        if (btn) {
+          btn.innerHTML = 'Create Account';
+          btn.disabled = false;
+        }
         return;
       }
       if (!terms) {
-        showError("You must accept the terms");
+        showNotification("You must accept the terms", "error");
+        if (btn) {
+          btn.innerHTML = 'Create Account';
+          btn.disabled = false;
+        }
         return;
       }
 
       try {
         await register(email, password);
-        showSuccess("Account created successfully! Please sign in.");
+        showNotification("Account created successfully! Please sign in.");
         navigateTo("login");
       } catch (err) {
-        showError(err.message || "Registration failed");
+        showNotification(err.message || "Registration failed", "error");
         console.error(err);
+      } finally {
+        if (btn) {
+          btn.innerHTML = 'Create Account';
+          btn.disabled = false;
+        }
+      }
+    });
+  }
+
+  // FORGOT PASSWORD
+  if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('forgot-submit-btn');
+      if (btn) {
+        btn.innerHTML = '<span class="loading-spinner"></span>';
+        btn.disabled = true;
+      }
+
+      const email = document.getElementById("forgot-email").value;
+
+      try {
+        await forgotPassword(email);
+        showNotification("Password reset link sent to your email!");
+        navigateTo("login");
+      } catch (err) {
+        showNotification(err.message || "Failed to send reset link", "error");
+        console.error(err);
+      } finally {
+        if (btn) {
+          btn.innerHTML = 'Send Reset Link';
+          btn.disabled = false;
+        }
       }
     });
   }

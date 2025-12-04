@@ -11,7 +11,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from .db import Base
+from db import Base
 
 
 class User(Base):
@@ -31,9 +31,12 @@ class Habit(Base):
     __tablename__ = "habits"
 
     id          = Column(Integer, primary_key=True)
+    user_id     = Column(Integer, ForeignKey("users.id"), nullable=True) # Nullable for system habits
     name        = Column(String, nullable=False)
+    description = Column(String, nullable=True)
     category    = Column(String, nullable=False)        # wellness | health | academic | work
     frequency   = Column(String, nullable=False)        # daily | weekly
+    is_custom   = Column(Boolean, default=False)
 
     user_habits = relationship("UserHabit", back_populates="habits")
 
@@ -44,10 +47,13 @@ class UserHabit(Base):
         UniqueConstraint("user_id", "habit_id", name="uq_user_habit"),
     )
 
-    id          = Column(Integer, primary_key=True)
-    user_id     = Column(Integer, ForeignKey("users.id"), nullable=False)
-    habit_id    = Column(Integer, ForeignKey("habits.id"), nullable=False)
-    is_active   = Column(Boolean, nullable=False, default=True)
+    id              = Column(Integer, primary_key=True)
+    user_id         = Column(Integer, ForeignKey("users.id"), nullable=False)
+    habit_id        = Column(Integer, ForeignKey("habits.id"), nullable=False)
+    is_active       = Column(Boolean, nullable=False, default=True)
+    current_streak  = Column(Integer, default=0)
+    longest_streak  = Column(Integer, default=0)
+    activated_at    = Column(Date, default=date.today)
 
     habits = relationship("Habit", back_populates="user_habits")
     checkins = relationship("Checkin", back_populates="user_habits")
