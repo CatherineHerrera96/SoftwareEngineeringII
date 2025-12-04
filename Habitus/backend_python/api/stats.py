@@ -6,18 +6,20 @@ from datetime import date, timedelta
 from ..db import get_db
 from .. import schemas
 from ..stats_service import compute_weekly_stats
+from ..auth_deps import get_current_user
+from ..models import User
 
 router = APIRouter(tags=["stats"])
 
 
-@router.get("/weekly/{user_id}", response_model=schemas.WeeklySummary)
+@router.get("/weekly", response_model=schemas.WeeklySummary)
 def get_weekly_stats(
-    user_id: str,
     week_start: date | None = Query(None, description="Week start date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     if week_start is None:
         today = date.today()
         #initialize as last Monday
         week_start = today - timedelta(today.weekday())
-    return compute_weekly_stats(db, user_id, week_start)
+    return compute_weekly_stats(db, str(current_user.id), week_start)

@@ -2,11 +2,28 @@ from datetime import date as DateType
 from pydantic import BaseModel, Field, ConfigDict  # 👈 añadimos ConfigDict
 
 
+# ----- User -----
+class UserBase(BaseModel):
+    email: str
+
+class UserRead(UserBase):
+    id: int
+    name: str | None = None
+    avatar_url: str | None = None
+    timezone: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class UserUpdate(BaseModel):
+    name: str | None = None
+    avatar_url: str | None = None
+    timezone: str | None = None
+
+
 # ----- Habit -----
 class HabitBase(BaseModel):
     name: str
     category: str
-    description: str
     frequency: str
 
 
@@ -15,7 +32,7 @@ class HabitCreate(HabitBase):
 
 
 class HabitRead(HabitBase):
-    id: str
+    id: int
 
     # Pydantic v2: usar model_config en vez de class Config
     model_config = ConfigDict(from_attributes=True)
@@ -23,39 +40,31 @@ class HabitRead(HabitBase):
 
 # ----- UserHabit -----
 class UserHabitCreate(BaseModel):
-    user_id: str
-    habit_id: str
-    is_active: bool
+    user_id: int
+    habit_id: int
 
 
 class UserHabitRead(BaseModel):
-    id: str
-    user_id: str
-    habit_id: str
+    id: int
+    user_id: int
+    habit_id: int
     is_active: bool
-
-    model_config = ConfigDict(from_attributes=True)
-
-class UserActiveHabitRead(BaseModel):
-    id: str
-    user_id: str
-    habit_id: str
-    name: str
     is_completed: bool
-    
+
     model_config = ConfigDict(from_attributes=True)
+
 
 # ----- Checkin -----
 class CheckinCreate(BaseModel):
-    user_habit_id: str
+    user_habit_id: int
     # Usamos DateType (alias) para evitar choque nombre campo/tipo
     date: DateType = Field(default_factory=DateType.today)
     is_completed: bool
 
 
 class CheckinRead(BaseModel):
-    id: str
-    user_habit_id: str
+    id: int
+    user_habit_id: int
     date: DateType
     is_completed: bool
 
@@ -64,8 +73,8 @@ class CheckinRead(BaseModel):
 
 # ----- StatsWeekly & summary -----
 class StatsWeeklyRead(BaseModel):
-    id: str
-    user_id: str
+    id: int
+    user_id: int
     week_start: DateType
     completion_rate: float
     streak_global: int
@@ -74,7 +83,7 @@ class StatsWeeklyRead(BaseModel):
 
 
 class WeeklySummary(BaseModel):
-    user_id: str
+    user_id: int
     week_start: DateType
     completion_rate: float
     streak_global: int
@@ -83,6 +92,6 @@ class WeeklySummary(BaseModel):
 
 
 class AchievementRead(BaseModel):
-    id: str
+    id: int
     title: str
     description: str

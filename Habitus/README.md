@@ -12,6 +12,7 @@ The project follows a microservices-inspired architecture with clear separation 
 - **Vanilla JS Frontend** - Single-page application with modular view architecture
 
 ```
+<<<<<<< HEAD
 ┌─────────────┐     ┌──────────────┐      ┌─────────────┐
 │  Frontend   │────▶│ Java Auth    │────▶│ PostgreSQL  │
 │  (Port 8001)│     │ (Port 8080)  │      │ Database    │
@@ -22,6 +23,18 @@ The project follows a microservices-inspired architecture with clear separation 
 │             │────▶│ Python API  │─────────────┘
 └─────────────┘      │ (Port 8000) │
                      └─────────────┘
+=======
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│  Frontend   │────▶│ Java Auth    │────▶│ PostgreSQL  │
+│  (Port 8001)│     │ (Port 8080)  │     │ Database    │
+│             │     └──────────────┘     └─────────────┘
+│             │            │                     ▲
+│             │            │                     │
+│             │     ┌──────▼──────┐             │
+│             │────▶│ Python API  │─────────────┘
+└─────────────┘     │ (Port 8000) │
+                    └─────────────┘
+>>>>>>> c927ece (Update full Habitus MVP (backends, frontend, db))
 ```
 
 ## ✨ MVP Features
@@ -366,7 +379,11 @@ Common files to remove if tracked:
 
 ## 📝 License
 
+<<<<<<< HEAD
 This project is for educational purposes as part of a Software Engineering course.
+=======
+This project is for educational purposes as part of a software architecture course.
+>>>>>>> c927ece (Update full Habitus MVP (backends, frontend, db))
 
 ---
 

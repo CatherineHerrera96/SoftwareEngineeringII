@@ -53,7 +53,7 @@ import { setAuth } from "../state.js";
 // Ejemplos posibles:
 //   - "http://localhost:8080/api/auth"
 //   - "https://mi-servidor.com/api/auth"
-const JAVA_BASE_URL = "http://localhost:8080/api/auth";
+const JAVA_BASE_URL = "http://localhost:8080/auth";
 
 /**
  * Inicia sesión contra el backend de autenticación.
@@ -77,36 +77,40 @@ const JAVA_BASE_URL = "http://localhost:8080/api/auth";
  * - Si la respuesta NO es ok (401, 400, etc.), lanza un error genérico.
  */
 export async function login(email, password) {
-  const res = await fetch(`${JAVA_BASE_URL}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  console.log(`Calling fetch to ${JAVA_BASE_URL}/login`); // DEBUG
+  try {
+    const res = await fetch(`${JAVA_BASE_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    console.log(`Response status: ${res.status}`); // DEBUG
 
-  if (!res.ok) {
-    // Aquí se podría hacer un manejo más específico (por código de estado),
-    // pero para el proyecto basta con lanzar un error genérico.
-    throw new Error("Login failed");
+    if (!res.ok) {
+      // User-friendly error messages
+      if (res.status === 404 || res.status === 401) {
+        throw new Error("Invalid email or password");
+      }
+      if (res.status === 500) {
+        throw new Error("Server error. Please try again later.");
+      }
+      throw new Error(`Login failed: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    // Java backend returns: { token: "JWT_STRING" }
+    // Store token and email (we know the email from input)
+    setAuth(data.token, { email });
+    return { token: data.token, email };
+  } catch (e) {
+    console.error("Fetch error: " + e.message);
+    throw e;
   }
-
-  const data = await res.json();
-
-  // Se asume que el backend devuelve al menos:
-  // { token, user_id, email }
-  if (!data.token || !data.user_id || !data.email) {
-    console.warn(
-      "[WARN] Respuesta de login no tiene el formato esperado:",
-      data
-    );
-  }
-
-  // Guardamos la sesión en el estado global.
-  setAuth(data.token, { id: data.user_id, email: data.email });
-
-  return data;
 }
+
+
 
 /**
  * Registra un nuevo usuario contra el backend de autenticación.
@@ -139,16 +143,21 @@ export async function register(email, password) {
   });
 
   if (!res.ok) {
-    throw new Error("Register failed");
+    if (res.status === 409) {
+      throw new Error("This email is already registered");
+    }
+    if (res.status === 400) {
+      throw new Error("Invalid email or password format");
+    }
+    throw new Error("Registration failed. Please try again.");
   }
 
-  // Si el backend devuelve algo útil (por ejemplo un mensaje),
-  // lo retornamos. Si no, data podría ser {} o null.
+  // Backend returns { token } on successful registration
   let data = null;
   try {
     data = await res.json();
   } catch (e) {
-    // Si no hay cuerpo JSON, no pasa nada; el registro igual fue ok.
+    // If no JSON body, that's ok for registration
     data = null;
   }
 

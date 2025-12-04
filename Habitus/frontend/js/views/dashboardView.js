@@ -35,7 +35,7 @@
 
 import { fetchWeeklyStatsAndAchievements } from "../api/habitsApi.js";
 
-export async function showDashboardView() {
+export async function renderDashboard() {
   // Elementos tal como están definidos en index.html
   const completionText = document.getElementById("weekly-completion");
   const streakText = document.getElementById("current-streak");

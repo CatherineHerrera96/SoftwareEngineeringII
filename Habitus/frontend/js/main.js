@@ -1,31 +1,26 @@
-// main.js
-import { showView } from "./router.js";
+import { navigateTo } from "./router.js";
 import { initLoginView } from "./views/loginView.js";
-import { showHabitsView } from "./views/habitsView.js";
-import { showDailyChecklistView } from "./views/dailyChecklistView.js";
-import { showDashboardView } from "./views/dashboardView.js";
-import { getCurrentUser, clearAuth } from "./state.js";
+import { clearAuth, getToken } from "./state.js";
 
 function initNav() {
   const buttons = document.querySelectorAll(".nav-link");
   buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      buttons.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-
       const dest = btn.getAttribute("data-nav");
-      if (dest === "habits") {
-        showView("habits");
-        showHabitsView();
-      } else if (dest === "daily") {
-        showView("daily");
-        showDailyChecklistView();
-      } else if (dest === "dashboard") {
-        showView("dashboard");
-        showDashboardView();
-      }
+      navigateTo(dest);
     });
   });
+
+  // Handle Register/Login links
+  const goToRegister = document.getElementById("go-to-register");
+  if (goToRegister) {
+    goToRegister.addEventListener("click", () => navigateTo("register"));
+  }
+
+  const goToLogin = document.getElementById("go-to-login");
+  if (goToLogin) {
+    goToLogin.addEventListener("click", () => navigateTo("login"));
+  }
 }
 
 function initLogout() {
@@ -33,29 +28,20 @@ function initLogout() {
   if (!btn) return;
 
   btn.addEventListener("click", () => {
-    // limpiar sesión en el estado
     clearAuth();
-
-    // quitar selección del menú
-    document
-      .querySelectorAll(".nav-link")
-      .forEach((b) => b.classList.remove("active"));
-
-    // volver al login (el router ocultará el header)
-    showView("login");
+    navigateTo("login");
   });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  initLoginView();
+  initLoginView(); // Sets up login form listeners
   initNav();
   initLogout();
 
-  // vista inicial
-  if (getCurrentUser()) {
-    showView("habits");
-    showHabitsView();
+  // Initial View
+  if (getToken()) {
+    navigateTo("profile");
   } else {
-    showView("login");
+    navigateTo("login");
   }
 });

@@ -54,7 +54,7 @@ import { fetchDailyChecklist, saveDailyStatus } from "../api/habitsApi.js";
  *        actualización visual (clase .completed).
  * 5. Calcula el porcentaje completado y ajusta el ancho de la barra.
  */
-export async function showDailyChecklistView() {
+export async function renderDailyChecklist() {
   const list = document.getElementById("daily-list");
   const bar = document.getElementById("daily-progress-bar");
   if (!list || !bar) return;
@@ -113,7 +113,7 @@ export async function showDailyChecklistView() {
     // - Marcamos visualmente el ítem como completado.
     // - Recalculamos la barra de progreso.
     btnDone.onclick = async () => {
-      await saveDailyStatus(item.userHabitId, true);
+      await saveDailyStatus(item.id, true);
       item.completed = true;
       li.classList.add("completed");
       updateProgress();
@@ -125,7 +125,7 @@ export async function showDailyChecklistView() {
     // - Quitamos la marca visual de completado.
     // - Recalculamos la barra de progreso.
     btnMissed.onclick = async () => {
-      await saveDailyStatus(item.userHabitId, false);
+      await saveDailyStatus(item.id, false);
       item.completed = false;
       li.classList.remove("completed");
       updateProgress();

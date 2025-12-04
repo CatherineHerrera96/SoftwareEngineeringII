@@ -1,1 +1,342 @@
+# ============================================
+# Habitus - Git Ignore Configuration
+# ============================================
+# This file ensures that build artifacts, local environments, IDE metadata,
+# and temporary files are NOT committed to the repository.
+#
+# NOTE: If any of these files are already tracked by Git, you must manually
+# remove them using: git rm --cached <file-or-directory>
+# ============================================
 
+# ============================================
+# Operating System Files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+*~
+
+# ============================================
+# General Temporary & Log Files
+# ============================================
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.old
+*.orig
+
+# ============================================
+# Environment & Secrets
+# ============================================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials/
+
+# ============================================
+# IDE & Editor Files
+# ============================================
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.metadata
+.factorypath
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# ============================================
+# Java / Maven (backend-java/authservice)
+# ============================================
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Compiled Java classes
+*.class
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven specific
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ============================================
+# Python (backend_python)
+# ============================================
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+pythonenv*/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Testing
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Linting / Formatting
+.ruff_cache/
+.pylint.d/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+*.sage.py
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# ============================================
+# Frontend (frontend/)
+# ============================================
+
+# Node.js (if added later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.parcel-cache/
+.cache/
+.vite/
+.turbo/
+
+# Coverage
+coverage/
+
+# TypeScript (if added later)
+*.tsbuildinfo
+
+# ESLint
+.eslintcache
+
+# Stylelint
+.stylelintcache
+
+# Package manager lock files (optional - team decision)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ============================================
+# Database & Docker
+# ============================================
+
+# Local database data directories (ephemeral)
+db/data/
+db/pgdata/
+postgres-data/
+
+# Docker volumes (if stored locally)
+.docker/
+
+# DO NOT IGNORE:
+# - docker-compose.yml
+# - db/*.sql (schema and seed files)
+# - Dockerfile(s)
+
+# ============================================
+# Documentation & Build Artifacts
+# ============================================
+
+# Generated documentation
+docs/_build/
+docs/.doctrees/
+site/
+
+# Report files
+*.report
+*.stats
+
+# ============================================
+# OS-Specific Directories
+# ============================================
+
+# Windows
+$RECYCLE.BIN/
+
+# macOS
+.AppleDouble
+.LSOverride
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Linux
+.directory
+.Trash-*
+
+# ============================================
+# Miscellaneous
+# ============================================
+
+# Archives (unless specifically needed)
+# *.7z
+# *.dmg
+# *.gz
+# *.iso
+# *.jar (already covered above)
+# *.rar (already covered above)
+# *.tar
+# *.zip (already covered above)
+
+# Backup files
+*~
+*.bak
+*.backup
+*.old
+
+# Template outputs
+*.rendered
+
+# ============================================
+# Project-Specific Exclusions
+# ============================================
+
+# Ignore Python virtual environment directories at root
+/Include/
+/Lib/
+/Scripts/
+pyvenv.cfg
+
+# Test output files
+test_output.txt
+verify_output.txt
+
+# Workshop PDFs (optional - team decision)
+# Workshop_*.pdf
+# workshop*.pdf

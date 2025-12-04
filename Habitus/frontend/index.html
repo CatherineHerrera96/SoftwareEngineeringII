@@ -16,8 +16,7 @@
       </div>
       <nav class="nav-links">
         <button class="nav-link" data-nav="habits">Habit Catalog</button>
-        <button class="nav-link" data-nav="daily">Daily Checklist</button>
-        <button class="nav-link" data-nav="dashboard">Weekly Progress</button>
+        <button class="nav-link" data-nav="profile">Profile</button>
       </nav>
       
       <button id="logout-btn" class="logout-btn">Log out</button>
@@ -129,77 +128,70 @@
         </div>
       </section>
 
-      <!-- VISTA DAILY CHECKLIST -->
-      <section class="view-page" data-view="daily" style="display: none;">
-        <h2 class="page-title">Today’s Habits</h2>
-        <p class="view-subtitle">Small steps, big results.</p>
-
-        <div class="progress-bar-wrapper">
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="daily-progress-bar"></div>
+      <!-- VISTA PROFILE (Unified) -->
+      <section class="view-page" data-view="profile" style="display: none;">
+        <div class="profile-header">
+          <div class="profile-info">
+            <h2 class="page-title">My Profile</h2>
+            <p id="profile-email-display" class="view-subtitle">user@example.com</p>
+          </div>
+          <div class="profile-actions">
+            <!-- Settings Form (Collapsible or visible) -->
+            <div class="settings-form">
+                <label>Name: <input type="text" id="profile-name" /></label>
+                <label>Avatar URL: <input type="text" id="profile-avatar" /></label>
+                <label>Timezone: <input type="text" id="profile-timezone" /></label>
+                <button id="save-profile-btn" class="btn-secondary">Save Info</button>
+            </div>
           </div>
         </div>
 
-        <ul id="daily-list" class="daily-list">
-          <!-- Se llena con JS -->
-        </ul>
-      </section>
-
-            <!-- VISTA DASHBOARD SEMANAL -->
-      <!--
-        Weekly Progress (Dashboard)
-        ---------------------------
-        Esta vista muestra un resumen semanal del progreso del usuario.
-
-        Elementos dinámicos (llenados por dashboardView.js):
-
-        - #weekly-completion
-            * Texto grande con el porcentaje de hábitos completados en la semana.
-            * Se alimenta con "completion" de fetchWeeklyStatsAndAchievements().
-
-        - #current-streak
-            * Texto grande con el número de días consecutivos (racha actual).
-            * Se alimenta con "streak" de fetchWeeklyStatsAndAchievements().
-
-        - #achievements-list
-            * Contenedor donde se crean tarjetas de logros.
-            * Cada logro tiene título y descripción.
-            * Se alimenta con "achievements" (array) de fetchWeeklyStatsAndAchievements().
-
-        Cuando el backend en Python esté listo:
-        - Solo hay que ajustar fetchWeeklyStatsAndAchievements() en habitsApi.js
-          para que haga fetch a la API real, manteniendo el formato:
-            { completion: number, streak: number, achievements: [{ id, title, description }] }
-      -->
-      <section class="view-page" data-view="dashboard" style="display: none;">
-        <h2 class="page-title">Weekly Progress</h2>
-
-        <div class="dashboard-grid">
-          <div class="card">
-            <h3>Weekly Completion</h3>
-            <!-- porcentaje semanal dinámico -->
-            <p class="big-number" id="weekly-completion">--</p>
-            <p>Habits completed this week.</p>
-          </div>
-
-          <div class="card">
-            <h3>Current Streak</h3>
-            <!-- racha actual dinámica -->
-            <p class="big-number" id="current-streak">--</p>
-            <p>Days in a row you’ve kept your habits.</p>
-          </div>
-
-          <div class="card">
-            <h3>7-Day Trend</h3>
-            <!-- Texto estático por ahora; se podría reemplazar por una gráfica más adelante -->
-            <p id="weekly-trend">Your habit completion is improving.</p>
-          </div>
+        <div class="profile-tabs">
+            <button class="profile-tab active" data-tab="daily">Daily Checklist</button>
+            <button class="profile-tab" data-tab="weekly">Weekly Progress</button>
         </div>
 
-        <h3 class="section-title">Achievements</h3>
-        <!-- listado dinámico de logros -->
-        <div id="achievements-list" class="achievements-list">
-          <!-- Se llena con JS desde dashboardView.js -->
+        <div class="profile-content">
+            <!-- DAILY CHECKLIST SUB-VIEW -->
+            <div id="profile-content-daily" class="profile-tab-content">
+                <h3 class="section-title">Today's Habits</h3>
+                <div class="progress-bar-wrapper">
+                  <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="daily-progress-bar"></div>
+                  </div>
+                </div>
+                <ul id="daily-list" class="daily-list">
+                  <!-- Se llena con JS -->
+                </ul>
+            </div>
+
+            <!-- WEEKLY PROGRESS SUB-VIEW -->
+            <div id="profile-content-weekly" class="profile-tab-content" style="display: none;">
+                <h3 class="section-title">Weekly Stats</h3>
+                <div class="dashboard-grid">
+                  <div class="card">
+                    <h3>Weekly Completion</h3>
+                    <p class="big-number" id="weekly-completion">--</p>
+                    <p>Habits completed this week.</p>
+                  </div>
+        
+                  <div class="card">
+                    <h3>Current Streak</h3>
+                    <p class="big-number" id="current-streak">--</p>
+                    <p>Days in a row you’ve kept your habits.</p>
+                  </div>
+        
+                  <div class="card">
+                    <h3>7-Day Trend</h3>
+                    <p id="weekly-trend">Your habit completion is improving.</p>
+                  </div>
+                </div>
+        
+                <h3 class="section-title">Achievements</h3>
+                <div id="achievements-list" class="achievements-list">
+                  <!-- Se llena con JS -->
+                </div>
+            </div>
         </div>
       </section>
 

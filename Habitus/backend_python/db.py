@@ -4,7 +4,8 @@ import os
 
 # For production, set DATABASE_URL, e.g.:
 # DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/habitus
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./habitus.db")
+# DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./habitus.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/habitus")
 
 connect_args = {}
 if DATABASE_URL.startswith("sqlite"):

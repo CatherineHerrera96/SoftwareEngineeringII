@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 
 from ..db import get_db
 from .. import schemas, crud
+from ..auth_deps import get_current_user
+from ..models import User
 
 router = APIRouter(tags=["checkins"])
 
@@ -11,6 +13,7 @@ router = APIRouter(tags=["checkins"])
 def create_checkin(
     checkin_in: schemas.CheckinCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     checkin = crud.create_or_update_checkin(
         db=db,

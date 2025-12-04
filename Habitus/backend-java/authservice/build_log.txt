@@ -1,0 +1,22 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.habitus:authservice >-----------------------
+[INFO] Building authservice 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ authservice ---
+[INFO] Deleting C:\Users\bamp0\Desktop\Habitus\backend-java\authservice\target
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.683 s
+[INFO] Finished at: 2025-12-03T18:47:29-05:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-clean-plugin:3.5.0:clean (default-clean) on project authservice: Failed to clean project: Failed to delete C:\Users\bamp0\Desktop\Habitus\backend-java\authservice\target\authservice-0.0.1-SNAPSHOT.jar: C:\Users\bamp0\Desktop\Habitus\backend-java\authservice\target\authservice-0.0.1-SNAPSHOT.jar: El proceso no tiene acceso al archivo porque estß siendo utilizado por otro proceso -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

@@ -35,10 +35,10 @@
 //   Esto se puede decidir al final del proyecto. Por ahora es útil para la demo.
 //
 
-import { fetchUserHabits, fetchHabits, saveUserHabits } from "../api/habitsApi.js";
+import { fetchHabits, saveUserHabits } from "../api/habitsApi.js";
+import { showError, showSuccess } from "../components/notifications.js";
 
 // ids de hábitos seleccionados (se usa en la sesión actual)
-let habitState = new Map();
 let selected = new Set();
 
 // lista completa de hábitos cargados desde fetchHabits()
@@ -53,19 +53,6 @@ let tabsInitialized = false;
 // Clave compartida con habitsApi.js para guardar selección en localStorage
 const STORAGE_KEY = "habitus_selected_habits";
 
-function loadHabitActivity(userHabits) {
-  //proces raw data from backend to list unpackable values 
-  let states = userHabits.map(
-    (habit) => [ habit.habit_id, habit.is_active ]
-  )
-  
-  //set user habit info into habitState
-  for (let habit_info of states) habitState.set(...habit_info)
-  //any not returned and not saved assume to not be active
-  for (let habit_id of (new Set(allHabits.map((v)=>v.id))).difference(new Set(habitState.keys())))
-    habitState.set(habit_id, false);
-}
-
 /**
  * Lee de localStorage los ids de hábitos seleccionados previamente
  * y los carga en el Set "selected".
@@ -77,16 +64,21 @@ function loadHabitActivity(userHabits) {
  * - Esto es un apoyo visual de frontend.
  * - El backend real podría proveer lo mismo vía un endpoint /user-habits.
  */
-async function loadSelectedFromStorageToSet() {
+function loadSelectedFromStorageToSet() {
   // Si ya tenemos algo en el Set, no volvemos a leer
-  if (habitState.size > 0) return;
-  let userHabits = await fetchUserHabits().catch(
-    (reason)=>{
-      console.error("Couldn't fetch active habits from user due to:\n", reason);
-      return []
+  if (selected.size > 0) return;
+
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        selected = new Set(arr);
+      }
     }
-  );
-  loadHabitActivity(userHabits);
+  } catch (e) {
+    console.warn("Error reading selected habits from storage", e);
+  }
 }
 
 /**
@@ -100,7 +92,7 @@ async function loadSelectedFromStorageToSet() {
  * 5. Renderiza las tarjetas según el filtro actual.
  * 6. Configura el botón "Save My Habits" para llamar a saveUserHabits().
  */
-export async function showHabitsView() {
+export async function renderHabits() {
   const grid = document.getElementById("habits-grid");
   const btnSave = document.getElementById("save-habits-btn");
   if (!grid) return;
@@ -111,7 +103,7 @@ export async function showHabitsView() {
   }
 
   // 2) Cargar selección previa (si existe) en el Set "selected"
-  await loadSelectedFromStorageToSet();
+  loadSelectedFromStorageToSet();
 
   // 3) Inicializar tabs una sola vez
   if (!tabsInitialized) {
@@ -120,18 +112,16 @@ export async function showHabitsView() {
   }
 
   // 4) Pintar los hábitos según el filtro actual
-  renderHabits(grid);
+  renderHabitsGrid(grid);
 
   // 5) Guardar selección al pulsar "Save My Habits"
   if (btnSave) {
     btnSave.onclick = async () => {
       try {
-        let newHabitActivity = await saveUserHabits(
-          Array.from(selected).map((v)=>({id: v, active: !habitState.get(v)}))
-        );
-        loadHabitActivity(newHabitActivity);
+        await saveUserHabits(Array.from(selected));
+        showSuccess("Habits saved successfully!");
       } catch (err) {
-        alert("Error saving habits");
+        showError(err.message || "Error saving habits");
         console.error(err);
       }
     };
@@ -164,7 +154,7 @@ function initTabs() {
       currentFilter = filter;
       const grid = document.getElementById("habits-grid");
       if (grid) {
-        renderHabits(grid);
+        renderHabitsGrid(grid);
       }
     });
   });
@@ -185,7 +175,7 @@ function initTabs() {
  * - El checkbox consulta el Set "selected" para saber si debe iniciar marcado.
  * - Al cambiar, actualiza el Set "selected".
  */
-function renderHabits(grid) {
+function renderHabitsGrid(grid) {
   grid.innerHTML = "";
 
   // Filtrar hábitos según la categoría actual
@@ -212,11 +202,11 @@ function renderHabits(grid) {
     toggle.className = "habit-toggle";
 
     // Si el id está en "selected", marcamos el checkbox al cargar
-    toggle.checked = habitState.get(h.id);
+    toggle.checked = selected.has(h.id);
 
     // Cuando el usuario marca o desmarca, se actualiza el Set
     toggle.addEventListener("change", () => {
-      if (toggle.checked != habitState.get(h.id)) {
+      if (toggle.checked) {
         selected.add(h.id);
       } else {
         selected.delete(h.id);

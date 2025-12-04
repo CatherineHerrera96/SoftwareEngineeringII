@@ -1,0 +1,139 @@
+# ===========================================
+# Habitus - Git Attributes Configuration
+# ===========================================
+# This file ensures consistent text handling across different operating systems
+# and helps Git properly detect binary vs text files.
+# ===========================================
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# ===========================================
+# Text Files - Enforce LF line endings
+# ===========================================
+
+# Source code
+*.java text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+
+# Web files
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+*.less text eol=lf
+
+# Configuration files
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.xml text eol=lf
+*.properties text eol=lf
+*.conf text eol=lf
+*.config text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+*.rst text eol=lf
+*.tex text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+
+# SQL
+*.sql text eol=lf
+
+# Build files
+*.gradle text eol=lf
+*.xml text eol=lf
+pom.xml text eol=lf
+Makefile text eol=lf
+
+# Docker
+Dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+.dockerignore text eol=lf
+
+# Git
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.gitmodules text eol=lf
+
+# ===========================================
+# Windows-specific files - Enforce CRLF
+# ===========================================
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# ===========================================
+# Binary Files - Explicitly mark as binary
+# ===========================================
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.webp binary
+
+# Fonts
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+
+# Archives
+*.jar binary
+*.war binary
+*.ear binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+*.7z binary
+
+# Compiled
+*.class binary
+*.pyc binary
+*.pyo binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# Documents
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+
+# Media
+*.mp3 binary
+*.mp4 binary
+*.avi binary
+*.mov binary
+*.wav binary
+*.flac binary
+
+# ===========================================
+# Special handling
+# ===========================================
+
+# Treat Maven wrapper JAR as binary
+.mvn/wrapper/maven-wrapper.jar binary

@@ -1,20 +1,50 @@
-// router.js
-import { getCurrentUser } from "./state.js";
+import { renderHabits } from './views/habitsView.js';
+import { renderProfile } from './views/profileView.js';
+import { renderLogin } from './views/loginView.js';
+import { getToken } from './state.js';
 
-const views = document.querySelectorAll("[data-view]");
-const header = document.getElementById("app-header");
+export function navigateTo(viewName) {
+  // 1. Check Auth
+  const token = getToken();
+  if (!token && viewName !== 'login' && viewName !== 'register') {
+    viewName = 'login';
+  } else if (token && (viewName === 'login' || viewName === 'register')) {
+    viewName = 'profile'; // Default to profile (checklist)
+  }
 
-export function showView(name) {
-  // mostrar solo la vista pedida
-  views.forEach((v) => {
-    v.style.display = v.getAttribute("data-view") === name ? "block" : "none";
+  // 2. Hide all views
+  document.querySelectorAll('.view-card, .view-page').forEach(el => {
+    el.style.display = 'none';
   });
 
-  // header solo cuando hay usuario y NO estamos en login/register
-  if (getCurrentUser() && name !== "login" && name !== "register") {
-    header.style.display = "flex";
-  } else {
-    header.style.display = "none";
+  // 3. Show target view
+  const target = document.querySelector(`[data-view="${viewName}"]`);
+  if (target) {
+    target.style.display = 'block';
+  }
+
+  // 4. Render logic
+  switch (viewName) {
+    case 'habits':
+      renderHabits();
+      break;
+    case 'profile':
+      renderProfile();
+      break;
+    case 'login':
+      renderLogin();
+      break;
+    // case 'register': renderRegister(); break;
+  }
+
+  // 5. Update Nav Active State
+  document.querySelectorAll('.nav-link').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.nav === viewName);
+  });
+
+  // 6. Show/Hide Header
+  const header = document.getElementById("app-header");
+  if (header) {
+    header.style.display = (token && viewName !== 'login' && viewName !== 'register') ? 'flex' : 'none';
   }
 }
-
