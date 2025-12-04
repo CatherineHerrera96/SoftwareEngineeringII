@@ -484,6 +484,5 @@ export async function fetchWeeklyStatsAndAchievements() {
         }
       }
     )
-  console.log(data)
   return data;
 }
