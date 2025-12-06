@@ -53,6 +53,13 @@
           <label class="form-label">Password</label>
           <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required />
         </div>
+
+        <div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="login-remember" style="accent-color: var(--primary);" />
+            <span style="font-size: 0.9rem; color: var(--text-muted);">Keep me signed in</span>
+          </label>
+        </div>
         <button type="submit" class="btn-primary" id="login-submit-btn">Sign In</button>
       </form>
       <p style="margin-top: 0.75rem; text-align: center;">
@@ -81,6 +88,30 @@
       <p style="margin-top: 1.5rem; text-align: center;">
         <a href="#" id="back-to-login" style="color: var(--text-muted); font-size: 0.9rem; text-decoration: none;">←
           Back to Sign In</a>
+      </p>
+    </section>
+
+    <!-- RESET PASSWORD VIEW -->
+    <section class="view-card login-card" data-view="reset-password" style="display: none;">
+      <img src="favicon.svg" alt="Habitus" style="width: 64px; height: 64px; margin-bottom: 1rem;">
+      <h1 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Set New Password</h1>
+      <p style="color: var(--text-muted); margin-bottom: 2rem;">Enter your new password below</p>
+      <form id="reset-password-form">
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" id="reset-password" class="form-input" placeholder="Enter new password" required
+            minlength="6" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" id="reset-password-confirm" class="form-input" placeholder="Confirm new password"
+            required minlength="6" />
+        </div>
+        <button type="submit" class="btn-primary" id="reset-submit-btn">Reset Password</button>
+      </form>
+      <p style="margin-top: 1.5rem; text-align: center;">
+        <a href="#" id="reset-back-to-login"
+          style="color: var(--text-muted); font-size: 0.9rem; text-decoration: none;">← Back to Sign In</a>
       </p>
     </section>
 
@@ -117,6 +148,65 @@
         <button type="button" class="btn-secondary" style="margin-left: 0.5rem; padding: 0.4rem 1rem;"
           id="go-to-login">Sign in</button>
       </p>
+    </section>
+
+    <!-- HOME VIEW -->
+    <section class="view-page home-view" data-view="home" style="display: none;">
+      <!-- Hero Section -->
+      <div class="home-hero">
+        <h1 id="home-hero-title">Build Better Habits</h1>
+        <p id="home-hero-subtitle">Track your progress, unlock achievements, and build lasting habits one day at a time.
+        </p>
+      </div>
+
+      <!-- Welcome Section -->
+      <div class="home-welcome">
+        <h2>Welcome back, <span id="home-welcome-name">there</span>! 👋</h2>
+        <p>Ready to continue your journey? Let's make today count.</p>
+      </div>
+
+      <!-- About Section -->
+      <div class="home-about">
+        <h3>What is Habitus?</h3>
+        <p>Habitus is your personal habit tracking companion. Build streaks, unlock achievements, and celebrate your
+          progress with seasonal themes that keep things fresh and exciting.</p>
+        <ul class="home-features-list">
+          <li>📊 <strong>Track Daily Habits</strong> - Monitor your progress with beautiful visualizations</li>
+          <li>🔥 <strong>Build Streaks</strong> - Keep your momentum going day after day</li>
+          <li>🏆 <strong>Unlock Achievements</strong> - Earn badges for your milestones</li>
+          <li>🎨 <strong>Seasonal Themes</strong> - Enjoy dynamic themes throughout the year</li>
+        </ul>
+      </div>
+
+      <!-- Feature Cards -->
+      <div class="home-features">
+        <h3>Quick Access</h3>
+        <div class="home-features-grid">
+          <div class="feature-card" data-feature="habits">
+            <div class="feature-icon">🎯</div>
+            <h4>My Habits</h4>
+            <p>Browse and manage your habit catalog</p>
+          </div>
+
+          <div class="feature-card" data-feature="checklist">
+            <div class="feature-icon">✅</div>
+            <h4>Daily Checklist</h4>
+            <p>Track today's habits and build your streak</p>
+          </div>
+
+          <div class="feature-card" data-feature="achievements">
+            <div class="feature-icon">🏆</div>
+            <h4>Achievements</h4>
+            <p>View your badges and milestones</p>
+          </div>
+
+          <div class="feature-card" data-feature="profile">
+            <div class="feature-icon">👤</div>
+            <h4>Profile</h4>
+            <p>Manage your account and preferences</p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- PROFILE VIEW -->

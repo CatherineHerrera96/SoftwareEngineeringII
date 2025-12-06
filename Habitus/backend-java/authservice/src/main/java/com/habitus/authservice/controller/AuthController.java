@@ -39,10 +39,27 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        authService.sendPasswordResetEmail(request.getEmail());
-        // Always return 200 for security (don't reveal if email exists)
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        try {
+            authService.sendPasswordResetEmail(request.getEmail());
+        } catch (Exception e) {
+            // Log but still return success for security (don't reveal errors)
+            System.err.println("Error in forgot-password endpoint: " + e.getMessage());
+            e.printStackTrace();
+        }
+        // Always return 200 for security (don't reveal if email exists or if there were
+        // errors)
+        return ResponseEntity.ok("If an account exists for this email, a reset link has been sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody com.habitus.authservice.dto.ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(request.getToken(), request.getNewPassword());
+            return ResponseEntity.ok("Password has been reset successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

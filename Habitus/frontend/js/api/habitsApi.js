@@ -1,4 +1,5 @@
-import { getToken } from "../state.js";
+import { getToken, clearAuth } from "../state.js";
+import { showNotification } from "../ui.js";
 
 const PY_BASE_URL = "http://25.1.31.133:8000/api";
 
@@ -13,6 +14,12 @@ export async function fetchHabits() {
   });
 
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      clearAuth();
+      showNotification("Session expired. Please log in again.", "error");
+      setTimeout(() => location.reload(), 1000);
+      return [];
+    }
     console.error("Failed to fetch habits");
     return [];
   }
@@ -32,6 +39,12 @@ export async function createCustomHabit(habitData) {
   });
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      throw new Error("Session expired");
+    }
     throw new Error('Failed to create habit');
   }
   return await response.json();
@@ -49,6 +62,12 @@ export async function updateHabit(habitId, habitData) {
   });
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      throw new Error("Session expired");
+    }
     throw new Error('Failed to update habit');
   }
   return await response.json();
@@ -64,6 +83,12 @@ export async function deleteHabit(habitId) {
   });
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      throw new Error("Session expired");
+    }
     throw new Error('Failed to delete habit');
   }
   return true;
@@ -92,6 +117,12 @@ export async function saveUserHabits(habitIds) {
   }
 
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      throw new Error("Session expired");
+    }
     throw new Error(`Error saving user habits: ${res.statusText}`);
   }
 
@@ -108,7 +139,15 @@ export async function fetchDailyChecklist() {
     }
   });
 
-  if (!res.ok) return [];
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      return [];
+    }
+    return [];
+  }
 
   const data = await res.json();
 
@@ -147,7 +186,15 @@ export async function saveCheckin(userHabitId, completed) {
     }),
   });
 
-  if (!res.ok) throw new Error("Error saving daily status");
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      throw new Error("Session expired");
+    }
+    throw new Error("Error saving daily status");
+  }
   return await res.json();
 }
 
@@ -156,7 +203,15 @@ export async function getProfile() {
   const response = await fetch(`${PY_BASE_URL}/profile/`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error('Failed to fetch profile');
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      throw new Error("Session expired");
+    }
+    throw new Error('Failed to fetch profile');
+  }
   return await response.json();
 }
 
@@ -179,7 +234,15 @@ export async function getAchievements() {
   const response = await fetch(`${PY_BASE_URL}/achievements/mine`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error('Failed to fetch achievements');
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      throw new Error("Session expired");
+    }
+    throw new Error('Failed to fetch achievements');
+  }
   return await response.json();
 }
 
@@ -195,6 +258,12 @@ export async function deleteUserHabit(userHabitId) {
   });
 
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      clearAuth();
+      showNotification("Session expired.", "error");
+      setTimeout(() => location.reload(), 1000);
+      throw new Error("Session expired");
+    }
     throw new Error("Failed to delete habit");
   }
   return true; // Success

@@ -76,7 +76,7 @@ const JAVA_BASE_URL = "http://25.1.31.133:8080/auth";
  * - Si la respuesta es exitosa, llama a setAuth(token, { id, email }).
  * - Si la respuesta NO es ok (401, 400, etc.), lanza un error genérico.
  */
-export async function login(email, password) {
+export async function login(email, password, rememberMe = false) {
   console.log(`Calling fetch to ${JAVA_BASE_URL}/login`); // DEBUG
   try {
     const res = await fetch(`${JAVA_BASE_URL}/login`, {
@@ -102,7 +102,7 @@ export async function login(email, password) {
     const data = await res.json();
     // Java backend returns: { token: "JWT_STRING" }
     // Store token and email (we know the email from input)
-    setAuth(data.token, { email });
+    setAuth(data.token, { email }, rememberMe);
     return { token: data.token, email };
   } catch (e) {
     console.error("Fetch error: " + e.message);
@@ -200,4 +200,27 @@ export async function forgotPassword(email) {
   }
 
   return true; // Always show success message for security
+}
+
+/**
+ * Reset password with token
+ * @param {string} token - Reset token from email
+ * @param {string} newPassword - New password
+ * @returns {Promise<void>}
+ */
+export async function resetPassword(token, newPassword) {
+  const res = await fetch(`${JAVA_BASE_URL}/reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ token, newPassword }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to reset password");
+  }
+
+  return true;
 }

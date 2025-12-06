@@ -2,12 +2,17 @@
 let authToken = null;
 let currentUser = null;
 
-export function setAuth(token, user) {
+export function setAuth(token, user, remember = true) {
   authToken = token;
   currentUser = user;
-  // Persist to localStorage
-  localStorage.setItem('auth_token', token);
-  localStorage.setItem('user', JSON.stringify(user));
+
+  if (remember) {
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+  } else {
+    sessionStorage.setItem('auth_token', token);
+    sessionStorage.setItem('user', JSON.stringify(user));
+  }
 }
 
 export function clearAuth() {
@@ -15,19 +20,19 @@ export function clearAuth() {
   currentUser = null;
   localStorage.removeItem('auth_token');
   localStorage.removeItem('user');
+  sessionStorage.removeItem('auth_token');
+  sessionStorage.removeItem('user');
 }
 
 export function getToken() {
-  // Try memory first, then localStorage
   if (authToken) return authToken;
-  authToken = localStorage.getItem('auth_token');
-  return authToken;
+  return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
 }
 
 export function getCurrentUser() {
-  // Try memory first, then localStorage
   if (currentUser) return currentUser;
-  const stored = localStorage.getItem('user');
+
+  let stored = localStorage.getItem('user') || sessionStorage.getItem('user');
   if (stored) {
     try {
       currentUser = JSON.parse(stored);

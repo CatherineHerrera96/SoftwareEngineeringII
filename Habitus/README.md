@@ -83,10 +83,45 @@ The project follows a microservices-inspired architecture with clear separation 
 5. **Serve the Frontend**
    ```bash
    cd frontend
-   python -3 -m http.server 8001
+   python -m http.server 8001
    ```
 
 > 💡 **Tip**: For detailed step-by-step instructions including troubleshooting, see [MVP_WALKTHROUGH.md](./MVP_WALKTHROUGH.md)
+
+## 📧 Email Configuration
+
+### Development (Current Setup - Mailtrap)
+
+**Emails are configured for testing only and will NOT reach real inboxes.**
+
+- All emails go to Mailtrap: https://mailtrap.io/inboxes
+- Used for "Forgot Password" feature
+- Current config in `backend-java/authservice/src/main/resources/application.properties`:
+  ```properties
+  spring.mail.host=sandbox.smtp.mailtrap.io
+  spring.mail.port=587
+  ```
+
+### Production (Real Email Delivery)
+
+To send to real addresses, update `application.properties` or use environment variables:
+
+**Gmail Example:**
+```properties
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your-email@gmail.com
+spring.mail.password=your-gmail-app-password
+```
+
+> ⚠️ **Note**: Gmail requires 2FA enabled and an App Password (not your regular password). Generate at: https://myaccount.google.com/apppasswords
+
+**Environment Variables (Recommended):**
+```bash
+export SMTP_HOST=smtp.gmail.com
+export SMTP_USER=your-email@gmail.com
+export SMTP_PASS=your-app-password
+```
 
 ## 🤝 Contributing
 

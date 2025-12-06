@@ -48,11 +48,12 @@ export function initLoginView() {
 
       const email = document.getElementById("login-email").value;
       const password = document.getElementById("login-password").value;
+      const rememberMe = document.getElementById("login-remember").checked;
 
       try {
-        await login(email, password);
+        await login(email, password, rememberMe);
         showNotification("Login successful! Welcome back.");
-        navigateTo("profile");
+        navigateTo("home");
       } catch (err) {
         showNotification(err.message || "Login failed", "error");
         console.error(err);
@@ -127,7 +128,7 @@ export function initLoginView() {
 
       try {
         await forgotPassword(email);
-        showNotification("Password reset link sent to your email!");
+        showNotification("If an account exists for this email, a reset link has been sent.");
         navigateTo("login");
       } catch (err) {
         showNotification(err.message || "Failed to send reset link", "error");

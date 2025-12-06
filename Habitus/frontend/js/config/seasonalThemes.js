@@ -16,7 +16,7 @@
  * - null         : ALLOW ALL (Automatic detection based on keywords)
  * ----------------------------------------------------------------------
  */
-export const CURRENT_SEASON = null;
+export const CURRENT_SEASON = 'christmas';
 
 /**
  * THEME DEFINITIONS

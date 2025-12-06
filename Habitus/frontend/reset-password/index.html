@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Habitus</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-body);
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="view-card login-card" style="display: block;">
+        <img src="../favicon.svg" alt="Habitus" style="width: 64px; height: 64px; margin-bottom: 1rem;">
+        <h1 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Set New Password</h1>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Enter your new password below</p>
+
+        <form id="reset-password-form">
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" id="reset-password" class="form-input" placeholder="Enter new password" required
+                    minlength="6" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" id="reset-password-confirm" class="form-input" placeholder="Confirm new password"
+                    required minlength="6" />
+            </div>
+            <button type="submit" class="btn-primary" id="reset-submit-btn">Reset Password</button>
+        </form>
+
+        <p style="margin-top: 1.5rem; text-align: center;">
+            <a href="/" style="color: var(--text-muted); font-size: 0.9rem; text-decoration: none;">← Back to Sign
+                In</a>
+        </p>
+
+        <!-- Notification Area -->
+        <div id="notification-area" class="notification-area"></div>
+    </section>
+
+    <script type="module">
+        import { resetPassword } from '../js/api/authApi.js';
+
+        // Simple Notification Helper since we are outside main app
+        function showNotification(message, type = 'success') {
+            const area = document.getElementById('notification-area');
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.textContent = message;
+            area.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        const form = document.getElementById('reset-password-form');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('reset-submit-btn');
+            btn.innerHTML = '<span class="loading-spinner"></span>';
+            btn.disabled = true;
+
+            const newPass = document.getElementById('reset-password').value;
+            const confirmPass = document.getElementById('reset-password-confirm').value;
+
+            if (newPass !== confirmPass) {
+                showNotification("Passwords do not match", "error");
+                btn.innerHTML = 'Reset Password';
+                btn.disabled = false;
+                return;
+            }
+
+            // Get token from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            if (!token) {
+                showNotification("Missing reset token in URL", "error");
+                btn.innerHTML = 'Reset Password';
+                btn.disabled = false;
+                return;
+            }
+
+            try {
+                await resetPassword(token, newPass);
+
+                // SECURITY: Clear any existing auth tokens to prevent wrong account login
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user');
+                sessionStorage.removeItem('auth_token');
+                sessionStorage.removeItem('user');
+
+                showNotification("✓ Password reset successful! Please log in with your new password.");
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } catch (err) {
+                showNotification(err.message, "error");
+                btn.innerHTML = 'Reset Password';
+                btn.disabled = false;
+            }
+        });
+
+        // Check token on load
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.get('token')) {
+            showNotification("Invalid link: No token found", "error");
+        }
+    </script>
+</body>
+
+</html>

@@ -32,6 +32,18 @@ def assign_habit_to_user(
     db: Session,
     user_habit_in: schemas.UserHabitCreate,
 ) -> models.UserHabit:
+    # Check if already exists (even if inactive)
+    existing = db.query(models.UserHabit).filter(
+        models.UserHabit.user_id == user_habit_in.user_id,
+        models.UserHabit.habit_id == user_habit_in.habit_id
+    ).first()
+
+    if existing:
+        existing.is_active = True
+        db.commit()
+        db.refresh(existing)
+        return existing
+
     user_habit = models.UserHabit(
         user_id=user_habit_in.user_id,
         habit_id=user_habit_in.habit_id,

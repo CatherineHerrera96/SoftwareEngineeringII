@@ -1086,10 +1086,13 @@ textarea {
     font-weight: 600;
     font-size: 0.9rem;
 }
+
 /* --- 7. THE 100 --- */
 .theme-the100 {
-    --primary: #4ade80 !important; /* Toxic Green */
-    --bg-body: #020617 !important; /* Deep Space */
+    --primary: #4ade80 !important;
+    /* Toxic Green */
+    --bg-body: #020617 !important;
+    /* Deep Space */
     --bg-card: #0f172a !important;
     --text-main: #e2e8f0 !important;
     --text-muted: #94a3b8 !important;
@@ -1138,8 +1141,10 @@ textarea {
 
 /* --- 8. COSMERE RPG --- */
 .theme-cosmere {
-    --primary: #0ea5e9 !important; /* Stormlight Blue */
-    --bg-body: #020617 !important; /* Shadesmar Dark */
+    --primary: #0ea5e9 !important;
+    /* Stormlight Blue */
+    --bg-body: #020617 !important;
+    /* Shadesmar Dark */
     --bg-card: #1e293b !important;
     --text-main: #f0f9ff !important;
     --text-muted: #94a3b8 !important;
@@ -1186,3 +1191,189 @@ textarea {
     pointer-events: none;
 }
 
+/* =========================================
+   HOME VIEW STYLES
+   ========================================= */
+
+.home-view {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Hero Section */
+.home-hero {
+    text-align: center;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--theme-primary, var(--primary)), var(--theme-secondary, var(--primary-hover)));
+    color: var(--theme-text, #ffffff);
+    position: relative;
+    overflow: hidden;
+}
+
+.home-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.home-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.home-hero p {
+    font-size: 1.125rem;
+    opacity: 0.95;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* Welcome Section */
+.home-welcome {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+}
+
+.home-welcome h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.home-welcome p {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.home-welcome #home-welcome-name {
+    color: var(--theme-primary, var(--primary));
+    font-weight: 600;
+}
+
+/* About Section */
+.home-about {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+}
+
+.home-about h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.home-about p {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.home-features-list {
+    list-style: none;
+    padding: 0;
+}
+
+.home-features-list li {
+    padding: 0.75rem 0;
+    color: var(--text-main);
+    font-size: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.home-features-list li strong {
+    color: var(--primary);
+}
+
+/* Feature Cards */
+.home-features {
+    margin-bottom: 3rem;
+}
+
+.home-features h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-main);
+}
+
+.home-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.feature-card {
+    background: var(--bg-card);
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--theme-primary, var(--primary));
+}
+
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.feature-card h4 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.feature-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .home-hero h1 {
+        font-size: 2rem;
+    }
+
+    .home-hero p {
+        font-size: 1rem;
+    }
+
+    .home-welcome h2 {
+        font-size: 1.5rem;
+    }
+
+    .home-features-grid {
+        grid-template-columns: 1fr;
+    }
+}
