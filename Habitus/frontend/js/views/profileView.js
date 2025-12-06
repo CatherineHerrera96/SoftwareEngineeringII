@@ -1,7 +1,11 @@
 import { getProfile, updateProfile, fetchDailyChecklist, saveCheckin, deleteUserHabit, getAchievements } from '../api/habitsApi.js';
 import { showNotification } from '../ui.js';
+import { getSeasonalTheme, applyGlobalTheme, SEASONAL_THEMES, CURRENT_SEASON } from '../config/seasonalThemes.js';
 
 export async function renderProfile() {
+    // 0. Apply Global Theme
+    applyGlobalTheme();
+
     // 1. Load Profile Data
     try {
         const profile = await getProfile();
@@ -102,9 +106,43 @@ async function renderDailyList() {
 
     try {
         const habits = await fetchDailyChecklist();
+
+        // --- SEASONAL CLEANUP ENFORCEMENT ---
+        // Iterate over fetched habits. If any belongs to an inactive season, delete it immediately.
+        const activeHabits = [];
+        let cleanupCount = 0;
+
+        for (const h of habits) {
+            // Check if habit is seasonal
+            const seasonId = SEASONAL_THEMES.find(t => {
+                const n = h.habit_name.toLowerCase();
+                const c = h.habit_category ? h.habit_category.toLowerCase() : '';
+                return t.keywords.some(k => n.includes(k)) || t.id === c;
+            })?.id;
+
+            if (seasonId) {
+                // It is seasonal. Strict check.
+                if (!CURRENT_SEASON || CURRENT_SEASON !== seasonId) {
+                    // Invalid season -> Delete
+                    console.log(`Cleaning up invalid seasonal habit: ${h.habit_name} (${seasonId})`);
+                    try {
+                        await deleteUserHabit(h.id);
+                        cleanupCount++;
+                    } catch (e) { console.error("Cleanup failed for", h.id, e); }
+                    continue; // Skip adding to list
+                }
+            }
+            activeHabits.push(h);
+        }
+
+        if (cleanupCount > 0) {
+            showNotification(`Cleaned up ${cleanupCount} expired seasonal habits.`);
+        }
+
+        const listItems = activeHabits;
         list.innerHTML = '';
 
-        if (habits.length === 0) {
+        if (listItems.length === 0) {
             list.innerHTML = `
                 <div style="text-align:center; color:var(--text-muted);">
                     <p>No habits selected.</p>
@@ -124,11 +162,18 @@ async function renderDailyList() {
 
         let completedCount = 0;
 
-        habits.forEach(h => {
+
+
+        listItems.forEach(h => {
             if (h.is_completed) completedCount++;
 
             const li = document.createElement('li');
-            li.className = `daily-item ${h.is_completed ? 'completed' : ''}`;
+
+            // Use shared seasonal helper - RETURNS OBJECT
+            const themeObj = getSeasonalTheme(h.habit_name);
+            const themeClass = themeObj ? themeObj.className : '';
+
+            li.className = `daily-item ${h.is_completed ? 'completed' : ''} ${themeClass}`;
 
             li.innerHTML = `
                 <span class="daily-name">${h.habit_name}</span>
@@ -141,43 +186,93 @@ async function renderDailyList() {
             `;
 
             // Check/Uncheck
-            li.querySelector('.btn-check').onclick = async () => {
+            const checkBtn = li.querySelector('.btn-check');
+            checkBtn.onclick = async () => {
+                const newStatus = !h.is_completed;
+
+                // Optimistic Update
+                h.is_completed = newStatus;
+                checkBtn.className = `btn-check ${newStatus ? 'missed' : 'done'}`; // 'missed' style used for Undo? or 'done'?
+                // Actually looking at style classes: 'done' usually green, 'missed' red? 
+                // Existing code: ${h.is_completed ? 'missed' : 'done'} -> Undo has 'missed' class? 
+                // Let's stick to existing logic: if completed, show UNDO (style 'missed' maybe meant 'destructive/red'?)
+                // wait, if is_completed is true, text is "Undo", class is "missed". 
+
+                checkBtn.textContent = newStatus ? 'Undo' : '✔ Done';
+                li.className = `daily-item ${newStatus ? 'completed' : ''} ${themeClass}`;
+
                 try {
-                    await saveCheckin(h.id, !h.is_completed);
-                    renderDailyList(); // Re-render to update UI
+                    await saveCheckin(h.id, newStatus);
+                    // No need to full re-render, we updated UI
+                    updateProgressBar(recalcCompletion(listItems));
                 } catch (err) {
-                    showNotification("Failed to update status", "error");
+                    console.error("Checkin failed", err);
+                    showNotification("Failed to save status", "error");
+                    // Revert
+                    h.is_completed = !newStatus;
+                    renderDailyList(); // Full re-render on error to be safe
                 }
             };
 
-            // Delete
-            li.querySelector('.btn-delete').onclick = async () => {
-                if (confirm(`Stop tracking ${h.habit_name}?`)) {
-                    try {
-                        await deleteUserHabit(h.id);
-                        showNotification("Habit removed.");
-                        renderDailyList();
-                    } catch (err) {
-                        showNotification("Failed to delete habit", "error");
-                    }
+            // Delete with Custom Modal
+            li.querySelector('.btn-delete').onclick = () => {
+                const modal = document.getElementById('confirm-modal');
+                const title = document.getElementById('confirm-title');
+                const msg = document.getElementById('confirm-message');
+                const btnOk = document.getElementById('confirm-ok');
+                const btnCancel = document.getElementById('confirm-cancel');
+
+                if (modal && title && msg && btnOk && btnCancel) {
+                    title.textContent = "Stop Tracking?";
+                    msg.textContent = `Are you sure you want to stop tracking "${h.habit_name}"?`;
+
+                    modal.style.display = 'flex';
+
+                    // Handler for Confirm
+                    const onConfirm = async () => {
+                        try {
+                            cleanup();
+                            await deleteUserHabit(h.id);
+                            showNotification("Habit removed.");
+                            renderDailyList();
+                        } catch (err) {
+                            showNotification("Failed to delete habit", "error");
+                        }
+                    };
+
+                    // Handler for Cancel
+                    const onCancel = () => {
+                        cleanup();
+                    };
+
+                    // Cleanup event listeners to avoid duplicates
+                    const cleanup = () => {
+                        modal.style.display = 'none';
+                        btnOk.removeEventListener('click', onConfirm);
+                        btnCancel.removeEventListener('click', onCancel);
+                    };
+
+                    btnOk.addEventListener('click', onConfirm);
+                    btnCancel.addEventListener('click', onCancel);
                 }
             };
 
             list.appendChild(li);
         });
 
-        const percent = Math.round((completedCount / habits.length) * 100);
-        updateProgressBar(percent);
+        updateProgressBar(completedCount / listItems.length);
 
     } catch (err) {
-        console.error(err);
-        list.innerHTML = '<p style="color:var(--danger); text-align:center;">Failed to load habits.</p>';
+        console.error('Error loading daily list:', err);
+        list.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Failed to load habits.</p>';
     }
 }
 
-function updateProgressBar(percent) {
-    const bar = document.getElementById('daily-progress-bar');
-    if (bar) bar.style.width = `${percent}%`;
+function updateProgressBar(fraction) {
+    const fill = document.getElementById('progress-fill');
+    const text = document.getElementById('progress-text');
+    if (fill) fill.style.width = (fraction * 100) + '%';
+    if (text) text.textContent = Math.round(fraction * 100) + '% Completed';
 }
 
 async function renderAchievementsList() {
@@ -187,27 +282,26 @@ async function renderAchievementsList() {
     try {
         const achievements = await getAchievements();
         list.innerHTML = '';
-
         if (achievements.length === 0) {
             list.innerHTML = '<p style="color:var(--text-muted);">No achievements yet. Keep going!</p>';
             return;
         }
-
-        achievements.forEach(ach => {
-            const card = document.createElement('div');
-            card.className = 'achievement-card';
-            card.innerHTML = `
-            <div class="achievement-icon-box">🏆</div>
-            <div class="achievement-info">
-                <h4>${ach.title}</h4>
-                <p>${ach.description}</p>
-            </div>
-            `;
-            list.appendChild(card);
+        achievements.forEach(a => {
+            const div = document.createElement('div');
+            div.className = 'achievement-card';
+            div.innerHTML = `<h4>${a.name}</h4><p>${a.description}</p>`;
+            list.appendChild(div);
         });
-
     } catch (err) {
-        console.error(err);
-        list.innerHTML = '<p style="color:var(--danger);">Failed to load achievements.</p>';
+        // Silent fail or minimal text
+        list.innerHTML = '<p style="color:var(--text-muted);">Synced.</p>';
     }
+}
+
+
+function recalcCompletion(items) {
+    const total = items.length;
+    if (total === 0) return 0;
+    const completed = items.filter(i => i.is_completed).length;
+    return completed / total;
 }

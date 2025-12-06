@@ -46,5 +46,9 @@ export function navigateTo(viewName) {
   const header = document.getElementById("app-header");
   if (header) {
     header.style.display = (token && viewName !== 'login' && viewName !== 'register') ? 'flex' : 'none';
+
+    if (header.style.display === 'flex') {
+      import('./ui.js').then(ui => ui.updateHeaderProfile());
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { getToken } from "../state.js";
 
-const PY_BASE_URL = "http://localhost:8000/api";
+const PY_BASE_URL = "http://25.1.31.133:8000/api";
 
 export async function fetchHabits() {
   const token = getToken();
@@ -121,6 +121,7 @@ export async function fetchDailyChecklist() {
       id: uh.id, // user_habit_id
       habit_id: uh.habit_id,
       habit_name: habit ? habit.name : "Unknown Habit",
+      habit_category: habit ? habit.category : "",
       is_completed: uh.is_completed, // Backend returns this computed field
       current_streak: uh.current_streak || 0
     };

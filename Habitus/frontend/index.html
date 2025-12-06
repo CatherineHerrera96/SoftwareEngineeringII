@@ -19,7 +19,15 @@
         <span>Habitus</span>
       </div>
       <nav class="nav-links">
-        <button class="nav-link" data-nav="profile">Profile</button>
+        <!-- Profile User Button -->
+        <button class="nav-link header-user-btn" data-nav="profile" id="header-user-btn"
+          style="display:flex; align-items:center; gap:0.5rem; padding:0.25rem 0.75rem;">
+          <div id="header-avatar"
+            style="width:24px; height:24px; background:#e0e7ff; color:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; overflow:hidden;">
+            U</div>
+          <span id="header-username">Profile</span>
+        </button>
+
         <button class="nav-link" data-nav="habits">Habits</button>
         <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Dark Mode">🌙</button>
         <button id="logout-btn" class="logout-btn">Log Out</button>
@@ -190,7 +198,6 @@
     <section class="view-page" data-view="habits" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h2>Habit Catalog</h2>
-        <button id="save-habits-btn" class="btn-primary" style="width: auto;">Save Selection</button>
       </div>
 
       <!-- Create Habit Form -->
@@ -276,6 +283,18 @@
   </main>
 
   <script type="module" src="js/main.js"></script>
+
+  <!-- FOOTER -->
+  <footer class='app-footer'>
+    <div class='footer-content'>
+      <p>This web application is an academic project of Universidad Nacional de Colombia – Sede Bogotá, School of
+        Engineering, for the course Software Engineering II, guided by professor MSc. Carlos Andrés Sierra (Computer
+        Engineer, Magister in Computer Engineering) and developed by the students Álvaro Andrés Romero Castro, Baruj
+        Vladimir Ramírez Escalante, Brayan Alejandro Muñoz Pérez, Jenny Catherine Herrera Garzón and Juan David Ladino
+        Triana, all from Ingeniería de Sistemas y Computación.</p>
+    </div>
+  </footer>
+
 </body>
 
 </html>

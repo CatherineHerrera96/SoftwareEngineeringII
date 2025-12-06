@@ -694,6 +694,7 @@ a {
         flex-wrap: wrap;
     }
 }
+
 /* Modal */
 .modal {
     position: fixed;
@@ -719,7 +720,469 @@ a {
     animation: slideIn 0.3s ease-out;
 }
 
-[data-theme=\
-dark\] .modal {
+[data-theme="dark"] .modal {
     background: rgba(0, 0, 0, 0.7);
 }
+
+
+/* =========================================
+   RICH SEASONAL THEMES
+   ========================================= */
+
+/* --- 0. GLOBAL THEME APPLICATION --- */
+/* If data-season is set, override specific variables globally */
+body[data-season] {
+    transition: background 0.5s ease;
+}
+
+body[data-season] .app-header {
+    background: var(--theme-header-bg, var(--bg-card)) !important;
+    color: var(--theme-text) !important;
+}
+
+body[data-season] .app-header .logo-area,
+body[data-season] .app-header a,
+body[data-season] .app-header button {
+    color: var(--theme-text) !important;
+}
+
+/* Fix Logout Button Contrast in Themes */
+body[data-season] .logout-btn {
+    background: transparent !important;
+    border-color: var(--theme-text) !important;
+    opacity: 0.9;
+}
+
+/* --- 0.5. NEW YEAR --- */
+.theme-new-year {
+    --primary: #fbbf24 !important;
+    /* Gold */
+    --primary-hover: #d97706 !important;
+    --success: #fbbf24 !important;
+    --theme-text: #fbbf24 !important;
+}
+
+.habit-card.theme-new-year {
+    background: linear-gradient(135deg, #000000 0%, #1f2937 100%) !important;
+    border: 2px solid #fbbf24 !important;
+    color: #fbbf24 !important;
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+}
+
+.habit-card.theme-new-year h3 {
+    color: white !important;
+    text-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
+}
+
+.habit-card.theme-new-year p {
+    color: #d1d5db !important;
+}
+
+.habit-card.theme-new-year .habit-category-badge {
+    background: #fbbf24 !important;
+    color: black !important;
+    border: none !important;
+    font-weight: 800;
+}
+
+/* Fireworks effects */
+.habit-card.theme-new-year::before {
+    content: '🎇';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.2rem;
+    opacity: 1;
+}
+
+.habit-card.theme-new-year::after {
+    content: '🥂';
+    font-size: 5rem;
+    position: absolute;
+    bottom: -10px;
+    right: 5px;
+    opacity: 0.2;
+    transform: rotate(15deg);
+    pointer-events: none;
+}
+
+/* --- 1. CHRISTMAS --- */
+.theme-christmas {
+    --primary: #ef4444 !important;
+    --primary-hover: #dc2626 !important;
+    --success: #15803d !important;
+}
+
+.habit-card.theme-christmas {
+    background: linear-gradient(135deg, #166534 0%, #0f172a 100%) !important;
+    border: 2px solid #ef4444 !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
+}
+
+.habit-card.theme-christmas h3 {
+    color: #fca5a5 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.habit-card.theme-christmas p {
+    color: #e2e8f0 !important;
+}
+
+.habit-card.theme-christmas .habit-category-badge {
+    background: #ef4444 !important;
+    color: white !important;
+    border: none;
+}
+
+.habit-card.theme-christmas::before {
+    content: '❄️';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.habit-card.theme-christmas::after {
+    content: '🎄';
+    font-size: 6rem;
+    position: absolute;
+    bottom: -15px;
+    right: -10px;
+    opacity: 0.15;
+    transform: rotate(-10deg);
+    pointer-events: none;
+}
+
+/* --- 2. HALLOWEEN --- */
+.theme-halloween {
+    --primary: #ff6b00 !important;
+    --primary-hover: #e65100 !important;
+}
+
+.habit-card.theme-halloween {
+    background: linear-gradient(135deg, #2a0a2e 0%, #000000 100%) !important;
+    border: 2px solid #ff6b00 !important;
+    color: #ffcc80 !important;
+    box-shadow: 0 4px 6px -1px rgba(255, 107, 0, 0.3);
+}
+
+.habit-card.theme-halloween h3 {
+    color: #ffa726 !important;
+    text-shadow: 0 1px 4px rgba(255, 107, 0, 0.6);
+}
+
+.habit-card.theme-halloween p {
+    color: #e1bee7 !important;
+}
+
+.habit-card.theme-halloween .habit-category-badge {
+    background: #ff6b00 !important;
+    color: black !important;
+    font-weight: 800;
+    border: none;
+}
+
+.habit-card.theme-halloween::before {
+    content: '🕸️';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.4rem;
+    opacity: 0.6;
+}
+
+.habit-card.theme-halloween::after {
+    content: '🎃';
+    font-size: 5rem;
+    position: absolute;
+    bottom: -5px;
+    right: 5px;
+    opacity: 0.2;
+    transform: rotate(15deg);
+    pointer-events: none;
+}
+
+/* --- 3. SUMMER --- */
+.theme-summer {
+    --primary: #00b4d8 !important;
+}
+
+.habit-card.theme-summer {
+    background: linear-gradient(135deg, #fffbed 0%, #daf4fa 100%) !important;
+    border: 2px solid #ffd60a !important;
+    color: #0077b6 !important;
+    box-shadow: 0 4px 10px rgba(0, 180, 216, 0.2);
+}
+
+.habit-card.theme-summer h3 {
+    color: #023e8a !important;
+}
+
+.habit-card.theme-summer p {
+    color: #0077b6 !important;
+}
+
+.habit-card.theme-summer .habit-category-badge {
+    background: #ffd60a !important;
+    color: #003e4d !important;
+    border: none;
+}
+
+.habit-card.theme-summer::before {
+    content: '🌤️';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.2rem;
+}
+
+.habit-card.theme-summer::after {
+    content: '🏖️';
+    font-size: 5rem;
+    position: absolute;
+    bottom: -5px;
+    right: 5px;
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+/* --- 4. VALENTINE --- */
+.theme-valentine {
+    --primary: #ff4d6d !important;
+    --bg-card: #fff0f3 !important;
+}
+
+.habit-card.theme-valentine {
+    background: linear-gradient(135deg, #fff0f3 0%, #ffe5ec 100%) !important;
+    border: 2px solid #ff4d6d !important;
+    color: #590d22 !important;
+}
+
+.habit-card.theme-valentine h3 {
+    color: #a4133c !important;
+}
+
+.habit-card.theme-valentine p {
+    color: #800f2f !important;
+}
+
+.habit-card.theme-valentine .habit-category-badge {
+    background: #ff4d6d !important;
+    color: white !important;
+    border: none;
+}
+
+.habit-card.theme-valentine::before {
+    content: '💌';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.2rem;
+}
+
+.habit-card.theme-valentine::after {
+    content: '💖';
+    font-size: 5rem;
+    position: absolute;
+    bottom: -10px;
+    right: 0;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+/* --- 5. APRIL FOOLS --- */
+.theme-april-fools {
+    --primary: #9b5de5 !important;
+}
+
+.habit-card.theme-april-fools {
+    background: #fff !important;
+    border: 2px dashed #9b5de5 !important;
+    transform: rotate(1deg);
+}
+
+.habit-card.theme-april-fools h3 {
+    color: #9b5de5 !important;
+    font-family: 'Comic Sans MS', cursive, sans-serif !important;
+}
+
+.habit-card.theme-april-fools::after {
+    content: '🤡';
+    font-size: 4rem;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    opacity: 0.2;
+}
+
+/* --- 6. SPRING --- */
+.theme-spring {
+    --primary: #70e000 !important;
+}
+
+.habit-card.theme-spring {
+    background: linear-gradient(135deg, #f7fff7 0%, #e6ffe6 100%) !important;
+    border: 2px solid #70e000 !important;
+    color: #0f4d0f !important;
+}
+
+.habit-card.theme-spring h3 {
+    color: #38b000 !important;
+}
+
+.habit-card.theme-spring .habit-category-badge {
+    background: #70e000 !important;
+    color: white !important;
+}
+
+.habit-card.theme-spring::after {
+    content: '🌸';
+    font-size: 5rem;
+    position: absolute;
+    bottom: -10px;
+    right: 0;
+    opacity: 0.2;
+}
+
+/* UI Fix: Disable resize for textareas */
+textarea {
+    resize: none !important;
+    height: 80px;
+}
+
+/* --- FOOTER STYLES --- */
+.app-footer {
+    margin-top: 2rem;
+    padding: 1.5rem 1rem;
+    border-top: 3px solid var(--primary);
+    /* Reactive to seasonal theme */
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-align: center;
+    line-height: 1.4;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.footer-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* --- HEADER PROFILE STYLES --- */
+.header-user-btn:hover {
+    background: var(--bg-input);
+    border-radius: 20px;
+}
+
+.header-user-btn .header-avatar {
+    flex-shrink: 0;
+}
+
+.header-user-btn span {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+/* --- 7. THE 100 --- */
+.theme-the100 {
+    --primary: #4ade80 !important; /* Toxic Green */
+    --bg-body: #020617 !important; /* Deep Space */
+    --bg-card: #0f172a !important;
+    --text-main: #e2e8f0 !important;
+    --text-muted: #94a3b8 !important;
+}
+
+.habit-card.theme-the100 {
+    background: linear-gradient(135deg, #052e16 0%, #000000 100%) !important;
+    border: 1px solid #22c55e !important;
+    color: #bbf7d0 !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+}
+
+.habit-card.theme-the100 h3 {
+    color: #4ade80 !important;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.habit-card.theme-the100 .habit-category-badge {
+    background: #14532d !important;
+    color: #4ade80 !important;
+    border: 1px solid #4ade80;
+}
+
+.habit-card.theme-the100::before {
+    content: '☣️';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+.habit-card.theme-the100::after {
+    content: '♾️';
+    font-size: 6rem;
+    position: absolute;
+    bottom: -15px;
+    right: -10px;
+    opacity: 0.1;
+    transform: rotate(-10deg);
+    pointer-events: none;
+}
+
+
+/* --- 8. COSMERE RPG --- */
+.theme-cosmere {
+    --primary: #0ea5e9 !important; /* Stormlight Blue */
+    --bg-body: #020617 !important; /* Shadesmar Dark */
+    --bg-card: #1e293b !important;
+    --text-main: #f0f9ff !important;
+    --text-muted: #94a3b8 !important;
+}
+
+.habit-card.theme-cosmere {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    border: 1px solid #38bdf8 !important;
+    color: #e0f2fe !important;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
+
+.habit-card.theme-cosmere h3 {
+    color: #38bdf8 !important;
+    font-family: 'Times New Roman', serif;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 5px #0ea5e9;
+}
+
+.habit-card.theme-cosmere .habit-category-badge {
+    background: #0c4a6e !important;
+    color: #7dd3fc !important;
+    border: 1px solid #0ea5e9;
+}
+
+.habit-card.theme-cosmere::before {
+    content: '⚔️';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.habit-card.theme-cosmere::after {
+    content: '🌪️';
+    font-size: 6rem;
+    position: absolute;
+    bottom: -15px;
+    right: -10px;
+    opacity: 0.15;
+    transform: rotate(-10deg);
+    pointer-events: none;
+}
+

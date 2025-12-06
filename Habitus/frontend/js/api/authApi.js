@@ -53,7 +53,7 @@ import { setAuth } from "../state.js";
 // Ejemplos posibles:
 //   - "http://localhost:8080/api/auth"
 //   - "https://mi-servidor.com/api/auth"
-const JAVA_BASE_URL = "http://localhost:8080/auth";
+const JAVA_BASE_URL = "http://25.1.31.133:8080/auth";
 
 /**
  * Inicia sesión contra el backend de autenticación.

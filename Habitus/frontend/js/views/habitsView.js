@@ -1,5 +1,6 @@
-import { fetchHabits, saveUserHabits, createCustomHabit, fetchDailyChecklist, updateHabit, deleteHabit } from '../api/habitsApi.js';
+import { fetchHabits, saveUserHabits, createCustomHabit, fetchDailyChecklist, updateHabit, deleteHabit, deleteUserHabit } from '../api/habitsApi.js';
 import { showNotification } from '../ui.js';
+import { getSeasonalTheme, applyGlobalTheme, SEASONAL_THEMES, CURRENT_SEASON } from '../config/seasonalThemes.js';
 
 let allHabits = [];
 let selectedHabitIds = new Set();
@@ -8,6 +9,9 @@ let selectedHabitIds = new Set();
 let confirmResolve = null;
 
 export async function renderHabits() {
+  // 0. Apply Global Theme
+  applyGlobalTheme();
+
   // 1. Fetch Data
   try {
     const [habits, userHabits] = await Promise.all([
@@ -16,9 +20,19 @@ export async function renderHabits() {
     ]);
 
     allHabits = habits;
+
+    // Map habit_id -> user_habit_id to support correct De-add (unassign)
+    // selectedHabitIds helps for quick "is added" check
     selectedHabitIds = new Set(userHabits.map(uh => uh.habit_id));
+    window.userHabitMap = new Map(); // Global or module-scope map
+    userHabits.forEach(uh => window.userHabitMap.set(uh.habit_id, uh.id));
 
     renderHabitsGrid('all');
+
+    // 2. Enforce Seasonal Persistence (Cleanup)
+    // Remove any user habit that belongs to an inactive season.
+    await cleanupInactiveSeasonalHabits(habits, userHabits);
+
   } catch (err) {
     console.error('Error loading habits:', err);
     showNotification('Failed to load habits', 'error');
@@ -26,6 +40,62 @@ export async function renderHabits() {
 
   // 2. Setup Listeners
   setupHabitsListeners();
+  // 2. Setup Listeners
+  setupHabitsListeners();
+}
+
+async function cleanupInactiveSeasonalHabits(allHabits, userHabits) {
+  // Collect specific UserHabit IDs to delete
+  const toDelete = [];
+
+  // Map habit_id to full habit obj for easy lookup
+  const habitMap = new Map();
+  allHabits.forEach(h => habitMap.set(h.id, h));
+
+  for (const uh of userHabits) {
+    const habit = habitMap.get(uh.habit_id);
+    if (!habit) continue;
+
+    // Check if this habit belongs to a season
+    const seasonId = SEASONAL_THEMES.find(t => {
+      const n = habit.name.toLowerCase();
+      const c = habit.category ? habit.category.toLowerCase() : '';
+      return t.keywords.some(k => n.includes(k)) || t.id === c;
+    })?.id;
+
+    if (seasonId) {
+      // It is seasonal.
+      // Invalid if:
+      // 1. CURRENT_SEASON is null (No seasonal habits allowed)
+      // 2. CURRENT_SEASON != seasonId (Wrong season)
+      if (!CURRENT_SEASON || CURRENT_SEASON !== seasonId) {
+        toDelete.push(uh.id);
+      }
+    }
+  }
+
+  if (toDelete.length > 0) {
+    console.log(`Cleaning up ${toDelete.length} inactive seasonal habits...`);
+    try {
+      // Delete one by one (or batch if API supported, but loop is fine for small numbers)
+      await Promise.all(toDelete.map(id => deleteUserHabit(id)));
+      // Update local state by removing from sets/maps
+      toDelete.forEach(id => {
+        // Find habit_id from user_habit_id
+        const habitId = [...window.userHabitMap.entries()]
+          .find(([hId, uId]) => uId === id)?.[0];
+        if (habitId) {
+          selectedHabitIds.delete(habitId);
+          window.userHabitMap.delete(habitId);
+        }
+      });
+      // Re-render to reflect removal
+      renderHabitsGrid('all');
+      showNotification(`Cleaned up ${toDelete.length} inactive seasonal habits.`);
+    } catch (err) {
+      console.error("Cleanup failed:", err);
+    }
+  }
 }
 
 function setupHabitsListeners() {
@@ -37,19 +107,6 @@ function setupHabitsListeners() {
       renderHabitsGrid(btn.dataset.filter);
     };
   });
-
-  // Save Selection
-  const saveBtn = document.getElementById('save-habits-btn');
-  if (saveBtn) {
-    saveBtn.onclick = async () => {
-      try {
-        await saveUserHabits(Array.from(selectedHabitIds));
-        showNotification("Habit selection saved!");
-      } catch (err) {
-        showNotification("Failed to save selection", "error");
-      }
-    };
-  }
 
   // Create Custom Habit
   const form = document.getElementById('create-habit-form');
@@ -217,52 +274,202 @@ async function handleDeleteHabit(habit) {
   }
 }
 
+
+// Helper to determine if a habit matches the current season
+function isCurrentSeasonHabit(habit) {
+  if (!CURRENT_SEASON) return false;
+  // We can match by category == Season Name (e.g. "Christmas")
+  // Or check theme keywords
+  const theme = getSeasonalTheme(habit.name, habit.category);
+  // getSeasonalTheme now strictly returns null if season mismatches, so existence check is enough
+  return !!theme;
+}
+
 function renderHabitsGrid(filter = 'all') {
   const grid = document.getElementById('habits-grid');
   if (!grid) return;
 
   grid.innerHTML = '';
 
-  const visible = allHabits.filter(h => filter === 'all' || h.category.toLowerCase() === filter.toLowerCase());
+  // FILTERING:
+  // 1. Category Filter (Tabs)
+  let visible = allHabits.filter(h => filter === 'all' || h.category.toLowerCase() === filter.toLowerCase());
+
+  // 2. Periodic/Seasonal Filter
+  // Logic:
+  // - If it's a "Seasonal Habit" (matches any defined season):
+  //    - If CURRENT_SEASON is null -> HIDE IT.
+  //    - If CURRENT_SEASON is set  -> SHOW ONLY IF matches current season.
+  // - If it's a "Regular Habit" -> SHOW ALWAYS.
+
+  visible = visible.filter(h => {
+    // Check if this habit belongs to ANY season definition
+    // We check all themes to find a match, ignoring CURRENT_SEASON for a moment
+    const matchedSeasonId = SEASONAL_THEMES.find(t => {
+      const n = h.name.toLowerCase();
+      const c = h.category ? h.category.toLowerCase() : '';
+      return t.keywords.some(k => n.includes(k)) || t.id === c;
+    })?.id;
+
+    if (matchedSeasonId) {
+      // It IS a seasonal habit.
+      // Rule: Show only if CURRENT_SEASON matches strictly.
+      if (!CURRENT_SEASON) return false; // "No Seasonal Mode" -> Hide all seasonal
+      return CURRENT_SEASON === matchedSeasonId;
+    }
+
+    // Not a seasonal habit -> Keep it
+    return true;
+  });
+
+  // SORTING:
+  // 1. Current Season first
+  // 2. Alphabetical
+  visible.sort((a, b) => {
+    const isSeasonA = isCurrentSeasonHabit(a);
+    const isSeasonB = isCurrentSeasonHabit(b);
+
+    if (isSeasonA && !isSeasonB) return -1;
+    if (!isSeasonA && isSeasonB) return 1;
+
+    // Fallback sort: Alphabetical by Name
+    const nameA = a.name.toLowerCase();
+    const nameB = b.name.toLowerCase();
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+
+    return 0;
+  });
 
   if (visible.length === 0) {
     grid.innerHTML = '<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center;">No habits found.</p>';
     return;
   }
 
+  // DEDUPLICATION:
+  // Prefer System habits (is_custom=false) over Custom habits (is_custom=true) if names match.
+  const uniqueMap = new Map();
   visible.forEach(h => {
+    // Normalization: Ensure is_custom is boolean
+    h.is_custom = !!h.is_custom;
+
+    if (uniqueMap.has(h.name)) {
+      const existing = uniqueMap.get(h.name);
+      // If we have an existing Custom habit, and the new one is System, overwrite with System.
+      if (existing.is_custom && !h.is_custom) {
+        uniqueMap.set(h.name, h);
+      }
+      // If existing is System, and new is Custom, ignore new.
+      // If both are same type, keep first (or sort order dependent).
+    } else {
+      uniqueMap.set(h.name, h);
+    }
+  });
+
+  const dedupedList = Array.from(uniqueMap.values());
+
+  dedupedList.forEach(h => {
     const isSelected = selectedHabitIds.has(h.id);
-    const isCustom = h.is_custom || h.user_id !== null;
+    const isCustom = h.is_custom;
+
+    // Use shared helper
+    const themeObj = getSeasonalTheme(h.name, h.category);
+    // themeObj is strictly null if not current season, so we only get styles for active season
+    const themeClass = themeObj ? themeObj.className : '';
+    const displayBadge = themeObj ? themeObj.displayName : h.category;
+
     const card = document.createElement('div');
-    card.className = `habit-card ${isSelected ? 'selected' : ''}`;
+    card.className = `habit-card ${isSelected ? 'selected' : ''} ${themeClass}`;
+    const badgeStyle = themeObj ? 'background: rgba(255,255,255,0.2); font-weight:bold;' : '';
+
+    // Button Logic
+    let actionBtnHtml = '';
+    if (isSelected) {
+      actionBtnHtml = `<button class="btn-selection-toggle added" style="padding: 0.4rem 0.8rem; font-size:0.8rem; border-radius: 20px; background: var(--success); color: white; border: none; cursor:pointer;" title="Click to remove">✓ Added</button>`;
+    } else {
+      actionBtnHtml = `<button class="btn-selection-toggle" style="padding: 0.4rem 0.8rem; font-size:0.8rem; border-radius: 20px; background: var(--bg-body); border: 1px solid var(--primary); color: var(--primary); cursor:pointer;">+ Add</button>`;
+    }
+
+    // Edit/Delete Controls: STRICTLY only for custom habits
+    let controlsHtml = '';
+    if (isCustom) {
+      controlsHtml = `
+            <button type="button" class="btn-edit-habit" title="Edit" style="background:none; border:none; cursor:pointer; font-size:1rem; opacity:0.6;">✏️</button>
+            <button type="button" class="btn-delete-habit" title="Delete" style="background:none; border:none; cursor:pointer; font-size:1rem; opacity:0.6; color:var(--danger);">🗑️</button>
+        `;
+    }
 
     card.innerHTML = `
-            <span class="habit-category-badge">${h.category}</span>
-            <h3 style="margin-bottom:0.5rem; font-size:1.1rem;">${h.name}</h3>
-            <p style="font-size:0.9rem; color:var(--text-muted); flex:1;">${h.description || ''}</p>
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-              <input type="checkbox" class="habit-checkbox" style="position:relative; top:0; right:0;" ${isSelected ? 'checked' : ''}>
-              ${isCustom ? `
-                <button type="button" class="btn-edit-habit" title="Edit" style="background:none; border:1px solid var(--border); border-radius:4px; padding:0.25rem 0.5rem; cursor:pointer; color:var(--text-muted); font-size:0.8rem;">✏️</button>
-                <button type="button" class="btn-delete-habit" title="Delete" style="background:none; border:1px solid var(--border); border-radius:4px; padding:0.25rem 0.5rem; cursor:pointer; color:var(--danger); font-size:0.8rem;">🗑️</button>
-              ` : ''}
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <span class="habit-category-badge" style="${badgeStyle}">${displayBadge}</span>
+                <div style="display:flex; gap:0.5rem;">${controlsHtml}</div>
             </div>
-        `;
+            <h3 style="margin:0.5rem 0; font-size:1.1rem;">${h.name}</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; flex:1;">${h.description || ''}</p>
+            <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: auto;">
+              ${actionBtnHtml}
+            </div>
+    `;
 
-    // Card Click -> Toggle Selection (only on card area, not buttons)
-    card.onclick = (e) => {
-      if (e.target.type !== 'checkbox' && !e.target.classList.contains('btn-edit-habit') && !e.target.classList.contains('btn-delete-habit')) {
-        const checkbox = card.querySelector('input');
-        checkbox.checked = !checkbox.checked;
-        toggleSelection(h.id, checkbox.checked, card);
-      }
-    };
+    // Toggle (Add / De-add)
+    const toggleBtn = card.querySelector('.btn-selection-toggle');
+    if (toggleBtn) {
+      toggleBtn.onclick = async (e) => {
+        e.stopPropagation();
 
-    // Checkbox Click
-    card.querySelector('input').onclick = (e) => {
-      e.stopPropagation();
-      toggleSelection(h.id, e.target.checked, card);
-    };
+        try {
+          if (isSelected) {
+            // REMOVE (De-add)
+            // Need user_habit_id
+            const userHabitId = window.userHabitMap ? window.userHabitMap.get(h.id) : null;
+
+            if (userHabitId) {
+              // Call DELETE /user-habits/{id} (needs import of deleteUserHabit in api, wait, I need to check imports)
+              // Assuming deleteUserHabit is available or I need to update file imports!
+              // I will check imports next. For now assume it is.
+              // Actually, I verified user_habits.py backend has DELETE. frontend api helper needs it.
+              // IMPORTANT: The import at the top of habitsView.js might need to include deleteUserHabit.
+              // Just to be safe, I'll update imports in a separate call if needed.
+              // But wait, the tool call is atomic. I must assume I'll fix imports.
+
+              // Use top-level import
+              await deleteUserHabit(userHabitId);
+
+              // Update State
+              selectedHabitIds.delete(h.id);
+              window.userHabitMap.delete(h.id);
+              showNotification("Removed from habits");
+            } else {
+              // Fallback for custom logic? Or weird state?
+              // Just untrack locally?
+              selectedHabitIds.delete(h.id);
+            }
+          } else {
+            // ADD (Track)
+            // Use saveUserHabits logic (which calls POST /user-habits with list)
+            // Or better, logic/habits.py track_habit is idempotent.
+            // We can just send this one ID.
+            // But saveUserHabits takes a LIST.
+            // Let's rely on saveUserHabits([h.id]), but backend 'track_habits' returns list of created UserHabits!
+            // So we can capture the ID.
+
+            const res = await saveUserHabits([h.id]);
+            // res is list of user_habit objects (from my reading of user_habits.py)
+            if (res && res.length > 0) {
+              const uh = res[0];
+              selectedHabitIds.add(h.id);
+              if (!window.userHabitMap) window.userHabitMap = new Map();
+              window.userHabitMap.set(h.id, uh.id);
+              showNotification("Added to habits");
+            }
+          }
+          renderHabitsGrid(filter);
+        } catch (err) {
+          console.error(err);
+          showNotification("Failed to update habit", "error");
+        }
+      };
+    }
 
     // Edit Button
     const editBtn = card.querySelector('.btn-edit-habit');
@@ -287,11 +494,5 @@ function renderHabitsGrid(filter = 'all') {
 }
 
 function toggleSelection(id, isSelected, cardElement) {
-  if (isSelected) {
-    selectedHabitIds.add(id);
-    cardElement.classList.add('selected');
-  } else {
-    selectedHabitIds.delete(id);
-    cardElement.classList.remove('selected');
-  }
+  // Deprecated by new logic inside render loop
 }
