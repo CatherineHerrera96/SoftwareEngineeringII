@@ -1,30 +1,26 @@
-import { getToken, clearAuth } from "../state.js";
-import { showNotification } from "../ui.js";
+import { getToken, clearAuth } from '../state.js';
+import { showNotification } from '../ui.js';
 
-const PY_BASE_URL = "http://25.1.31.133:8000/api";
+// PYTHON API URL - Dynamic Host for Remote/Network Access
+const API_HOST = window.location.hostname; // e.g. 'localhost' or '25.x.x.x' or '192.168.x.x'
+const PY_BASE_URL = `http://${API_HOST}:8000/api`;
 
 export async function fetchHabits() {
   const token = getToken();
-  if (!token) return [];
-
-  const res = await fetch(`${PY_BASE_URL}/habits/`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
+  const response = await fetch(`${PY_BASE_URL}/habits/`, {
+    headers: { 'Authorization': `Bearer ${token}` }
   });
 
-  if (!res.ok) {
-    if (res.status === 401 || res.status === 403) {
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
       clearAuth();
-      showNotification("Session expired. Please log in again.", "error");
+      showNotification("Session expired.", "error");
       setTimeout(() => location.reload(), 1000);
-      return [];
+      throw new Error("Session expired");
     }
-    console.error("Failed to fetch habits");
-    return [];
+    throw new Error('Failed to fetch habits');
   }
-
-  return await res.json();
+  return await response.json();
 }
 
 export async function createCustomHabit(habitData) {
@@ -166,7 +162,9 @@ export async function fetchDailyChecklist() {
       longest_streak: uh.longest_streak || 0,
       total_completions: uh.total_completions || 0,
       lock_until: uh.next_available_checkin_at, // Use standardized name for UI
-      is_active: uh.is_active
+      is_active: uh.is_active,
+      streak_broken: uh.streak_broken,
+      previous_streak: uh.previous_streak
     };
   });
 }
@@ -204,7 +202,16 @@ export async function saveCheckin(userHabitId, completed) {
       throw new Error(JSON.stringify(errData.detail || errData));
     }
 
-    throw new Error("Error saving daily status");
+    // Handle other errors (500, 400, etc)
+    let errorMessage = "Error saving daily status";
+    try {
+      const errData = await res.json();
+      console.error("[Checkin API Error]", errData);
+      if (errData.detail) errorMessage = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+    } catch (e) {
+      console.error("Could not parse error response", e);
+    }
+    throw new Error(errorMessage);
   }
   return await res.json();
 }

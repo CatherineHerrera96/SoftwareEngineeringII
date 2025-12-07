@@ -8,6 +8,18 @@ let selectedHabitIds = new Set();
 // Confirmation modal promise resolver
 let confirmResolve = null;
 
+async function refreshDailyChecklistIfActive() {
+  const profileTab = document.querySelector('[data-view="profile"]');
+  if (profileTab && !profileTab.classList.contains('hidden')) {
+    try {
+      const { renderDailyChecklist } = await import('./dailyChecklistView.js');
+      await renderDailyChecklist();
+    } catch (e) {
+      console.warn('Could not refresh Daily Checklist:', e);
+    }
+  }
+}
+
 export async function renderHabits() {
   // 0. Apply Global Theme
   applyGlobalTheme();
@@ -138,6 +150,7 @@ function setupHabitsListeners() {
           }
           selectedHabitIds.add(created.id);
           showNotification(`Created & Added ${name}!`);
+          await refreshDailyChecklistIfActive();
         } catch (e) {
           console.error("Auto-add failed", e);
           showNotification(`Created ${name}, but failed to add to profile.`, 'warning');
@@ -158,7 +171,7 @@ function setupHabitsListeners() {
   setupConfirmModal();
 }
 
-function setupConfirmModal() {
+export function setupConfirmModal() {
   const modal = document.getElementById('confirm-modal');
   const cancelBtn = document.getElementById('confirm-cancel');
   const okBtn = document.getElementById('confirm-ok');
@@ -197,7 +210,7 @@ function setupConfirmModal() {
   }
 }
 
-function showConfirmDialog(title, message) {
+export function showConfirmDialog(title, message) {
   return new Promise((resolve) => {
     const modal = document.getElementById('confirm-modal');
     const titleEl = document.getElementById('confirm-title');
@@ -473,6 +486,7 @@ function renderHabitsGrid(filter = 'all') {
               if (!window.userHabitMap) window.userHabitMap = new Map();
               window.userHabitMap.set(h.id, uh.id);
               showNotification("Added to habits");
+              await refreshDailyChecklistIfActive();
             }
           }
           renderHabitsGrid(filter);

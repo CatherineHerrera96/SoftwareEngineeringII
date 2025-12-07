@@ -237,6 +237,11 @@ function switchTab(tabName) {
     if (statsContent) statsContent.style.display = tabName === 'stats' ? 'block' : 'none';
     if (tabDaily) tabDaily.classList.toggle('active', tabName === 'daily');
     if (tabStats) tabStats.classList.toggle('active', tabName === 'stats');
+
+    // Trigger refresh if daily tab is activated
+    if (tabName === 'daily') {
+        renderDailyChecklist();
+    }
 }
 
 async function renderDailyList() {

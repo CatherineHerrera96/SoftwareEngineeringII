@@ -458,6 +458,28 @@ a {
     opacity: 0.8;
 }
 
+/* Broken Streak Red Halo */
+.daily-item.streak-broken {
+    border-color: var(--danger) !important;
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.4),
+        0 0 40px rgba(220, 38, 38, 0.2);
+    animation: pulse-red 2s ease-in-out infinite;
+}
+
+@keyframes pulse-red {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(220, 38, 38, 0.4),
+            0 0 40px rgba(220, 38, 38, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(220, 38, 38, 0.6),
+            0 0 60px rgba(220, 38, 38, 0.3);
+    }
+}
+
 .btn-check {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -1416,4 +1438,50 @@ textarea {
 
 [data-theme="dark"] .daily-timer {
     background: rgba(0, 0, 0, 0.2);
+}
+
+/* Streak Levels */
+.daily-item.streak-level-0 {
+    border-left: 4px solid var(--border);
+}
+
+.daily-item.streak-level-1 {
+    border-left: 4px solid var(--success);
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.2);
+}
+
+.daily-item.streak-level-2 {
+    border-left: 4px solid #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.daily-item.streak-level-3 {
+    border-left: 4px solid #f59e0b;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.daily-item.streak-level-4 {
+    border-left: 4px solid #d97706;
+    box-shadow: 0 0 20px rgba(217, 119, 6, 0.5);
+    border: 1px solid #d97706;
+}
+
+@keyframes streak-broken-pulse {
+    0% {
+        box-shadow: 0 0 4px rgba(255, 75, 75, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 14px rgba(255, 75, 75, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 4px rgba(255, 75, 75, 0.3);
+    }
+}
+
+.daily-item.streak-broken {
+    border-color: #ff4b4b !important;
+    box-shadow: 0 0 12px rgba(255, 75, 75, 0.6) !important;
+    animation: streak-broken-pulse 1.2s infinite !important;
 }

@@ -65,6 +65,10 @@ class UserHabitRead(BaseModel):
     window_end_at: datetime | None = None
     last_completed_at: datetime | None = None
     is_completed: bool = False
+    
+    # New fields for broken streak visual feedback
+    streak_broken: bool = False
+    previous_streak: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

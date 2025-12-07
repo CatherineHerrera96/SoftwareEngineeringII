@@ -82,4 +82,7 @@ def list_checkins(
     current_user: User = Depends(get_current_user)
 ):
     # Return checkins for current user
-    return db.query(Checkin).join(UserHabit).filter(UserHabit.user_id == current_user.id).all()
+    return db.query(Checkin).join(UserHabit).filter(
+        UserHabit.user_id == current_user.id,
+        Checkin.is_completed == True
+    ).all()

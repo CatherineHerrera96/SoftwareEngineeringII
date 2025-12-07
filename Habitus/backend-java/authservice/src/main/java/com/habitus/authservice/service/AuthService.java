@@ -17,4 +17,6 @@ public interface AuthService {
     UserResponse changeEmail(Integer userId, String currentPassword, String newEmail);
 
     void deleteAccount(Integer userId, String currentPassword);
+
+    void sendTestEmail(String email);
 }

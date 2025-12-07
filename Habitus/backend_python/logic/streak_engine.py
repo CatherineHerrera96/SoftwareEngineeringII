@@ -18,6 +18,7 @@ except ImportError:
         return timezone.utc
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from models import User, UserHabit, Checkin
 import config
@@ -50,7 +51,8 @@ class StreakResult:
         lock_until: datetime,
         status: str,
         user_message: str,
-        new_achievements: list = None
+        new_achievements: list = None,
+        debug_info: dict = None
     ):
         self.habit_id = habit_id
         self.current_streak = current_streak
@@ -60,6 +62,7 @@ class StreakResult:
         self.status = status
         self.user_message = user_message
         self.new_achievements = new_achievements or []
+        self.debug_info = debug_info or {}
 
     def to_dict(self):
         return {
@@ -70,7 +73,8 @@ class StreakResult:
             "lock_until": self.lock_until.isoformat(),
             "status": self.status,
             "user_message": self.user_message,
-            "new_achievements": self.new_achievements
+            "new_achievements": self.new_achievements,
+            "debug": self.debug_info
         }
 
 
@@ -141,13 +145,13 @@ def calculate_streak(
     last_completed_at: Optional[datetime],
     current_now: datetime,
     current_streak: int
-) -> Tuple[int, str, str]:
+) -> Tuple[int, str, str, dict]:
     """
     Calculate new streak value based on interval indices.
     Includes debug logging for streak analysis.
     """
     if last_completed_at is None:
-        return (1, StreakStatus.STARTED, "🎉 Started your first streak! Keep it going!")
+        return (1, StreakStatus.STARTED, "🎉 Started your first streak! Keep it going!", {})
     
     # Normalize for safety (though subtraction usually handles it)
     if last_completed_at.tzinfo:
@@ -164,10 +168,17 @@ def calculate_streak(
     current_idx = get_interval_index(now_utc)
     
     diff = current_idx - last_idx
+    debug_info = {
+        "last_utc": str(last_utc),
+        "now_utc": str(now_utc),
+        "last_idx": last_idx,
+        "curr_idx": current_idx,
+        "diff": diff
+    }
     
     if diff == 0:
         # Same interval - already completed
-        return (current_streak, StreakStatus.CONTINUES, f"🔥 {current_streak}-day streak!")
+        return (current_streak, StreakStatus.CONTINUES, f"🔥 {current_streak}-day streak!", debug_info)
     elif diff == 1:
         # Consecutive interval - Increment!
         new_streak = current_streak + 1
@@ -178,7 +189,7 @@ def calculate_streak(
             f"🎯 {new_streak} days strong! Don't break the chain!",
         ]
         message = messages[min(new_streak - 1, len(messages) - 1)]
-        return (new_streak, StreakStatus.CONTINUES, message)
+        return (new_streak, StreakStatus.CONTINUES, message, debug_info)
     else:
         # Gap > 1 - Reset
         old_streak = current_streak
@@ -188,7 +199,7 @@ def calculate_streak(
             f"🔄 Your {old_streak}-day streak ended, but every day is a new chance!",
         ]
         message = messages[min(old_streak - 1, len(messages) - 1)] if old_streak > 0 else "Let's start a new streak!"
-        return (1, StreakStatus.RESET, message)
+        return (1, StreakStatus.RESET, message, debug_info)
 
 
 def get_next_interval_start(dt: datetime) -> datetime:
@@ -276,7 +287,14 @@ async def process_checkin(
              # Should not happen with get_user_now consistency
              pass
 
-    # 4. Check if already completed in this interval (idempotent)
+    today = now.date()
+    
+    # 1. LOCK PARENT (UserHabit) FIRST - Avoid Deadlock
+    # We must lock the parent before touching the child (Checkin) to enforce lock ordering.
+    # We re-fetch user_habit specifically to lock it for this transaction.
+    user_habit = db.query(UserHabit).filter(UserHabit.id == user_habit.id).with_for_update().first()
+    
+    # 2. Check if already completed in this interval (idempotent)
     # Double check logic - if last_completed is in current interval
     if is_completed_in_current_interval(user_habit.last_completed_at, now):
          return StreakResult(
@@ -290,14 +308,55 @@ async def process_checkin(
             new_achievements=[]
         )
     
-    # 5. Calculate new streak
-    new_streak, status, user_message = calculate_streak(
+    today = now.date()
+    # 5. Create/update checkin record (MOVED to avoid IntegrityError rollback side-effects)
+    
+    if config.STREAK_MODE == config.StreakMode.DAILY:
+        log_date = now.date()
+    else:
+        log_date = now.date()
+
+    # Safe Upsert for Checkin (Simplified)
+    # 1. We ALREADY hold the Lock on UserHabit (Parent).
+    # 2. We use Soft Deletes, so rows don't disappear.
+    # Therefore, checking availability is deterministic. We don't need complex retry loops.
+    
+    checkin = db.query(Checkin).filter(
+        Checkin.user_habit_id == user_habit.id,
+        Checkin.log_date == log_date
+    ).first() # No need for explicit lock on child if we own parent and are about to write? Actually safer to just query.
+    
+    if checkin:
+        # Row exists (Active or Soft-Deleted) -> Update
+        checkin.is_completed = True
+    else:
+        # Row missing -> Insert
+        # Safe because we hold UserHabit lock, so no other thread can be inserting for this UserHabit right now.
+        checkin = Checkin(
+            user_habit_id=user_habit.id,
+            log_date=log_date,
+            is_completed=True
+        )
+        db.add(checkin)
+    
+    # Flush to ensure constraints are checked now (while we are safe)
+    db.flush()
+
+    # RELOAD UserHabit to be sure (optional but safe)
+    db.refresh(user_habit)
+
+    # 6. Calculate new streak (AFTER Checkin is secure)
+    print(f"DEBUG: process_checkin BEFORE | habit={habit_id} | current={user_habit.current_streak} | longest={user_habit.longest_streak} | last={user_habit.last_completed_at}")
+    
+    new_streak, status, user_message, debug_info = calculate_streak(
         user_habit.last_completed_at,
         now,
         user_habit.current_streak
     )
     
-    # 6. Update user_habit
+    print(f"DEBUG: calculate_streak OUTPUT | new_streak={new_streak} | status={status}")
+
+    # 7. Update user_habit
     user_habit.current_streak = new_streak
     user_habit.longest_streak = max(user_habit.longest_streak, new_streak)
     if user_habit.total_completions is None:
@@ -305,31 +364,12 @@ async def process_checkin(
     user_habit.total_completions += 1
     user_habit.last_completed_at = now
     
+    print(f"DEBUG: process_checkin AFTER | current={user_habit.current_streak} | longest={user_habit.longest_streak}")
+    
     # CALCULATE NEXT AVAILABLE (Start of Next Interval)
     user_habit.next_available_checkin_at = get_next_interval_start(now)
     
-    # 7. Create/update checkin record
-    if config.STREAK_MODE == config.StreakMode.DAILY:
-        log_date = now.date()
-    else:
-        log_date = now.date()
-    
-    checkin = db.query(Checkin).filter(
-        Checkin.user_habit_id == user_habit.id,
-        Checkin.log_date == log_date
-    ).first()
-    
-    if not checkin:
-        checkin = Checkin(
-            user_habit_id=user_habit.id,
-            log_date=log_date,
-            is_completed=True
-        )
-        db.add(checkin)
-    else:
-        checkin.is_completed = True
-    
-    db.commit()
+    db.commit() # Commit Streak Updates
     db.refresh(user_habit)
     
     # Capture values for result BEFORE risky achievement evaluation
@@ -369,7 +409,8 @@ async def process_checkin(
         lock_until=res_lock_until,
         status=res_status,
         user_message=res_user_message,
-        new_achievements=new_achievements
+        new_achievements=new_achievements,
+        debug_info=debug_info
     )
 
 
@@ -387,16 +428,19 @@ async def undo_checkin(
     if not user:
         raise StreakError("USER_NOT_FOUND", "User not found")
         
+    # LOCK PARENT (UserHabit) FIRST - Avoid Deadlock
+    # Must match lock order in process_checkin
     user_habit = db.query(UserHabit).filter(
         UserHabit.user_id == user_id,
         UserHabit.habit_id == habit_id
-    ).first()
+    ).with_for_update().first()
     
     if not user_habit:
         raise StreakError("HABIT_NOT_ASSIGNED", "Habit Not Found")
 
     now = get_user_now(user)
     
+    today = now.date()
     # 2. Find Today's Checkin
     # Use logic matching process_checkin for log_date
     if config.STREAK_MODE == config.StreakMode.DAILY:
@@ -422,9 +466,26 @@ async def undo_checkin(
             user_message="Nothing to undo for today.",
             new_achievements=[]
         )
-        
-    # 3. Perform Undo
-    db.delete(checkin)
+    
+    # Check if already undone (Idempotency)
+    # If soft-deleted (is_completed=False), do nothing.
+    if not checkin.is_completed:
+         return StreakResult(
+            habit_id=habit_id,
+            current_streak=user_habit.current_streak,
+            longest_streak=user_habit.longest_streak,
+            total_completions=user_habit.total_completions,
+            lock_until=now,
+            status="undo_nop",
+            user_message="Already undone.",
+            new_achievements=[]
+        )
+
+    # 3. Perform Undo (Soft Delete)
+    # Instead of deleting, we set is_completed=False.
+    # Instead of deleting, we set is_completed=False.
+    # This preserves the record and avoids UniqueConstraint races on re-checkin.
+    checkin.is_completed = False
     
     # Revert counts (Safe decrement)
     if user_habit.total_completions > 0:
@@ -450,7 +511,9 @@ async def undo_checkin(
         # Calculate "Yesterday"
         if config.STREAK_MODE == config.StreakMode.TEST:
              interval = config.STREAK_INTERVAL_SECONDS
-             user_habit.last_completed_at = now - timedelta(seconds=interval * 1.5)
+             # Set to exactly 1 interval ago to ensure Diff=1 (Consecutive)
+             # 1.5 was risky because it could push into Diff=2
+             user_habit.last_completed_at = now - timedelta(seconds=interval)
         else:
              user_habit.last_completed_at = now - timedelta(days=1)
              

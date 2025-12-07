@@ -27,6 +27,7 @@ def compute_weekly_stats(db: Session, user_id: str, week_start: date) -> WeeklyS
             UserHabit.user_id == user_id,
             Checkin.log_date >= start,
             Checkin.log_date < end,
+            Checkin.is_completed == True
         )
     )
     checkins = q.all()

@@ -131,4 +131,14 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/test-email")
+    public ResponseEntity<String> sendTestEmail(@RequestParam String email) {
+        try {
+            authService.sendTestEmail(email);
+            return ResponseEntity.ok("Test email sent to " + email);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to send test email: " + e.getMessage());
+        }
+    }
+
 }

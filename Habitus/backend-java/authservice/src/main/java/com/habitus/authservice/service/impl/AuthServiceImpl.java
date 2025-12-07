@@ -244,6 +244,13 @@ public class AuthServiceImpl implements AuthService {
         log.info("Account deleted for user: {} (ID: {})", user.getEmail(), userId);
     }
 
+    @Override
+    public void sendTestEmail(String email) {
+        log.info("Sending test email to: {}", email);
+        emailService.sendSimpleMessage(email, "Habitus SMTP Test",
+                "<h1>It Works!</h1><p>This is a test email from your Habitus backend.</p>");
+    }
+
     private String buildStyledEmailHtml(String email, String resetLink) {
         return "<!DOCTYPE html>" +
                 "<html>" +

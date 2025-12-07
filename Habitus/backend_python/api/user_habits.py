@@ -80,6 +80,31 @@ def list_my_habits(
         # Calculate Deadline (Window End)
         # For current interval, the "Next Interval Start" IS the deadline of this interval.
         window_end_at = streak_engine.get_next_interval_start(user_now)
+        
+        # STREAK RESET LOGIC: Check if streak is broken based on intervals
+        # The previous logic (now >= next_available) was wrong because next_available starts the NEW window.
+        # We only reset if the gap between last_completed and now is > 1.
+        
+        streak_broken = False
+        previous_streak = None
+        
+        if habits_info.last_completed_at and habits_info.current_streak > 0:
+            # Use the engine to check if checking in NOW would be a Reset
+            # calculate_streak returns (new_streak, status, message, debug)
+            _, status, _, _ = streak_engine.calculate_streak(
+                habits_info.last_completed_at, 
+                user_now, 
+                habits_info.current_streak
+            )
+            
+            if status == streak_engine.StreakStatus.RESET:
+                # Streak is broken (gap > 1)
+                previous_streak = habits_info.current_streak
+                habits_info.current_streak = 0
+                streak_broken = True
+                # Reset cooldown/lock
+                habits_info.next_available_checkin_at = None
+                db.commit()
 
         results.append(schemas.UserHabitRead(
             id=habits_info.id,
@@ -92,7 +117,9 @@ def list_my_habits(
             next_available_checkin_at=habits_info.next_available_checkin_at,
             window_end_at=window_end_at,
             last_completed_at=habits_info.last_completed_at,
-            is_completed=is_completed
+            is_completed=is_completed,
+            streak_broken=streak_broken,
+            previous_streak=previous_streak
         ))
         
     return results
@@ -137,10 +164,11 @@ def delete_user_habit(
     # Soft delete by setting is_active to False
     user_habit.is_active = False
     
-    # Reset streak on deletion (so re-adding starts fresh, or keep logic as preferred)
-    # user_habit.current_streak = 0
+    # Reset streak on deletion so re-adding starts fresh
+    user_habit.current_streak = 0
+    # Also reset lock so they can start immediately if re-added
+    user_habit.next_available_checkin_at = None
     
     db.commit()
     
-    # Return 204 No Content equivalent or success message
     return {"message": "Habit deleted successfully"}

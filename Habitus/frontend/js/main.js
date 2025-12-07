@@ -5,6 +5,7 @@ import { initHomeView } from "./views/homeView.js";
 import { clearAuth, getToken } from "./state.js";
 import { initTheme, loadThemePreference, applyTheme } from "./ui.js";
 import { applyGlobalTheme } from "./config/seasonalThemes.js";
+import { setupConfirmModal } from "./views/habitsView.js";
 
 // Apply saved theme IMMEDIATELY to prevent flash
 const savedTheme = loadThemePreference();
@@ -56,6 +57,7 @@ function initLogout() {
 window.addEventListener("DOMContentLoaded", () => {
   applyGlobalTheme(); // Apply seasonal theme (will use already-set data-theme)
   initTheme(); // Initialize theme toggle button
+  setupConfirmModal(); // Setup global confirmation modal
   initLoginView(); // Sets up login form listeners
   initResetPasswordView(); // Sets up reset password form
   initHomeView(); // Sets up home view listeners
