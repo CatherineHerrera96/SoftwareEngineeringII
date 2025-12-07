@@ -1,8 +1,6 @@
 package com.habitus.authservice.service;
 
-import com.habitus.authservice.dto.AuthResponse;
-import com.habitus.authservice.dto.LoginRequest;
-import com.habitus.authservice.dto.RegisterRequest;
+import com.habitus.authservice.dto.*;
 
 public interface AuthService {
 
@@ -13,4 +11,10 @@ public interface AuthService {
     void sendPasswordResetEmail(String email);
 
     void resetPassword(String token, String newPassword);
+
+    void changePassword(Integer userId, String currentPassword, String newPassword);
+
+    UserResponse changeEmail(Integer userId, String currentPassword, String newEmail);
+
+    void deleteAccount(Integer userId, String currentPassword);
 }

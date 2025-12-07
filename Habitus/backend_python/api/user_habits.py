@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, Body, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from db import get_db
@@ -45,39 +46,70 @@ def assign_user_habit(
             user_id=h.user_id,
             habit_id=h.habit_id,
             is_active=h.is_active,
+            current_streak=h.current_streak,
+            longest_streak=h.longest_streak,
+            total_completions=h.total_completions,
+            next_available_checkin_at=h.next_available_checkin_at,
+            last_completed_at=h.last_completed_at,
             is_completed=False 
         ) for h in created_habits
     ]
 
+
+from logic import streak_engine
 
 @router.get("/", response_model=List[schemas.UserHabitRead])
 def list_my_habits(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return [
-        schemas.UserHabitRead(
+    user_now = streak_engine.get_user_now(current_user)
+    results = []
+    
+    # We ignore the SQL-derived 'completed' boolean because it is date-based
+    # and doesn't handle Test Mode intervals correctly.
+    for habits_info, _ in crud.list_user_habits(db, user_id=current_user.id):
+        
+        # Determine strict completion status for current interval
+        # This handles both Daily and Test Mode (60s) intervals correctly
+        is_completed = streak_engine.is_completed_in_current_interval(
+            habits_info.last_completed_at,
+            user_now
+        )
+        
+        # Calculate Deadline (Window End)
+        # For current interval, the "Next Interval Start" IS the deadline of this interval.
+        window_end_at = streak_engine.get_next_interval_start(user_now)
+
+        results.append(schemas.UserHabitRead(
             id=habits_info.id,
             user_id=habits_info.user_id,
             habit_id=habits_info.habit_id,
             is_active=habits_info.is_active,
             current_streak=habits_info.current_streak,
             longest_streak=habits_info.longest_streak,
-            is_completed=completed
-        )
-        for habits_info, completed in crud.list_user_habits(db, user_id=current_user.id)
-    ]
+            total_completions=habits_info.total_completions,
+            next_available_checkin_at=habits_info.next_available_checkin_at,
+            window_end_at=window_end_at,
+            last_completed_at=habits_info.last_completed_at,
+            is_completed=is_completed
+        ))
+        
+    return results
 
 
-@router.delete("/{user_habit_id}", status_code=204)
+@router.delete("/{user_habit_id}")
 def delete_user_habit(
     user_habit_id: int,
+    confirm: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
     Remove a habit from the user's tracked habits.
-    Only the owner of the habit can delete it.
+    
+    If the habit has an active streak (>0), deletion requires ?confirm=true.
+    Otherwise, returns a 400/409 with details about the streak to be lost.
     """
     user_habit = db.query(UserHabit).filter(UserHabit.id == user_habit_id).first()
     
@@ -87,8 +119,28 @@ def delete_user_habit(
     if user_habit.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this habit")
     
+    # Check for active streak/progress
+    has_progress = user_habit.current_streak > 0
+    
+    if has_progress and not confirm:
+        # Require confirmation
+        return JSONResponse(
+            status_code=409,
+            content={
+                "requires_confirmation": True,
+                "detail": f"You will lose your {user_habit.current_streak}-day streak!",
+                "current_streak": user_habit.current_streak,
+                "longest_streak": user_habit.longest_streak
+            }
+        )
+    
     # Soft delete by setting is_active to False
     user_habit.is_active = False
+    
+    # Reset streak on deletion (so re-adding starts fresh, or keep logic as preferred)
+    # user_habit.current_streak = 0
+    
     db.commit()
     
-    return None
+    # Return 204 No Content equivalent or success message
+    return {"message": "Habit deleted successfully"}

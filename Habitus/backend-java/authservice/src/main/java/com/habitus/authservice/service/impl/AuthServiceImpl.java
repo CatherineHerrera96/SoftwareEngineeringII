@@ -3,6 +3,7 @@ package com.habitus.authservice.service.impl;
 import com.habitus.authservice.dto.AuthResponse;
 import com.habitus.authservice.dto.LoginRequest;
 import com.habitus.authservice.dto.RegisterRequest;
+import com.habitus.authservice.dto.UserResponse;
 import com.habitus.authservice.entity.User;
 import com.habitus.authservice.exception.EmailAlreadyExistsException;
 import com.habitus.authservice.exception.InvalidCredentialsException;
@@ -169,6 +170,78 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.delete(resetToken);
 
         log.info("Password reset successfully for user: {}", user.getEmail());
+    }
+
+    @Override
+    public void changePassword(Integer userId, String currentPassword, String newPassword) {
+        // 1. Find user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 2. Validate current password
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        // 3. Validate new password is different
+        if (currentPassword.equals(newPassword)) {
+            throw new IllegalArgumentException("New password must be different from current password");
+        }
+
+        // 4. Update password
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        log.info("Password changed successfully for user: {}", user.getEmail());
+    }
+
+    @Override
+    public UserResponse changeEmail(Integer userId, String currentPassword, String newEmail) {
+        // 1. Find user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 2. Validate current password
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        // 3. Check if new email is already in use
+        if (userRepository.findByEmail(newEmail).isPresent()) {
+            throw new IllegalArgumentException("Email is already in use");
+        }
+
+        // 4. Update email
+        String oldEmail = user.getEmail();
+        user.setEmail(newEmail);
+        userRepository.save(user);
+
+        log.info("Email changed from {} to {} for user ID: {}", oldEmail, newEmail, userId);
+
+        // 5. Return updated user info
+        return new com.habitus.authservice.dto.UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getAvatarUrl(),
+                user.getTimezone());
+    }
+
+    @Override
+    public void deleteAccount(Integer userId, String currentPassword) {
+        // 1. Find user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 2. Validate current password
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        // 3. Delete user (cascade will handle related entities if configured)
+        userRepository.delete(user);
+
+        log.info("Account deleted for user: {} (ID: {})", user.getEmail(), userId);
     }
 
     private String buildStyledEmailHtml(String email, String resetLink) {

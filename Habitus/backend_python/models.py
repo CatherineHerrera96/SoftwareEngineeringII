@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import date, datetime
 from sqlalchemy import (
     Column,
     String,
     Date,
+    DateTime,
     Boolean,
     Numeric,
     Integer,
@@ -53,6 +54,9 @@ class UserHabit(Base):
     is_active       = Column(Boolean, nullable=False, default=True)
     current_streak  = Column(Integer, default=0)
     longest_streak  = Column(Integer, default=0)
+    total_completions = Column(Integer, default=0)
+    last_completed_at = Column(DateTime(timezone=True), nullable=True)
+    next_available_checkin_at = Column(DateTime(timezone=True), nullable=True)
     activated_at    = Column(Date, default=date.today)
 
     habits = relationship("Habit", back_populates="user_habits")
@@ -77,10 +81,11 @@ class Achievement(Base):
     __tablename__ = "achievements"
 
     id              = Column(Integer, primary_key=True)
+    code            = Column(String, unique=True, nullable=False)  # e.g., "STREAK_3"
     name            = Column(String, nullable=False)
     description     = Column(String)
-    condition_type  = Column(String, nullable=False)
-    threshold       = Column(Integer, nullable=False)
+    threshold_type  = Column(String, nullable=False)  # "streak_length" or "total_completions"
+    threshold_value = Column(Integer, nullable=False)
     
     usr_achievements = relationship("UserAchievement", back_populates="achievements")
 
@@ -88,13 +93,14 @@ class Achievement(Base):
 class UserAchievement(Base):
     __tablename__ = "user_achievements"
     __table_args__ = (
-        UniqueConstraint("user_id", "achievement_id", name="uq_user_week"),
+        UniqueConstraint("user_id", "achievement_id", "habit_id", name="uq_user_achievement_habit"),
     )
     
     id              = Column(Integer, primary_key=True)
     user_id         = Column(Integer, ForeignKey("users.id"), nullable=False)
     achievement_id  = Column(Integer, ForeignKey("achievements.id"), nullable=False)
-    awarded_at      = Column(Date, nullable= False, default=date.today())
+    habit_id        = Column(Integer, ForeignKey("habits.id"), nullable=True)  # For per-habit achievements
+    awarded_at      = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     
     user = relationship("User", back_populates="usr_achievements")
     achievements = relationship("Achievement", back_populates="usr_achievements")

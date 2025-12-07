@@ -81,6 +81,16 @@ export function initLoginView() {
       const confirm = document.getElementById("register-password-confirm").value;
       const terms = document.getElementById("register-terms").checked;
 
+      // Password length validation (consistent with password change policy)
+      if (password.length < 8) {
+        showNotification("Password must be at least 8 characters", "error");
+        if (btn) {
+          btn.innerHTML = 'Create Account';
+          btn.disabled = false;
+        }
+        return;
+      }
+
       if (password !== confirm) {
         showNotification("Passwords do not match", "error");
         if (btn) {

@@ -45,7 +45,7 @@
 //   en lugar de "token"), se podría adaptar aquí sin tocar las vistas.
 //
 
-import { setAuth } from "../state.js";
+import { setAuth, getToken } from "../state.js";
 
 // URL base del backend de autenticación en Java.
 //
@@ -220,6 +220,92 @@ export async function resetPassword(token, newPassword) {
   if (!res.ok) {
     const errorText = await res.text();
     throw new Error(errorText || "Failed to reset password");
+  }
+
+  return true;
+}
+
+/**
+ * Change password for authenticated user
+ * @param {string} currentPassword - Current password for verification
+ * @param {string} newPassword - New password
+ * @returns {Promise<void>}
+ */
+export async function changePassword(currentPassword, newPassword) {
+  const token = getToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const res = await fetch(`${JAVA_BASE_URL}/change-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to change password");
+  }
+
+  return true;
+}
+
+/**
+ * Change email for authenticated user
+ * @param {string} currentPassword - Current password for verification
+ * @param {string} newEmail - New email address
+ * @returns {Promise<object>} Updated user data
+ */
+export async function changeEmail(currentPassword, newEmail) {
+  const token = getToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const res = await fetch(`${JAVA_BASE_URL}/change-email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ currentPassword, newEmail }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to change email");
+  }
+
+  return await res.json();
+}
+
+/**
+ * Delete account for authenticated user
+ * @param {string} currentPassword - Current password for verification
+ * @returns {Promise<void>}
+ */
+export async function deleteAccount(currentPassword) {
+  const token = getToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const res = await fetch(`${JAVA_BASE_URL}/account`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ currentPassword }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to delete account");
   }
 
   return true;

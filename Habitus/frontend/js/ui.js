@@ -1,5 +1,6 @@
 
 import { getProfile } from './api/habitsApi.js';
+import { applyGlobalTheme } from './config/seasonalThemes.js';
 
 export async function updateHeaderProfile() {
     const avatarEl = document.getElementById('header-avatar');
@@ -36,14 +37,59 @@ export function showNotification(msg, type = 'success') {
     }, 3000);
 }
 
+/**
+ * Load saved theme preference from localStorage
+ * @returns {string} - 'light' or 'dark'
+ */
+export function loadThemePreference() {
+    return localStorage.getItem('theme-preference') || 'light';
+}
+
+/**
+ * Save theme preference to localStorage
+ * @param {string} theme - 'light' or 'dark'
+ */
+export function saveThemePreference(theme) {
+    localStorage.setItem('theme-preference', theme);
+}
+
+/**
+ * Apply theme immediately (called before DOM loads to prevent flash)
+ * @param {string} theme - 'light' or 'dark'
+ */
+export function applyTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+    // Reapply seasonal theme with new mode
+    applyGlobalTheme(theme);
+}
+
+/**
+ * Initialize theme toggle button with persistence
+ */
 export function initTheme() {
     const btn = document.getElementById('theme-toggle');
     if (!btn) return;
 
+    // Load saved preference and apply
+    const savedTheme = loadThemePreference();
+    console.log('[initTheme] Loaded saved theme:', savedTheme);
+    applyTheme(savedTheme);
+
+    // Toggle handler
     btn.onclick = () => {
         const current = document.body.getAttribute('data-theme');
         const next = current === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', next);
-        btn.textContent = next === 'dark' ? '☀️' : '🌙';
+        console.log('[initTheme] Toggling from', current, 'to', next);
+
+        // Apply new theme
+        applyTheme(next);
+
+        // Save preference
+        saveThemePreference(next);
+        console.log('[initTheme] Theme preference saved');
     };
 }

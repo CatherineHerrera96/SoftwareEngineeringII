@@ -1,27 +1,61 @@
-# Backend access to user info and tracking
+# Backend - Habitus Python Service
 
-This module is the one in charge of tracking the user data, from tracking new habits, to registering daily completion of habits. All through an API REST to transfer data between the frontend and database.
+This service handles the core business logic for Habitus, including habit tracking, streaks, and achievements.
 
-It's made with the **FastAPI**, which is made to easly handle RESTful responses. It also uses **SQLAlchemy** to power it's connection with the database
+## Tech Stack
+- **FastAPI**: RESTful API framework.
+- **SQLAlchemy**: ORM for PostgreSQL.
+- **Pydantic**: Data validation and schema definition.
 
-## How to use
+## Setup & Running
 
-From Habitus folder, execute the command:
+1. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-uvicorn backend_python.main:app
-```
+2. **Database Migration:**
+   This project uses a custom migration script for the streak system.
+   ```bash
+   python migrate_streaks.py
+   ```
 
-The parameter `--reload` may be used for automatic reload of the backend, on changes to files pretainig to the API. Very useful to check changes manualy while prototyping. 
+3. **Run the Server:**
+   ```bash
+   python main.py
+   ```
+   Server runs on `http://0.0.0.0:8000`.
+
+## Configuration (Environment Variables)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DATABASE_URL` | `postgresql://...` | Connection string for PostgreSQL |
+| `STREAK_MODE` | `daily` | `daily` (24h cooldown) or `test` (short intervals) |
+| `STREAK_INTERVAL_SECONDS` | `60` | Duration of interval in `test` mode |
+
+### Streak Modes
+- **Daily Mode**: Habits can be checked once per calendar day. Cooldown resets at midnight or after 24 hours depending on logic.
+- **Test Mode**: Habits can be checked every `STREAK_INTERVAL_SECONDS` (default 60s). exact timestamps are used.
+
+## API Endpoints
+
+### Habits
+- `GET /api/user-habits/`: List today's checklist with streak status.
+- `POST /api/user-habits/{id}/assign`: Assign a habit to the user.
+- `DELETE /api/user-habits/{id}`: Delete a habit (requires confirmation if active streak).
+
+### Check-ins
+- `POST /api/checkins/`: Complete a habit for the current interval.
+  - Returns `200 OK` with streak info if successful.
+  - Returns `409 Conflict` if cooldown is active (with `lock_until` time).
+
+### Achievements
+- `GET /api/achievements/mine`: List unlocked achievements.
+- `GET /api/achievements/`: List all available achievements.
 
 ## Testing
-
-Made using the **Pytest** package, it integrates easly with **FastAPI**.
-
-It automaticaly runs tests defined on python files starting with test_ or ending in _test.
-
-To run the test suite simply use the command:
-
+Run the test suite with:
 ```bash
 pytest
 ```

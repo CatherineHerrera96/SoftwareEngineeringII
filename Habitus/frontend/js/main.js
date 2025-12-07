@@ -3,8 +3,12 @@ import { initLoginView } from "./views/loginView.js";
 import { initResetPasswordView } from "./views/resetPasswordView.js";
 import { initHomeView } from "./views/homeView.js";
 import { clearAuth, getToken } from "./state.js";
-import { initTheme } from "./ui.js";
+import { initTheme, loadThemePreference, applyTheme } from "./ui.js";
 import { applyGlobalTheme } from "./config/seasonalThemes.js";
+
+// Apply saved theme IMMEDIATELY to prevent flash
+const savedTheme = loadThemePreference();
+applyTheme(savedTheme);
 
 function initNav() {
   const buttons = document.querySelectorAll(".nav-link");
@@ -50,8 +54,8 @@ function initLogout() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  applyGlobalTheme(); // Apply seasonal theme
-  initTheme();
+  applyGlobalTheme(); // Apply seasonal theme (will use already-set data-theme)
+  initTheme(); // Initialize theme toggle button
   initLoginView(); // Sets up login form listeners
   initResetPasswordView(); // Sets up reset password form
   initHomeView(); // Sets up home view listeners

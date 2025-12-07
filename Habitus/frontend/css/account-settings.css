@@ -1,0 +1,138 @@
+/* =========================================
+   ACCOUNT SETTINGS STYLES
+   ========================================= */
+
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto 3rem;
+    padding: 0 1rem;
+}
+
+.settings-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.settings-card h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-main);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.setting-description {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+}
+
+.settings-card .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.settings-card .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.settings-card .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.settings-card .form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.form-error {
+    display: none;
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.form-error:not(:empty) {
+    display: block;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Danger Zone Styling */
+.danger-zone {
+    border-color: var(--danger);
+    background: linear-gradient(135deg,
+            rgba(239, 68, 68, 0.05) 0%,
+            rgba(239, 68, 68, 0.02) 100%);
+}
+
+[data-theme="dark"] .danger-zone {
+    background: linear-gradient(135deg,
+            rgba(239, 68, 68, 0.1) 0%,
+            rgba(239, 68, 68, 0.05) 100%);
+}
+
+.danger-zone h3 {
+    color: var(--danger);
+}
+
+.danger-zone .setting-description {
+    color: var(--text-main);
+}
+
+.danger-zone .setting-description strong {
+    color: var(--danger);
+}
+
+/* Responsive Settings */
+@media (max-width: 768px) {
+    .settings-card {
+        padding: 1.5rem;
+    }
+
+    .settings-container {
+        padding: 0 0.5rem;
+    }
+
+    .settings-card h3 {
+        font-size: 1.1rem;
+    }
+}

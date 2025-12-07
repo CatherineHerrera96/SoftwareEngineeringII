@@ -3,6 +3,7 @@ import { renderProfile } from './views/profileView.js';
 import { renderLogin } from './views/loginView.js';
 import { renderResetPassword } from './views/resetPasswordView.js';
 import { renderHome } from './views/homeView.js';
+import { renderDailyChecklist } from './views/dailyChecklistView.js';
 import { getToken } from './state.js';
 
 export function navigateTo(viewName) {
@@ -35,6 +36,12 @@ export function navigateTo(viewName) {
       break;
     case 'profile':
       renderProfile();
+      break;
+    case 'checklist':
+      renderDailyChecklist();
+      break;
+    case 'achievements':
+      renderProfile('stats');
       break;
     case 'login':
     case 'register':

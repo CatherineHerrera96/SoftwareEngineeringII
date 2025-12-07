@@ -1,0 +1,457 @@
+/* =========================================
+   PROFILE SETTINGS MODAL
+   ========================================= */
+
+.profile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: none;
+}
+
+.profile-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+[data-theme="dark"] .profile-modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.profile-modal-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 580px;
+    max-width: 90vw;
+    background: var(--bg-card);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.profile-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-main);
+}
+
+.profile-modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-main);
+}
+
+.profile-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.profile-modal-close:hover {
+    background: var(--bg-input);
+    color: var(--text-main);
+}
+
+.profile-settings-tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem 2rem 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-main);
+    overflow-x: auto;
+}
+
+.profile-tab {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.profile-tab:hover {
+    color: var(--text-main);
+}
+
+.profile-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.profile-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.profile-tab-content {
+    display: none;
+}
+
+.profile-tab-content.active {
+    display: block;
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.profile-tab-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-main);
+    font-size: 1.1rem;
+}
+
+.profile-tab-content .form-group {
+    margin-bottom: 1.25rem;
+}
+
+/* Danger Zone in Modal */
+.danger-zone-content {
+    padding: 1.5rem;
+    border: 2px solid var(--danger);
+    border-radius: var(--radius);
+    background: linear-gradient(135deg,
+            rgba(239, 68, 68, 0.05) 0%,
+            rgba(239, 68, 68, 0.02) 100%);
+}
+
+[data-theme="dark"] .danger-zone-content {
+    background: linear-gradient(135deg,
+            rgba(239, 68, 68, 0.1) 0%,
+            rgba(239, 68, 68, 0.05) 100%);
+}
+
+/* =========================================
+   PROFILE SETTINGS MODAL
+   ========================================= */
+
+.profile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: none;
+}
+
+.profile-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+[data-theme="dark"] .profile-modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.profile-modal-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 580px;
+    max-width: 90vw;
+    background: var(--bg-card);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.profile-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-main);
+}
+
+.profile-modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-main);
+}
+
+.profile-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.profile-modal-close:hover {
+    background: var(--bg-input);
+    color: var(--text-main);
+}
+
+.profile-settings-tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem 2rem 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-main);
+    overflow-x: auto;
+}
+
+.profile-tab {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.profile-tab:hover {
+    color: var(--text-main);
+}
+
+.profile-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.profile-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.profile-tab-content {
+    display: none;
+}
+
+.profile-tab-content.active {
+    display: block;
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.profile-tab-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-main);
+    font-size: 1.1rem;
+}
+
+.profile-tab-content .form-group {
+    margin-bottom: 1.25rem;
+}
+
+/* Danger Zone in Modal */
+.danger-zone-content {
+    padding: 1.5rem;
+    border: 2px solid var(--danger);
+    border-radius: var(--radius);
+    background: linear-gradient(135deg,
+            rgba(239, 68, 68, 0.05) 0%,
+            rgba(239, 68, 68, 0.02) 100%);
+}
+
+[data-theme="dark"] .danger-zone-content {
+    background: linear-gradient(135deg,
+            rgba(239, 68, 68, 0.1) 0%,
+            rgba(239, 68, 68, 0.05) 100%);
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .profile-modal-panel {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .profile-modal-content {
+        padding: 1.5rem;
+    }
+
+    .profile-settings-tabs {
+        padding: 0.75rem 1rem 0;
+        gap: 0.25rem;
+    }
+
+    .profile-tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Delete Confirmation Modal */
+.delete-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20000;
+    /* Above everything */
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-confirm-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+}
+
+.delete-confirm-content {
+    position: relative;
+    background: var(--bg-card);
+    border: 2px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4);
+    animation: modalPop 0.3s ease-out;
+}
+
+@keyframes modalPop {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.delete-confirm-content h3 {
+    color: var(--danger);
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.delete-confirm-content p {
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.delete-confirm-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.delete-confirm-actions button {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.delete-confirm-cancel {
+    background: var(--bg-input);
+    color: var(--text-main);
+}
+
+.delete-confirm-cancel:hover {
+    background: var(--border);
+}
+
+.delete-confirm-delete {
+    background: var(--danger);
+    color: white;
+}
+
+.delete-confirm-delete:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}

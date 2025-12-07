@@ -608,7 +608,7 @@ a {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 1000;
+    z-index: 10000;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -1376,4 +1376,44 @@ textarea {
     .home-features-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Global Daily Timer */
+.daily-timer {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 0.4rem 0.8rem;
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    color: var(--primary);
+    transition: all 0.3s ease;
+    min-width: 140px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.daily-timer.expired {
+    color: var(--text-muted) !important;
+    border-color: var(--border) !important;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+[data-theme="dark"] .daily-timer {
+    background: rgba(0, 0, 0, 0.2);
 }

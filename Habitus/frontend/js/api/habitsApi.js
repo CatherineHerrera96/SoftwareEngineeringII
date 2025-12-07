@@ -162,7 +162,11 @@ export async function fetchDailyChecklist() {
       habit_name: habit ? habit.name : "Unknown Habit",
       habit_category: habit ? habit.category : "",
       is_completed: uh.is_completed, // Backend returns this computed field
-      current_streak: uh.current_streak || 0
+      current_streak: uh.current_streak || 0,
+      longest_streak: uh.longest_streak || 0,
+      total_completions: uh.total_completions || 0,
+      lock_until: uh.next_available_checkin_at, // Use standardized name for UI
+      is_active: uh.is_active
     };
   });
 }
@@ -193,6 +197,13 @@ export async function saveCheckin(userHabitId, completed) {
       setTimeout(() => location.reload(), 1000);
       throw new Error("Session expired");
     }
+
+    // Handle Cooldown (409)
+    if (res.status === 409) {
+      const errData = await res.json();
+      throw new Error(JSON.stringify(errData.detail || errData));
+    }
+
     throw new Error("Error saving daily status");
   }
   return await res.json();
@@ -246,11 +257,14 @@ export async function getAchievements() {
   return await response.json();
 }
 
-export async function deleteUserHabit(userHabitId) {
+export async function deleteUserHabit(userHabitId, confirm = false) {
   const token = getToken();
   if (!token) throw new Error("Not authenticated");
 
-  const res = await fetch(`${PY_BASE_URL}/user-habits/${userHabitId}`, {
+  // Add confirm flag if true
+  const url = `${PY_BASE_URL}/user-habits/${userHabitId}${confirm ? '?confirm=true' : ''}`;
+
+  const res = await fetch(url, {
     method: "DELETE",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -264,7 +278,31 @@ export async function deleteUserHabit(userHabitId) {
       setTimeout(() => location.reload(), 1000);
       throw new Error("Session expired");
     }
+
+    // Handle Confirmation Required (409)
+    if (res.status === 409) {
+      const errorData = await res.json();
+      throw new Error(JSON.stringify(errorData));
+    }
+
     throw new Error("Failed to delete habit");
   }
-  return true; // Success
+
+  return true;
+}
+
+export async function fetchStreakWindow() {
+  const token = getToken();
+  if (!token) throw new Error("No token");
+
+  const res = await fetch(`${PY_BASE_URL}/streak-window`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch streak window");
+  }
+  return await res.json();
 }

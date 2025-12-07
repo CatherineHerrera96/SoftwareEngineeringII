@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Habitus - Modern Tracker</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/account-settings.css" />
+  <link rel="stylesheet" href="css/profile-modal.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 
@@ -127,7 +129,8 @@
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" id="register-password" class="form-input" placeholder="Enter your password" required />
+          <input type="password" id="register-password" class="form-input" placeholder="At least 8 characters"
+            required />
         </div>
         <div class="form-group">
           <label class="form-label">Confirm Password</label>
@@ -221,28 +224,140 @@
           <h2 id="profile-name-display">Demo User</h2>
           <p id="profile-email-display" style="color: var(--text-muted);">demo@habitus.com</p>
         </div>
-        <button class="btn-secondary" id="toggle-edit-profile">Edit Profile</button>
+        <button class="btn-secondary" id="open-settings-modal">⚙️ Edit Profile</button>
       </div>
 
-      <!-- Edit Profile Form -->
-      <div id="edit-profile-section" class="view-card" style="display: none; margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 1rem;">Update Profile</h3>
-        <form id="profile-edit-form">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group">
-              <label class="form-label">Display Name</label>
-              <input type="text" id="edit-name" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Avatar URL</label>
-              <input type="text" id="edit-avatar" class="form-input" placeholder="https://..." />
-            </div>
+      <!-- Edit Profile Modal -->
+      <div id="edit-profile-modal" class="profile-modal" style="display: none;">
+        <div class="profile-modal-overlay" id="modal-overlay"></div>
+        <div class="profile-modal-panel">
+          <div class="profile-modal-header">
+            <h2>Profile & Account Settings</h2>
+            <button class="profile-modal-close" id="close-settings-modal">✕</button>
           </div>
-          <div style="display: flex; gap: 1rem;">
-            <button type="button" class="btn-secondary" id="cancel-edit-profile">Cancel</button>
-            <button type="submit" class="btn-primary" style="width: auto;">Save Changes</button>
+
+          <!-- Settings Tabs -->
+          <div class="profile-settings-tabs">
+            <button class="profile-tab active" data-settings-tab="profile-info">Profile</button>
+            <button class="profile-tab" data-settings-tab="email">Email</button>
+            <button class="profile-tab" data-settings-tab="password">Password</button>
+            <button class="profile-tab" data-settings-tab="danger">Danger Zone</button>
           </div>
-        </form>
+
+          <div class="profile-modal-content">
+
+            <!-- Profile Info Tab -->
+            <div class="profile-tab-content active" id="tab-profile-info">
+              <h3>Basic Information</h3>
+              <p class="setting-description">Update your display name and avatar.</p>
+              <form id="profile-edit-form">
+                <div class="form-group">
+                  <label class="form-label">Display Name</label>
+                  <input type="text" id="edit-name" class="form-input" placeholder="Your name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Avatar URL</label>
+                  <input type="text" id="edit-avatar" class="form-input" placeholder="https://..." />
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+              </form>
+            </div>
+
+            <!-- Change Email Tab -->
+            <div class="profile-tab-content" id="tab-email">
+              <h3>Change Email</h3>
+              <p class="setting-description">Update your email address. You'll need to verify your current password.</p>
+              <form id="change-email-form">
+                <div class="form-group">
+                  <label class="form-label">Current Password</label>
+                  <input type="password" id="email-current-password" class="form-input" required
+                    placeholder="Enter current password" />
+                  <span class="form-error" id="email-current-password-error"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">New Email Address</label>
+                  <input type="email" id="new-email" class="form-input" required
+                    placeholder="your.new.email@example.com" />
+                  <span class="form-error" id="new-email-error"></span>
+                </div>
+                <button type="submit" class="btn-primary">Update Email</button>
+              </form>
+            </div>
+
+            <!-- Change Password Tab -->
+            <div class="profile-tab-content" id="tab-password">
+              <h3>Change Password</h3>
+              <p class="setting-description">Update your password. Make sure it's strong and secure.</p>
+              <form id="change-password-form">
+                <div class="form-group">
+                  <label class="form-label">Current Password</label>
+                  <input type="password" id="password-current" class="form-input" required
+                    placeholder="Enter current password" />
+                  <span class="form-error" id="password-current-error"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">New Password</label>
+                  <input type="password" id="password-new" class="form-input" required
+                    placeholder="Enter new password (min 8 characters)" />
+                  <span class="form-error" id="password-new-error"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm New Password</label>
+                  <input type="password" id="password-confirm" class="form-input" required
+                    placeholder="Confirm new password" />
+                  <span class="form-error" id="password-confirm-error"></span>
+                </div>
+                <button type="submit" class="btn-primary">Update Password</button>
+              </form>
+            </div>
+
+            <!-- Danger Zone Tab -->
+            <div class="profile-tab-content" id="tab-danger">
+              <div class="danger-zone-content">
+                <h3 style="color: var(--danger);">Delete Account</h3>
+                <p class="setting-description">⚠️ <strong>Warning:</strong> This action cannot be undone. All your data
+                  will
+                  be permanently deleted.</p>
+                <form id="delete-account-form">
+                  <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" id="delete-current-password" class="form-input" required
+                      placeholder="Enter current password" />
+                    <span class="form-error" id="delete-current-password-error"></span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Type DELETE to confirm</label>
+                    <input type="text" id="delete-confirmation" class="form-input" required
+                      placeholder="Type DELETE in capital letters" />
+                    <span class="form-error" id="delete-confirmation-error"></span>
+                  </div>
+                  <button type="submit" class="btn-danger" id="delete-account-btn" disabled>Delete My Account</button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Delete Confirmation Modal -->
+      <div id="delete-confirm-modal" class="delete-confirm-modal">
+        <div class="delete-confirm-overlay"></div>
+        <div class="delete-confirm-content">
+          <h3>⚠️ Delete Account</h3>
+          <p><strong>Are you absolutely sure?</strong></p>
+          <p>This action cannot be undone. All your data will be permanently deleted, including:</p>
+          <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+            <li>Your profile and account information</li>
+            <li>All your habits and progress</li>
+            <li>Your achievements and streaks</li>
+            <li>All historical data</li>
+          </ul>
+          <div class="delete-confirm-actions">
+            <button class="delete-confirm-cancel" id="delete-cancel-btn">Cancel</button>
+            <button class="delete-confirm-delete" id="delete-final-btn">Yes, Delete Everything</button>
+          </div>
+        </div>
       </div>
 
       <div class="tabs-container">

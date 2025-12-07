@@ -24,7 +24,8 @@ export const CURRENT_SEASON = 'christmas';
  * - displayName: The text label to show on the habit card
  * - keywords: Words to trigger this theme
  * - className: CSS class for styling individual cards
- * - themeColors: Global colors for the app header, background, etc.
+ * - lightColors: Colors for light mode
+ * - darkColors: Colors for dark mode
  */
 export const SEASONAL_THEMES = [
     {
@@ -32,10 +33,17 @@ export const SEASONAL_THEMES = [
         displayName: '⚔️ Cosmere RPG',
         keywords: ['stormlight', 'mistborn', 'radiant', 'allomancy', 'shardblade', 'investiture', 'lashing'],
         className: 'theme-cosmere',
-        themeColors: {
-            '--theme-primary': '#0ea5e9', // Stormlight Blue
-            '--theme-secondary': '#94a3b8', // Mistborn Silver
-            '--theme-bg': '#0f172a', // Dark Navy
+        lightColors: {
+            '--theme-primary': '#0ea5e9',
+            '--theme-secondary': '#0c4a6e',
+            '--theme-bg': '#e0f2fe',
+            '--theme-header-bg': 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+            '--theme-text': '#0c4a6e'
+        },
+        darkColors: {
+            '--theme-primary': '#38bdf8',
+            '--theme-secondary': '#94a3b8',
+            '--theme-bg': '#0f172a',
             '--theme-header-bg': 'linear-gradient(135deg, #0c4a6e, #0ea5e9)',
             '--theme-text': '#e0f2fe'
         }
@@ -45,10 +53,17 @@ export const SEASONAL_THEMES = [
         displayName: '♾️ The 100',
         keywords: ['survival', 'grounder', 'ark', 'skaikru', 'commander', 'warrior', 'mount weather', 'radiation'],
         className: 'theme-the100',
-        themeColors: {
-            '--theme-primary': '#4ade80', // Radioactive Green
-            '--theme-secondary': '#14532d', // Dark Green
-            '--theme-bg': '#020617', // Deep Space
+        lightColors: {
+            '--theme-primary': '#22c55e',
+            '--theme-secondary': '#16a34a',
+            '--theme-bg': '#f0fdf4',
+            '--theme-header-bg': 'linear-gradient(135deg, #22c55e, #16a34a)',
+            '--theme-text': '#14532d'
+        },
+        darkColors: {
+            '--theme-primary': '#4ade80',
+            '--theme-secondary': '#14532d',
+            '--theme-bg': '#020617',
             '--theme-header-bg': 'linear-gradient(135deg, #022c22, #14532d)',
             '--theme-text': '#4ade80'
         }
@@ -58,12 +73,19 @@ export const SEASONAL_THEMES = [
         displayName: '🎆 New Year',
         keywords: ['resolution', 'year', 'goal', 'january', 'fresh start', 'declutter', 'review'],
         className: 'theme-new-year',
-        themeColors: {
-            '--theme-primary': '#fbbf24', // Gold
-            '--theme-secondary': '#000000', // Black
-            '--theme-bg': '#111827', // Dark Slate
+        lightColors: {
+            '--theme-primary': '#f59e0b',
+            '--theme-secondary': '#d97706',
+            '--theme-bg': '#fffbeb',
+            '--theme-header-bg': 'linear-gradient(135deg, #fbbf24, #d97706)',
+            '--theme-text': '#78350f'
+        },
+        darkColors: {
+            '--theme-primary': '#fbbf24',
+            '--theme-secondary': '#000000',
+            '--theme-bg': '#111827',
             '--theme-header-bg': 'linear-gradient(135deg, #000000, #1f2937)',
-            '--theme-text': '#fbbf24' // Gold text
+            '--theme-text': '#fbbf24'
         }
     },
     {
@@ -71,12 +93,19 @@ export const SEASONAL_THEMES = [
         displayName: '🎄 Christmas',
         keywords: ['christmas', 'santa', 'cocoa', 'gift', 'snow', 'reindeer', 'december'],
         className: 'theme-christmas',
-        themeColors: {
-            '--theme-primary': '#d42426', // Red
-            '--theme-secondary': '#f57474ff', // Green
-            '--theme-bg': '#f0f7f4', // Snowy white/mint
-            '--theme-header-bg': 'linear-gradient(135deg, #d42426, #b9f1b7ff)',
-            '--theme-text': '#ffffff'
+        lightColors: {
+            '--theme-primary': '#dc2626',
+            '--theme-secondary': '#16a34a',
+            '--theme-bg': '#fef2f2',
+            '--theme-header-bg': 'linear-gradient(135deg, #dc2626, #16a34a)',
+            '--theme-text': '#7f1d1d'
+        },
+        darkColors: {
+            '--theme-primary': '#f87171',
+            '--theme-secondary': '#4ade80',
+            '--theme-bg': '#1f1414',
+            '--theme-header-bg': 'linear-gradient(135deg, #991b1b, #166534)',
+            '--theme-text': '#fecaca'
         }
     },
     {
@@ -84,12 +113,19 @@ export const SEASONAL_THEMES = [
         displayName: '🎃 Spooky Season',
         keywords: ['halloween', 'pumpkin', 'spooky', 'ghost', 'witch', 'candy', 'october'],
         className: 'theme-halloween',
-        themeColors: {
-            '--theme-primary': '#ff6b00', // Orange
-            '--theme-secondary': '#4a0e4e', // Purple
-            '--theme-bg': '#1a1a1a', // Dark
-            '--theme-header-bg': 'linear-gradient(135deg, #ff6b00, #4a0e4e)',
-            '--theme-text': '#ffffff'
+        lightColors: {
+            '--theme-primary': '#f97316',
+            '--theme-secondary': '#a855f7',
+            '--theme-bg': '#fff7ed',
+            '--theme-header-bg': 'linear-gradient(135deg, #f97316, #a855f7)',
+            '--theme-text': '#7c2d12'
+        },
+        darkColors: {
+            '--theme-primary': '#fb923c',
+            '--theme-secondary': '#c084fc',
+            '--theme-bg': '#1a0f0a',
+            '--theme-header-bg': 'linear-gradient(135deg, #ea580c, #9333ea)',
+            '--theme-text': '#fed7aa'
         }
     },
     {
@@ -97,12 +133,19 @@ export const SEASONAL_THEMES = [
         displayName: '☀️ Summer Vibes',
         keywords: ['summer', 'beach', 'sun', 'swim', 'ocean', 'vacation', 'july', 'august'],
         className: 'theme-summer',
-        themeColors: {
-            '--theme-primary': '#00b4d8', // Cyan
-            '--theme-secondary': '#ffd60a', // Sun Yellow
-            '--theme-bg': '#fffbed', // Warm sandy light
-            '--theme-header-bg': 'linear-gradient(135deg, #00b4d8, #ffd60a)',
-            '--theme-text': '#003e4d'
+        lightColors: {
+            '--theme-primary': '#06b6d4',
+            '--theme-secondary': '#fbbf24',
+            '--theme-bg': '#f0fdfa',
+            '--theme-header-bg': 'linear-gradient(135deg, #06b6d4, #fbbf24)',
+            '--theme-text': '#134e4a'
+        },
+        darkColors: {
+            '--theme-primary': '#22d3ee',
+            '--theme-secondary': '#fde047',
+            '--theme-bg': '#0a2420',
+            '--theme-header-bg': 'linear-gradient(135deg, #0e7490, #ca8a04)',
+            '--theme-text': '#ccfbf1'
         }
     },
     {
@@ -110,12 +153,19 @@ export const SEASONAL_THEMES = [
         displayName: '💖 Valentine',
         keywords: ['valentine', 'love', 'heart', 'romance', 'date', 'february'],
         className: 'theme-valentine',
-        themeColors: {
-            '--theme-primary': '#ff4d6d', // Pink
-            '--theme-secondary': '#c9184a', // Deep Red
-            '--theme-bg': '#fff0f3', // Light pink
-            '--theme-header-bg': 'linear-gradient(135deg, #ff4d6d, #c9184a)',
-            '--theme-text': '#ffffff'
+        lightColors: {
+            '--theme-primary': '#ec4899',
+            '--theme-secondary': '#f43f5e',
+            '--theme-bg': '#fdf2f8',
+            '--theme-header-bg': 'linear-gradient(135deg, #ec4899, #f43f5e)',
+            '--theme-text': '#831843'
+        },
+        darkColors: {
+            '--theme-primary': '#f472b6',
+            '--theme-secondary': '#fb7185',
+            '--theme-bg': '#1f0a14',
+            '--theme-header-bg': 'linear-gradient(135deg, #be185d, #e11d48)',
+            '--theme-text': '#fce7f3'
         }
     },
     {
@@ -123,12 +173,19 @@ export const SEASONAL_THEMES = [
         displayName: '🤡 Prank Time',
         keywords: ['april fools', 'prank', 'joke', 'clown'],
         className: 'theme-april-fools',
-        themeColors: {
-            '--theme-primary': '#9b5de5', // Purple
-            '--theme-secondary': '#f15bb5', // Pink
-            '--theme-bg': '#f0efff',
-            '--theme-header-bg': 'linear-gradient(135deg, #9b5de5, #f15bb5)',
-            '--theme-text': '#ffffff'
+        lightColors: {
+            '--theme-primary': '#a855f7',
+            '--theme-secondary': '#ec4899',
+            '--theme-bg': '#faf5ff',
+            '--theme-header-bg': 'linear-gradient(135deg, #a855f7, #ec4899)',
+            '--theme-text': '#581c87'
+        },
+        darkColors: {
+            '--theme-primary': '#c084fc',
+            '--theme-secondary': '#f472b6',
+            '--theme-bg': '#1a0a1f',
+            '--theme-header-bg': 'linear-gradient(135deg, #7e22ce, #be185d)',
+            '--theme-text': '#f3e8ff'
         }
     },
     {
@@ -136,35 +193,54 @@ export const SEASONAL_THEMES = [
         displayName: '🌸 Spring',
         keywords: ['spring', 'flower', 'bloom', 'garden', 'april', 'may'],
         className: 'theme-spring',
-        themeColors: {
-            '--theme-primary': '#70e000', // Bright Green
-            '--theme-secondary': '#38b000', // Darker Green
-            '--theme-bg': '#f7fff7',
-            '--theme-header-bg': 'linear-gradient(135deg, #70e000, #38b000)',
-            '--theme-text': '#0f4d0f'
+        lightColors: {
+            '--theme-primary': '#22c55e',
+            '--theme-secondary': '#84cc16',
+            '--theme-bg': '#f7fee7',
+            '--theme-header-bg': 'linear-gradient(135deg, #22c55e, #84cc16)',
+            '--theme-text': '#14532d'
+        },
+        darkColors: {
+            '--theme-primary': '#4ade80',
+            '--theme-secondary': '#a3e635',
+            '--theme-bg': '#0f1a0a',
+            '--theme-header-bg': 'linear-gradient(135deg, #15803d, #4d7c0f)',
+            '--theme-text': '#d9f99d'
         }
     }
 ];
 
 /**
- * Apply the global theme to the document body.
+ * Apply the global theme to the document body based on current season and dark/light mode.
+ * @param {string} mode - 'light' or 'dark' (optional, will read from body if not provided)
  */
-export const applyGlobalTheme = () => {
+export const applyGlobalTheme = (mode) => {
     const body = document.body;
+
+    // Determine current mode
+    const currentMode = mode || body.getAttribute('data-theme') || 'light';
 
     // Reset if null
     if (!CURRENT_SEASON) {
         body.removeAttribute('data-season');
-        body.style = ''; // Clear inline vars
+        // Clear only theme-specific vars, keep data-theme
+        const themeVars = ['--theme-primary', '--theme-secondary', '--theme-bg', '--theme-header-bg', '--theme-text'];
+        themeVars.forEach(v => body.style.removeProperty(v));
         return;
     }
 
     const theme = SEASONAL_THEMES.find(t => t.id === CURRENT_SEASON);
-    if (theme && theme.themeColors) {
+    if (theme) {
         body.setAttribute('data-season', theme.id);
+
+        // Choose color set based on mode
+        const colors = currentMode === 'dark' ? theme.darkColors : theme.lightColors;
+
         // Apply CSS variables
-        for (const [key, val] of Object.entries(theme.themeColors)) {
-            body.style.setProperty(key, val);
+        if (colors) {
+            for (const [key, val] of Object.entries(colors)) {
+                body.style.setProperty(key, val);
+            }
         }
     }
 };

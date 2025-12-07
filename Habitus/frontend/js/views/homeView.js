@@ -13,10 +13,10 @@ export function initHomeView() {
         habitCard.addEventListener('click', () => navigateTo('habits'));
     }
     if (checklistCard) {
-        checklistCard.addEventListener('click', () => navigateTo('profile')); // Profile has checklist
+        checklistCard.addEventListener('click', () => navigateTo('checklist'));
     }
     if (achievementsCard) {
-        achievementsCard.addEventListener('click', () => navigateTo('profile')); // Profile has achievements
+        achievementsCard.addEventListener('click', () => navigateTo('achievements'));
     }
     if (profileCard) {
         profileCard.addEventListener('click', () => navigateTo('profile'));

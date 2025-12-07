@@ -1,8 +1,14 @@
 import { getProfile, updateProfile, fetchDailyChecklist, saveCheckin, deleteUserHabit, getAchievements } from '../api/habitsApi.js';
+import { changePassword, changeEmail, deleteAccount } from '../api/authApi.js';
 import { showNotification } from '../ui.js';
+import { updateUser, clearAuth } from '../state.js';
+import { navigateTo } from '../router.js';
+import { updateHeaderProfile } from '../ui.js';
+import { setupProfileModal, setupSettingsTabs } from '../components/profileModal.js';
 import { getSeasonalTheme, applyGlobalTheme, SEASONAL_THEMES, CURRENT_SEASON } from '../config/seasonalThemes.js';
+import { renderDailyChecklist } from './dailyChecklistView.js';
 
-export async function renderProfile() {
+export async function renderProfile(activeTab = 'daily') {
     // 0. Apply Global Theme
     applyGlobalTheme();
 
@@ -15,12 +21,20 @@ export async function renderProfile() {
         showNotification('Failed to load profile', 'error');
     }
 
-    // 2. Setup Event Listeners (Edit Profile, Tabs)
+    // 2. Setup Modal and Settings Tabs
+    setupProfileModal();
+    setupSettingsTabs();
+
+    // 3. Setup Event Listeners (Forms, Tabs)
     setupProfileListeners();
 
-    // 3. Render Sub-views
-    renderDailyList();
+    // 4. Render Sub-views
+    // DELEGATE to external dailyChecklistView which handles the global timer
+    renderDailyChecklist();
     renderAchievementsList();
+
+    // 5. Switch to requested tab
+    switchTab(activeTab);
 }
 
 function updateProfileUI(profile) {
@@ -47,15 +61,8 @@ function updateProfileUI(profile) {
 }
 
 function setupProfileListeners() {
-    // Edit Profile Toggle
-    const section = document.getElementById('edit-profile-section');
-    const toggle = document.getElementById('toggle-edit-profile');
-    const cancel = document.getElementById('cancel-edit-profile');
+    // Profile Edit Form (now in modal)
     const form = document.getElementById('profile-edit-form');
-
-    if (toggle && section) toggle.onclick = () => section.style.display = 'block';
-    if (cancel && section) cancel.onclick = () => section.style.display = 'none';
-
     if (form) {
         form.onsubmit = async (e) => {
             e.preventDefault();
@@ -66,14 +73,13 @@ function setupProfileListeners() {
                 const updated = await updateProfile({ name: newName, avatar_url: newAvatar });
                 updateProfileUI(updated);
                 showNotification("Profile updated!");
-                if (section) section.style.display = 'none';
             } catch (err) {
                 showNotification("Failed to update profile", "error");
             }
         };
     }
 
-    // Tabs
+    // Daily/Stats Tabs
     const tabDaily = document.getElementById('tab-btn-daily');
     const tabStats = document.getElementById('tab-btn-stats');
 
@@ -82,6 +88,142 @@ function setupProfileListeners() {
     }
     if (tabStats) {
         tabStats.onclick = () => switchTab('stats');
+    }
+
+    // Account Settings Forms
+
+    // Change Email Form
+    const changeEmailForm = document.getElementById('change-email-form');
+    if (changeEmailForm) {
+        changeEmailForm.onsubmit = async (e) => {
+            e.preventDefault();
+            clearFormErrors();
+
+            const currentPassword = document.getElementById('email-current-password').value;
+            const newEmail = document.getElementById('new-email').value;
+
+            // Basic validation
+            if (!currentPassword || !newEmail) {
+                showFormError('new-email-error', 'Please fill in all fields');
+                return;
+            }
+
+            if (!newEmail.includes('@')) {
+                showFormError('new-email-error', 'Please enter a valid email');
+                return;
+            }
+
+            try {
+                const updatedUser = await changeEmail(currentPassword, newEmail);
+
+                // Clear form
+                changeEmailForm.reset();
+
+                // Show success message
+                showNotification('Email updated! Please log in with your new email.');
+
+                // Log out user (JWT token is now invalid with old email)
+                clearAuth();
+
+                // Close modal
+                const modal = document.getElementById('edit-profile-modal');
+                if (modal) modal.style.display = 'none';
+
+                // Redirect to login after a delay
+                setTimeout(() => {
+                    navigateTo('login');
+                }, 2000);
+            } catch (err) {
+                showFormError('email-current-password-error', err.message || 'Failed to change email');
+            }
+        };
+    }
+
+    // Change Password Form
+    const changePasswordForm = document.getElementById('change-password-form');
+    if (changePasswordForm) {
+        changePasswordForm.onsubmit = async (e) => {
+            e.preventDefault();
+            clearFormErrors();
+
+            const currentPassword = document.getElementById('password-current').value;
+            const newPassword = document.getElementById('password-new').value;
+            const confirmPassword = document.getElementById('password-confirm').value;
+
+            // Client-side validation
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showFormError('password-confirm-error', 'Please fill in all fields');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showFormError('password-new-error', 'Password must be at least 8 characters');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showFormError('password-confirm-error', 'Passwords do not match');
+                return;
+            }
+
+            try {
+                await changePassword(currentPassword, newPassword);
+
+                // Clear form
+                changePasswordForm.reset();
+
+                showNotification('Password changed successfully!');
+            } catch (err) {
+                showFormError('password-current-error', err.message || 'Failed to change password');
+            }
+        };
+    }
+
+    // Delete Account Form
+    const deleteAccountForm = document.getElementById('delete-account-form');
+    const deleteConfirmationInput = document.getElementById('delete-confirmation');
+    const deleteAccountBtn = document.getElementById('delete-account-btn');
+
+    // Enable delete button only when "DELETE" is typed
+    if (deleteConfirmationInput && deleteAccountBtn) {
+        deleteConfirmationInput.oninput = () => {
+            deleteAccountBtn.disabled = deleteConfirmationInput.value !== 'DELETE';
+        };
+    }
+
+    if (deleteAccountForm) {
+        deleteAccountForm.onsubmit = async (e) => {
+            e.preventDefault();
+            clearFormErrors();
+
+            const currentPassword = document.getElementById('delete-current-password').value;
+            // Note: 'confirmation' var was undefined in original code too, assuming it refers to input value or global scope
+            const confirmation = deleteConfirmationInput.value;
+
+            if (confirmation !== 'DELETE') {
+                showFormError('delete-confirmation-error', 'You must type DELETE to confirm');
+                return;
+            }
+
+            const deleteModal = document.getElementById('delete-confirm-modal');
+            const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+            const deleteFinalBtn = document.getElementById('delete-final-btn');
+
+            if (deleteModal) {
+                deleteModal.style.display = 'flex';
+                deleteCancelBtn.onclick = () => deleteModal.style.display = 'none';
+                deleteFinalBtn.onclick = async () => {
+                    try {
+                        await deleteAccount(currentPassword);
+                        clearAuth();
+                        showNotification('Account deleted.');
+                        setTimeout(() => navigateTo('login'), 2000);
+                    } catch (err) {
+                        showFormError('delete-current-password-error', err.message || 'Failed to delete account');
+                    }
+                };
+            }
+        };
     }
 }
 
@@ -93,186 +235,20 @@ function switchTab(tabName) {
 
     if (dailyContent) dailyContent.style.display = tabName === 'daily' ? 'block' : 'none';
     if (statsContent) statsContent.style.display = tabName === 'stats' ? 'block' : 'none';
-
     if (tabDaily) tabDaily.classList.toggle('active', tabName === 'daily');
     if (tabStats) tabStats.classList.toggle('active', tabName === 'stats');
 }
 
 async function renderDailyList() {
-    const list = document.getElementById('daily-list');
-    if (!list) return;
-
-    list.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Loading...</p>';
-
-    try {
-        const habits = await fetchDailyChecklist();
-
-        // --- SEASONAL CLEANUP ENFORCEMENT ---
-        // Iterate over fetched habits. If any belongs to an inactive season, delete it immediately.
-        const activeHabits = [];
-        let cleanupCount = 0;
-
-        for (const h of habits) {
-            // Check if habit is seasonal
-            const seasonId = SEASONAL_THEMES.find(t => {
-                const n = h.habit_name.toLowerCase();
-                const c = h.habit_category ? h.habit_category.toLowerCase() : '';
-                return t.keywords.some(k => n.includes(k)) || t.id === c;
-            })?.id;
-
-            if (seasonId) {
-                // It is seasonal. Strict check.
-                if (!CURRENT_SEASON || CURRENT_SEASON !== seasonId) {
-                    // Invalid season -> Delete
-                    console.log(`Cleaning up invalid seasonal habit: ${h.habit_name} (${seasonId})`);
-                    try {
-                        await deleteUserHabit(h.id);
-                        cleanupCount++;
-                    } catch (e) { console.error("Cleanup failed for", h.id, e); }
-                    continue; // Skip adding to list
-                }
-            }
-            activeHabits.push(h);
-        }
-
-        if (cleanupCount > 0) {
-            showNotification(`Cleaned up ${cleanupCount} expired seasonal habits.`);
-        }
-
-        const listItems = activeHabits;
-        list.innerHTML = '';
-
-        if (listItems.length === 0) {
-            list.innerHTML = `
-                <div style="text-align:center; color:var(--text-muted);">
-                    <p>No habits selected.</p>
-                    <button id="btn-go-habits" class="btn-secondary" style="margin-top:1rem;">Browse Habits</button>
-                </div>
-            `;
-            const btnGo = document.getElementById('btn-go-habits');
-            if (btnGo) {
-                btnGo.onclick = () => {
-                    const navBtn = document.querySelector('.nav-link[data-nav="habits"]');
-                    if (navBtn) navBtn.click();
-                };
-            }
-            updateProgressBar(0);
-            return;
-        }
-
-        let completedCount = 0;
-
-
-
-        listItems.forEach(h => {
-            if (h.is_completed) completedCount++;
-
-            const li = document.createElement('li');
-
-            // Use shared seasonal helper - RETURNS OBJECT
-            const themeObj = getSeasonalTheme(h.habit_name);
-            const themeClass = themeObj ? themeObj.className : '';
-
-            li.className = `daily-item ${h.is_completed ? 'completed' : ''} ${themeClass}`;
-
-            li.innerHTML = `
-                <span class="daily-name">${h.habit_name}</span>
-                <div style="display:flex; align-items:center;">
-                    <button class="btn-check ${h.is_completed ? 'missed' : 'done'}">
-                    ${h.is_completed ? 'Undo' : '✔ Done'}
-                    </button>
-                    <button class="btn-delete" title="Remove">🗑</button>
-                </div>
-            `;
-
-            // Check/Uncheck
-            const checkBtn = li.querySelector('.btn-check');
-            checkBtn.onclick = async () => {
-                const newStatus = !h.is_completed;
-
-                // Optimistic Update
-                h.is_completed = newStatus;
-                checkBtn.className = `btn-check ${newStatus ? 'missed' : 'done'}`; // 'missed' style used for Undo? or 'done'?
-                // Actually looking at style classes: 'done' usually green, 'missed' red? 
-                // Existing code: ${h.is_completed ? 'missed' : 'done'} -> Undo has 'missed' class? 
-                // Let's stick to existing logic: if completed, show UNDO (style 'missed' maybe meant 'destructive/red'?)
-                // wait, if is_completed is true, text is "Undo", class is "missed". 
-
-                checkBtn.textContent = newStatus ? 'Undo' : '✔ Done';
-                li.className = `daily-item ${newStatus ? 'completed' : ''} ${themeClass}`;
-
-                try {
-                    await saveCheckin(h.id, newStatus);
-                    // No need to full re-render, we updated UI
-                    updateProgressBar(recalcCompletion(listItems));
-                } catch (err) {
-                    console.error("Checkin failed", err);
-                    showNotification("Failed to save status", "error");
-                    // Revert
-                    h.is_completed = !newStatus;
-                    renderDailyList(); // Full re-render on error to be safe
-                }
-            };
-
-            // Delete with Custom Modal
-            li.querySelector('.btn-delete').onclick = () => {
-                const modal = document.getElementById('confirm-modal');
-                const title = document.getElementById('confirm-title');
-                const msg = document.getElementById('confirm-message');
-                const btnOk = document.getElementById('confirm-ok');
-                const btnCancel = document.getElementById('confirm-cancel');
-
-                if (modal && title && msg && btnOk && btnCancel) {
-                    title.textContent = "Stop Tracking?";
-                    msg.textContent = `Are you sure you want to stop tracking "${h.habit_name}"?`;
-
-                    modal.style.display = 'flex';
-
-                    // Handler for Confirm
-                    const onConfirm = async () => {
-                        try {
-                            cleanup();
-                            await deleteUserHabit(h.id);
-                            showNotification("Habit removed.");
-                            renderDailyList();
-                        } catch (err) {
-                            showNotification("Failed to delete habit", "error");
-                        }
-                    };
-
-                    // Handler for Cancel
-                    const onCancel = () => {
-                        cleanup();
-                    };
-
-                    // Cleanup event listeners to avoid duplicates
-                    const cleanup = () => {
-                        modal.style.display = 'none';
-                        btnOk.removeEventListener('click', onConfirm);
-                        btnCancel.removeEventListener('click', onCancel);
-                    };
-
-                    btnOk.addEventListener('click', onConfirm);
-                    btnCancel.addEventListener('click', onCancel);
-                }
-            };
-
-            list.appendChild(li);
-        });
-
-        updateProgressBar(completedCount / listItems.length);
-
-    } catch (err) {
-        console.error('Error loading daily list:', err);
-        list.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Failed to load habits.</p>';
-    }
+    // Deprecated: Now handled by dailyChecklistView.js
+    console.warn("renderDailyList is deprecated. Use renderDailyChecklist instead.");
 }
 
 function updateProgressBar(fraction) {
-    const fill = document.getElementById('progress-fill');
-    const text = document.getElementById('progress-text');
+    const fill = document.getElementById('daily-progress-bar');
+    // const text = document.getElementById('progress-text'); // Element not in HTML
     if (fill) fill.style.width = (fraction * 100) + '%';
-    if (text) text.textContent = Math.round(fraction * 100) + '% Completed';
+    // if (text) text.textContent = Math.round(fraction * 100) + '% Completed';
 }
 
 async function renderAchievementsList() {
@@ -281,23 +257,38 @@ async function renderAchievementsList() {
 
     try {
         const achievements = await getAchievements();
+        console.log("Achievements fetch result:", achievements); // Debug log
+
         list.innerHTML = '';
-        if (achievements.length === 0) {
-            list.innerHTML = '<p style="color:var(--text-muted);">No achievements yet. Keep going!</p>';
+        if (!achievements || achievements.length === 0) {
+            list.innerHTML = `
+                <div style="text-align:center; color:var(--text-muted); padding:2rem;">
+                    <p>No achievements unlocked yet.</p>
+                    <small>Keep your streaks going to earn badges!</small>
+                </div>
+            `;
             return;
         }
+
         achievements.forEach(a => {
             const div = document.createElement('div');
             div.className = 'achievement-card';
-            div.innerHTML = `<h4>${a.name}</h4><p>${a.description}</p>`;
+            // Use fallback icon if no image provided
+            div.innerHTML = `
+                <div class="achievement-icon">🏆</div>
+                <div class="achievement-info">
+                    <h4>${a.name}</h4>
+                    <p>${a.description}</p>
+                    <small style="color:var(--primary);">${a.awarded_at ? new Date(a.awarded_at).toLocaleDateString() : 'Unlocked'}</small>
+                </div>
+            `;
             list.appendChild(div);
         });
     } catch (err) {
-        // Silent fail or minimal text
-        list.innerHTML = '<p style="color:var(--text-muted);">Synced.</p>';
+        console.error("Failed to render achievements:", err);
+        list.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Could not load achievements.</p>';
     }
 }
-
 
 function recalcCompletion(items) {
     const total = items.length;

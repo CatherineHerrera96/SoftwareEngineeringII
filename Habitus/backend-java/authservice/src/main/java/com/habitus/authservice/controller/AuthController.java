@@ -62,4 +62,73 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(
+            @RequestBody com.habitus.authservice.dto.ChangePasswordRequest request) {
+        try {
+            // Get authenticated user ID from security context
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("Auth: " + auth);
+            System.out.println("Principal: " + auth.getPrincipal());
+            System.out.println("Principal class: " + auth.getPrincipal().getClass().getName());
+
+            var userDetails = (com.habitus.authservice.security.CustomUserDetails) auth.getPrincipal();
+            Integer userId = userDetails.getUser().getId();
+
+            authService.changePassword(userId, request.getCurrentPassword(), request.getNewPassword());
+            return ResponseEntity.ok("Password changed successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Authentication error: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Server error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/change-email")
+    public ResponseEntity<?> changeEmail(@RequestBody com.habitus.authservice.dto.ChangeEmailRequest request) {
+        try {
+            // Get authenticated user ID from security context
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            var userDetails = (com.habitus.authservice.security.CustomUserDetails) auth.getPrincipal();
+            Integer userId = userDetails.getUser().getId();
+
+            com.habitus.authservice.dto.UserResponse updatedUser = authService.changeEmail(
+                    userId,
+                    request.getCurrentPassword(),
+                    request.getNewEmail());
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            // Check if it's a duplicate email error
+            if (e.getMessage().contains("already in use")) {
+                return ResponseEntity.status(409).body(e.getMessage());
+            }
+            return ResponseEntity.status(401).body(e.getMessage());
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Authentication error: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Server error: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/account")
+    public ResponseEntity<String> deleteAccount(@RequestBody com.habitus.authservice.dto.DeleteAccountRequest request) {
+        try {
+            // Get authenticated user ID from security context
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            var userDetails = (com.habitus.authservice.security.CustomUserDetails) auth.getPrincipal();
+            Integer userId = userDetails.getUser().getId();
+
+            authService.deleteAccount(userId, request.getCurrentPassword());
+            return ResponseEntity.ok("Account deleted successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
 }

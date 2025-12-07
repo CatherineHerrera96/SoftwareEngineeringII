@@ -16,9 +16,12 @@ def list_all_achievements(
 ):
     return [
         schemas.AchievementRead(
-            id          = ach.id,
-            title       = ach.name,
-            description = ach.description
+            id              = ach.id,
+            code            = ach.code,
+            name            = ach.name,
+            description     = ach.description,
+            threshold_type  = ach.threshold_type,
+            threshold_value = ach.threshold_value
         )
         for ach in crud.list_achievements(db)
     ]
@@ -30,9 +33,12 @@ def list_my_achievements(
 ):
     return [
         schemas.AchievementRead(
-            id          = ach.id,
-            title       = ach.name,
-            description = ach.description
+            id              = ach.id,
+            code            = ach.code,
+            name            = ach.name,
+            description     = ach.description,
+            threshold_type  = ach.threshold_type,
+            threshold_value = ach.threshold_value
         )
         for ach in crud.list_user_achievements(db, current_user.id)
     ]

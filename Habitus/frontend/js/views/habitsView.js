@@ -128,9 +128,21 @@ function setupHabitsListeners() {
       try {
         const created = await createCustomHabit(newHabitData);
         allHabits.push(created);
-        selectedHabitIds.add(created.id);
 
-        showNotification(`Created ${name}!`);
+        // Automatically add to user's profile
+        try {
+          const addedList = await saveUserHabits([created.id]);
+          if (addedList && addedList.length > 0) {
+            if (!window.userHabitMap) window.userHabitMap = new Map();
+            window.userHabitMap.set(created.id, addedList[0].id);
+          }
+          selectedHabitIds.add(created.id);
+          showNotification(`Created & Added ${name}!`);
+        } catch (e) {
+          console.error("Auto-add failed", e);
+          showNotification(`Created ${name}, but failed to add to profile.`, 'warning');
+        }
+
         form.reset();
         renderHabitsGrid();
       } catch (err) {
@@ -420,41 +432,41 @@ function renderHabitsGrid(filter = 'all') {
         try {
           if (isSelected) {
             // REMOVE (De-add)
-            // Need user_habit_id
             const userHabitId = window.userHabitMap ? window.userHabitMap.get(h.id) : null;
 
             if (userHabitId) {
-              // Call DELETE /user-habits/{id} (needs import of deleteUserHabit in api, wait, I need to check imports)
-              // Assuming deleteUserHabit is available or I need to update file imports!
-              // I will check imports next. For now assume it is.
-              // Actually, I verified user_habits.py backend has DELETE. frontend api helper needs it.
-              // IMPORTANT: The import at the top of habitsView.js might need to include deleteUserHabit.
-              // Just to be safe, I'll update imports in a separate call if needed.
-              // But wait, the tool call is atomic. I must assume I'll fix imports.
+              try {
+                await deleteUserHabit(userHabitId);
+                selectedHabitIds.delete(h.id);
+                window.userHabitMap.delete(h.id);
+                showNotification("Removed from habits");
+              } catch (err) {
+                // Check for confirmation requirement
+                let errData = {};
+                try { errData = JSON.parse(err.message); } catch (e) { }
 
-              // Use top-level import
-              await deleteUserHabit(userHabitId);
-
-              // Update State
-              selectedHabitIds.delete(h.id);
-              window.userHabitMap.delete(h.id);
-              showNotification("Removed from habits");
+                if (errData.requires_confirmation) {
+                  // Use existing modal helper
+                  const confirmed = await showConfirmDialog("Stop Tracking?", `${errData.detail || "You have a streak!"} Remove anyway?`);
+                  if (confirmed) {
+                    await deleteUserHabit(userHabitId, true);
+                    selectedHabitIds.delete(h.id);
+                    window.userHabitMap.delete(h.id);
+                    showNotification("Removed from habits");
+                  } else {
+                    return; // Abort
+                  }
+                } else {
+                  throw err; // Unknown error
+                }
+              }
             } else {
-              // Fallback for custom logic? Or weird state?
-              // Just untrack locally?
+              // Local only cleanup
               selectedHabitIds.delete(h.id);
             }
           } else {
-            // ADD (Track)
-            // Use saveUserHabits logic (which calls POST /user-habits with list)
-            // Or better, logic/habits.py track_habit is idempotent.
-            // We can just send this one ID.
-            // But saveUserHabits takes a LIST.
-            // Let's rely on saveUserHabits([h.id]), but backend 'track_habits' returns list of created UserHabits!
-            // So we can capture the ID.
-
+            // ADD
             const res = await saveUserHabits([h.id]);
-            // res is list of user_habit objects (from my reading of user_habits.py)
             if (res && res.length > 0) {
               const uh = res[0];
               selectedHabitIds.add(h.id);

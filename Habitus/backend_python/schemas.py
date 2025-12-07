@@ -1,4 +1,4 @@
-from datetime import date as DateType
+from datetime import date as DateType, datetime
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -60,6 +60,10 @@ class UserHabitRead(BaseModel):
     is_active: bool
     current_streak: int = 0
     longest_streak: int = 0
+    total_completions: int = 0
+    next_available_checkin_at: datetime | None = None
+    window_end_at: datetime | None = None
+    last_completed_at: datetime | None = None
     is_completed: bool = False
 
     model_config = ConfigDict(from_attributes=True)
@@ -103,7 +107,10 @@ class WeeklySummary(BaseModel):
 
 class AchievementRead(BaseModel):
     id: int
-    title: str
-    description: str
+    code: str
+    name: str # Was title
+    description: str | None = None
+    threshold_type: str
+    threshold_value: int
 
     model_config = ConfigDict(from_attributes=True)
