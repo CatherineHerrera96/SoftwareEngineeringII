@@ -1,9 +1,9 @@
 import { getProfile, updateProfile, fetchDailyChecklist, saveCheckin, deleteUserHabit, getAchievements } from '../api/habitsApi.js';
 import { changePassword, changeEmail, deleteAccount } from '../api/authApi.js';
-import { showNotification } from '../ui.js';
+import { showNotification, updateHeaderProfile, showFormError, clearFormErrors } from '../ui.js';
 import { updateUser, clearAuth } from '../state.js';
 import { navigateTo } from '../router.js';
-import { updateHeaderProfile } from '../ui.js';
+
 import { setupProfileModal, setupSettingsTabs } from '../components/profileModal.js';
 import { getSeasonalTheme, applyGlobalTheme, SEASONAL_THEMES, CURRENT_SEASON } from '../config/seasonalThemes.js';
 import { renderDailyChecklist } from './dailyChecklistView.js';

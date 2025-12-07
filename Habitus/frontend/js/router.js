@@ -6,7 +6,7 @@ import { renderHome } from './views/homeView.js';
 import { renderDailyChecklist } from './views/dailyChecklistView.js';
 import { getToken } from './state.js';
 
-export function navigateTo(viewName) {
+export function navigateTo(viewName, params = {}) {
   // 1. Check Auth
   const token = getToken();
   if (!token && viewName !== 'login' && viewName !== 'register' && viewName !== 'forgot-password' && viewName !== 'reset-password') {
@@ -35,14 +35,18 @@ export function navigateTo(viewName) {
       renderHabits();
       break;
     case 'profile':
-      renderProfile();
+      // Pass the specific tab if requested (e.g. 'daily', 'stats', etc.)
+      // Default is 'daily' in renderProfile signature
+      renderProfile(params.tab);
       break;
     case 'checklist':
-      renderDailyChecklist();
-      break;
+      // Alias for profile?tab=daily
+      navigateTo('profile', { tab: 'daily' });
+      return;
     case 'achievements':
-      renderProfile('stats');
-      break;
+      // Alias for profile?tab=stats
+      navigateTo('profile', { tab: 'stats' });
+      return;
     case 'login':
     case 'register':
     case 'forgot-password':
@@ -55,7 +59,9 @@ export function navigateTo(viewName) {
 
   // 5. Update Nav Active State
   document.querySelectorAll('.nav-link').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.nav === viewName);
+    const navTarget = btn.dataset.nav;
+    // Simple match or handling aliases if needed
+    btn.classList.toggle('active', navTarget === viewName);
   });
 
   // 6. Show/Hide Header

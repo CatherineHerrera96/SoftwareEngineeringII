@@ -64,16 +64,26 @@ export async function renderDailyChecklist() {
     if (windowEndAt && timeUntilEnd > 1000) {
       // Valid future window (at least 1s away)
       console.log('[renderDailyChecklist] Starting timer - ends in', Math.floor(timeUntilEnd / 1000), 's');
-      hasRefreshedAfterExpiry = false;
+      hasRefreshedAfterExpiry = false; // Reset flag so next expiry triggers refresh
       startTimer(windowEndAt);
     } else if (windowEndAt) {
       // Expired or very close
+      console.warn('[renderDailyChecklist] Window expired. Backend rotation might be pending.');
+
       const t = document.getElementById('daily-timer');
       if (t) {
-        t.textContent = "00:00:00";
+        t.textContent = "Updating cycle...";
         t.classList.add('expired');
       }
-      console.warn('[renderDailyChecklist] Window expired, no timer started');
+
+      // Retry fetching after a short delay to allow backend to rotate
+      // Prevent infinite rapid loops with a reasonable delay (e.g. 3s)
+      console.log('[renderDailyChecklist] Retrying in 3s...');
+      if (streakTimerInterval) clearInterval(streakTimerInterval);
+      streakTimerInterval = setTimeout(() => {
+        renderDailyChecklist();
+      }, 3000);
+
     } else {
       const t = document.getElementById('daily-timer');
       if (t) t.textContent = "No active window";
@@ -97,26 +107,30 @@ function startTimer(endTime) {
     streakTimerInterval = null;
   }
 
+  // Timer update function
   const update = () => {
     const now = new Date();
     const diff = endTime - now;
 
     if (diff <= 0) {
       console.log('[Timer] EXPIRED');
-      timerEl.textContent = "00:00:00";
-      timerEl.classList.add('expired');
+      if (timerEl) {
+        timerEl.textContent = "00:00:00";
+        timerEl.classList.add('expired');
+      }
 
       if (streakTimerInterval) {
         clearInterval(streakTimerInterval);
         streakTimerInterval = null;
       }
 
+      // Trigger refresh ONE time per expiry event
       if (!hasRefreshedAfterExpiry) {
         hasRefreshedAfterExpiry = true;
-        console.log("[Timer] Scheduling ONE refresh...");
+        console.log("[Timer] Scheduling refresh...");
         setTimeout(() => {
           renderDailyChecklist();
-        }, 100);
+        }, 1500); // 1.5s delay to let backend finish any maintenance
       }
       return;
     }
@@ -249,18 +263,20 @@ function renderList(items, container) {
             streakSpan.innerHTML = `🔥 ${result.user_message || (result.current_streak + " day streak!")}`;
             streakSpan.style.color = 'var(--text-muted)';
           } else if (result.status === 'streak_reset') {
-            streakSpan.innerHTML = `💔 ${result.user_message || "Streak reset"}`;
-            streakSpan.style.color = 'var(--danger)';
-          } else if (result.streak_broken && result.current_streak === 0) {
-            // Explicit broken state handling
+            // Only show "Streak reset" if it was actually a loss of a LONG streak, not just 1->0
+            if (result.previous_streak > 1) {
+              streakSpan.innerHTML = `💔 ${result.user_message || "Streak reset"}`;
+              streakSpan.style.color = 'var(--danger)';
+            } else {
+              streakSpan.innerHTML = '';
+            }
+          } else if (result.streak_broken && item.current_streak === 0) {
             streakSpan.innerHTML = `💔 You lost your ${result.previous_streak || 0}-day streak!`;
             streakSpan.style.color = 'var(--danger)';
-          } else if (result.current_streak > 0) {
-            // Even if undone, if there is a streak, show it!
-            streakSpan.innerHTML = `🔥 ${result.current_streak} day streak`;
+          } else if (item.current_streak > 0) {
+            streakSpan.innerHTML = `🔥 ${item.current_streak} day streak`;
             streakSpan.style.color = 'var(--text-muted)';
           } else {
-            // No streak
             streakSpan.innerHTML = '';
           }
         }

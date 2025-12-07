@@ -93,3 +93,29 @@ export function initTheme() {
         console.log('[initTheme] Theme preference saved');
     };
 }
+
+/**
+ * Show error message for a specific form field
+ * @param {string} errorElementId - ID of the error span
+ * @param {string} message - Error message
+ */
+export function showFormError(errorElementId, message) {
+    const el = document.getElementById(errorElementId);
+    if (el) {
+        el.textContent = message;
+        el.style.display = 'block';
+        el.style.color = 'var(--danger)';
+        el.style.fontSize = '0.8rem';
+        el.style.marginTop = '0.25rem';
+    }
+}
+
+/**
+ * Clear all form errors
+ */
+export function clearFormErrors() {
+    document.querySelectorAll('.form-error').forEach(el => {
+        el.textContent = '';
+        el.style.display = 'none';
+    });
+}
