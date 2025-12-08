@@ -64,7 +64,16 @@ docker-compose up -d
 This service handles login, registration, and user profiles.
 
 1. Open a terminal in `backend-java/authservice`.
-2. Run the application using the Maven wrapper:
+2. **Create a `.env` file** in this directory:
+    ```properties
+    DB_URL=jdbc:postgresql://localhost:5432/habitus
+    DB_USERNAME=postgres
+    DB_PASSWORD=password
+    FRONTEND_URL=http://localhost:8001
+    ```
+    *Note: This file is required for the application to start.*
+
+3. Run the application using the Maven wrapper:
 
 ```bash
 cd backend-java/authservice

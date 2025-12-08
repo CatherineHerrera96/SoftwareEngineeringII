@@ -27,6 +27,7 @@ class HabitBase(BaseModel):
     frequency: str
     description: str | None = None
     is_custom: bool = False
+    season_id: str | None = None  # NEW: seasonal affinity
 
 
 class HabitCreate(HabitBase):

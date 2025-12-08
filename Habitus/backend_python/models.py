@@ -38,6 +38,7 @@ class Habit(Base):
     category    = Column(String, nullable=False)        # wellness | health | academic | work
     frequency   = Column(String, nullable=False)        # daily | weekly
     is_custom   = Column(Boolean, default=False)
+    season_id   = Column(String, nullable=True)         # NEW: 'christmas', 'halloween', etc. NULL = permanent
 
     user_habits = relationship("UserHabit", back_populates="habits")
 

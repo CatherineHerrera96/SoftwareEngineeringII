@@ -41,7 +41,7 @@
 
     /* Layout */
     --header-height: 70px;
-    --max-width: 1000px;
+    --max-width: 1200px;
 }
 
 /* DARK MODE OVERRIDES */
@@ -248,66 +248,189 @@ a {
     color: var(--text-main);
 }
 
-/* Achievements & Stats Layout */
+/* Achievements & Stats Layout (REDESIGNED) */
+
+.achievements-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    width: 100%;
+    max-width: 1200px;
+    /* Wider container */
+    margin: 0 auto;
+    /* Horizontal centering */
+    padding: 0 1rem;
+}
 
 /* 1. Header Stats Row (Top) */
-.achievements-header-stats {
+/* 1. Header Stats Row (Top) */
+.achievements-top-row {
+    display: flex;
+    justify-content: center;
+    /* Centered as requested title */
+    gap: 2rem;
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.stats-block {
     display: flex;
     gap: 1.5rem;
-    margin-bottom: 2rem;
-    align-items: stretch;
 }
 
 .stat-card {
-    background: var(--bg-secondary);
-    padding: 1rem;
-    border-radius: 12px;
+    background: var(--bg-card);
+    padding: 1.5rem 3rem;
+    /* Larger container */
+    border-radius: 16px;
     text-align: center;
-    border: 1px solid var(--border-color);
-    flex: 1;
-    /* Equal width */
+    border: 2px solid var(--border-color);
+    /* Stronger border default */
+    min-width: 220px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+    overflow: hidden;
 }
 
-.stat-card.compact {
-    padding: 0.75rem 1rem;
-    /* More compact */
+.stat-card:hover {
+    transform: translateY(-3px);
 }
 
-/* 2. Headers */
-.section-header {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
+/* Ensure emoji is hidden if present */
+.stat-emoji {
+    display: none;
+}
+
+.stat-value {
+    font-size: 3.5rem;
+    /* Huge number */
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 0.5rem;
     color: var(--text-main);
+    letter-spacing: -2px;
 }
 
-.section-header.locked-header {
-    margin-top: 2.5rem;
-    opacity: 0.8;
+/* Gradient Text Effect for Numbers */
+.stat-card.gold .stat-value {
+    background: linear-gradient(135deg, var(--theme-primary, #eab308) 0%, var(--theme-secondary, #ca8a04) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* 3. Empty State */
-.empty-state-card {
-    text-align: center;
+.stat-card.silver .stat-value {
+    background: linear-gradient(135deg, var(--theme-primary, #60a5fa) 0%, var(--theme-secondary, #2563eb) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-card.bronze .stat-value {
+    background: linear-gradient(135deg, var(--theme-primary, #fb923c) 0%, var(--theme-secondary, #ea580c) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1.5px;
     color: var(--text-muted);
-    padding: 2.5rem;
-    background: var(--bg-secondary);
-    border-radius: 12px;
-    border: 1px dashed var(--border);
-    margin: 1rem 0;
 }
 
-/* 4. Grids & Cards */
-.achievements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+/* Glow / Aura Styles (Border + Shadow) - Uses Seasonal Theme Colors */
+.stat-card.gold {
+    border-color: var(--theme-primary, #eab308);
+    box-shadow: 0 0 20px var(--theme-primary, rgba(234, 179, 8, 0.25)), inset 0 0 20px var(--theme-primary, rgba(234, 179, 8, 0.05));
+}
+
+.stat-card.silver {
+    border-color: var(--theme-primary, #3b82f6);
+    box-shadow: 0 0 20px var(--theme-primary, rgba(59, 130, 246, 0.25)), inset 0 0 20px var(--theme-primary, rgba(59, 130, 246, 0.05));
+}
+
+.stat-card.bronze {
+    border-color: var(--theme-primary, #f97316);
+    box-shadow: 0 0 20px var(--theme-primary, rgba(249, 115, 22, 0.25)), inset 0 0 20px var(--theme-primary, rgba(249, 115, 22, 0.05));
+}
+
+.stat-card.neutral {
+    border-color: var(--border);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+/* 2. Bottom Row (Columns) */
+.achievements-bottom-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
+    /* Spread columns */
+    align-items: flex-start;
+}
+
+.achievements-col {
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
+    flex: 1;
+    /* Equal width */
+    min-width: 350px;
+    /* Minimum width before wrapping */
+}
+
+.achievements-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+
+.achievements-column-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+}
+
+.link-button:hover {
+    text-decoration: underline;
+}
+
+/* 3. Cards & Lists */
+.achievements-unlocked-list,
+.achievements-locked-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .achievement-card {
@@ -321,12 +444,24 @@ a {
     align-items: flex-start;
 }
 
-.achievement-card.highlighted {
+/* Featured Card (Last Unlocked) */
+.achievement-card.featured {
     background: var(--bg-card);
     border: 2px solid var(--primary);
-    margin-bottom: 1.5rem;
     padding: 1.5rem;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
+    margin-bottom: 1rem;
+    /* Space before list */
+}
+
+.achievement-card.featured .achievement-icon {
+    width: 4rem;
+    height: 4rem;
+    font-size: 2rem;
+}
+
+.achievement-card.featured .achievement-title {
+    font-size: 1.2rem;
 }
 
 .achievement-card:hover:not(.locked) {
@@ -335,7 +470,7 @@ a {
 }
 
 .achievement-card.locked {
-    opacity: 0.7;
+    opacity: 0.75;
     background: rgba(255, 255, 255, 0.02);
 }
 
@@ -351,12 +486,6 @@ a {
     font-size: 1.75rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.achievement-card.highlighted .achievement-icon {
-    width: 4.5rem;
-    height: 4.5rem;
-    font-size: 2.5rem;
 }
 
 /* Tier-specific icon backgrounds */
@@ -404,10 +533,6 @@ a {
     font-size: 1rem;
     font-weight: 600;
     color: var(--text-main);
-}
-
-.achievement-card.highlighted .achievement-title {
-    font-size: 1.15rem;
 }
 
 .achievement-tier {
@@ -493,16 +618,49 @@ a {
     transition: width 0.3s;
 }
 
-@media (max-width: 600px) {
-    .achievements-header-stats {
-        flex-direction: column;
-        /* Stack stats on mobile */
+/* 4. Toggle Button */
+.achievements-toggle-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.achievements-toggle-btn:hover {
+    background: var(--bg-body);
+    color: var(--text-main);
+    border-color: var(--text-muted);
+}
+
+.empty-state-card {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+}
+
+
+@media (max-width: 768px) {
+    .achievements-bottom-row {
+        grid-template-columns: 1fr;
+        /* Stack columns on mobile */
+        gap: 2rem;
+    }
+
+    .stats-block {
         gap: 0.75rem;
     }
 
-    .achievements-grid {
-        grid-template-columns: 1fr;
-        /* 1 col on mobile */
+    .stat-card h3 {
+        font-size: 1.5rem;
     }
 }
 

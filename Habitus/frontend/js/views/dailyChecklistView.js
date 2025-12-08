@@ -197,14 +197,14 @@ function renderList(items, container) {
       // Show Best Streak alongside current if Best > streak
       let bestInfo = "";
       if (best > streak) {
-        bestInfo = ` · <span title="Best Streak">🏅 ${best}</span>`;
+        bestInfo = ` · <span title="Best Streak">🏅 Best: ${best}</span>`;
       }
       streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);">🔥 ${streak} day streak${bestInfo}</small>`;
     } else if (best > 0) {
       // Show Best even if current is 0
-      streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);">🏅 Best: ${best} days</small>`;
+      streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);">🏅 Best streak: ${best}</small>`;
     } else {
-      streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);"></small>`;
+      streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);">Start a streak!</small>`;
     }
 
     li.innerHTML = `

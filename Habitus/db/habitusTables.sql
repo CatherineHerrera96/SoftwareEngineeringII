@@ -23,6 +23,7 @@ CREATE TABLE habits (
     category VARCHAR(100),
     frequency VARCHAR(50),
     is_custom BOOLEAN DEFAULT FALSE,
+    season_id VARCHAR(50), -- NEW: tracks seasonal affinity (e.g., 'christmas', 'halloween', NULL for permanent)
     created_at TIMESTAMP DEFAULT NOW()
 );
 

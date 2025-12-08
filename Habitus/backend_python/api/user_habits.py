@@ -57,6 +57,7 @@ def assign_user_habit(
 
 
 from logic import streak_engine
+from seasonal_config import CURRENT_SEASON
 
 @router.get("/", response_model=List[schemas.UserHabitRead])
 def list_my_habits(
@@ -69,6 +70,23 @@ def list_my_habits(
     # We ignore the SQL-derived 'completed' boolean because it is date-based
     # and doesn't handle Test Mode intervals correctly.
     for habits_info, _ in crud.list_user_habits(db, user_id=current_user.id):
+        
+        # SEASONAL FILTERING:
+        # 1. If habit has no season_id (Permanent) -> ALWAYS SHOW
+        # 2. If habit has season_id (Seasonal):
+        #    - matches CURRENT_SEASON -> SHOW
+        #    - does NOT match (or CURRENT_SEASON is None) -> HIDE
+        if habits_info.habits.season_id is not None:
+             if CURRENT_SEASON != habits_info.habits.season_id:
+                 # WRONG SEASON:
+                 # 1. Reset streak to 0 (so it starts fresh next year)
+                 if habits_info.current_streak > 0:
+                     habits_info.current_streak = 0
+                     habits_info.next_available_checkin_at = None # Unlock
+                     db.commit()
+                 
+                 # 2. Hide from list
+                 continue
         
         # Determine strict completion status for current interval
         # This handles both Daily and Test Mode (60s) intervals correctly

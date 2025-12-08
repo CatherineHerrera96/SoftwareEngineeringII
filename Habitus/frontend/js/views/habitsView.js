@@ -129,12 +129,23 @@ function setupHabitsListeners() {
       const cat = document.getElementById('new-habit-cat').value;
       const desc = document.getElementById('new-habit-desc')?.value || '';
 
+      // Detect if this habit belongs to current season
+      const seasonMatch = SEASONAL_THEMES.find(t => {
+        const n = name.toLowerCase();
+        const c = cat ? cat.toLowerCase() : '';
+        return t.keywords.some(k => n.includes(k)) || t.id === c;
+      });
+
+      // If seasonal habit is detected AND we're in that season, tag it
+      const season_id = (seasonMatch && CURRENT_SEASON === seasonMatch.id) ? seasonMatch.id : null;
+
       const newHabitData = {
         name: name,
         category: cat,
         description: desc || "Custom habit",
         frequency: "daily",
-        is_custom: true
+        is_custom: true,
+        season_id: season_id  // NEW: track seasonal affinity
       };
 
       try {
