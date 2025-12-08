@@ -116,6 +116,23 @@ public class AuthController {
         }
     }
 
+    @PatchMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody com.habitus.authservice.dto.UpdateProfileRequest request) {
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            var userDetails = (com.habitus.authservice.security.CustomUserDetails) auth.getPrincipal();
+            Integer userId = userDetails.getUser().getId();
+
+            var updatedUser = authService.updateProfile(userId, request);
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Server error: " + e.getMessage());
+        }
+    }
+
     @DeleteMapping("/account")
     public ResponseEntity<String> deleteAccount(@RequestBody com.habitus.authservice.dto.DeleteAccountRequest request) {
         try {
@@ -128,6 +145,12 @@ public class AuthController {
             return ResponseEntity.ok("Account deleted successfully.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(401).body(e.getMessage());
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Authentication error: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Server error: " + e.getMessage());
         }
     }
 

@@ -21,6 +21,8 @@ async def get_streak_window(
     user_now = streak_engine.get_user_now(current_user)
     window_end_at = streak_engine.get_next_interval_start(user_now)
     
+    print(f"DEBUG_WINDOW: User={current_user.email} TZ={current_user.timezone} Now={user_now} End={window_end_at}")
+    
     return {
         "window_end_at": window_end_at.isoformat(),
         "current_time": user_now.isoformat()

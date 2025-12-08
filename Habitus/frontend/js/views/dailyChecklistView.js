@@ -189,11 +189,20 @@ function renderList(items, container) {
     // Streak Text Logic
     let streakHtml = '';
     const streak = item.current_streak || 0;
+    const best = item.longest_streak || 0;
 
     if (item.streak_broken && item.previous_streak) {
       streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--danger);">💔 You lost your ${item.previous_streak}-day streak!</small>`;
     } else if (streak > 0) {
-      streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);">🔥 ${streak} day streak</small>`;
+      // Show Best Streak alongside current if Best > streak
+      let bestInfo = "";
+      if (best > streak) {
+        bestInfo = ` · <span title="Best Streak">🏅 ${best}</span>`;
+      }
+      streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);">🔥 ${streak} day streak${bestInfo}</small>`;
+    } else if (best > 0) {
+      // Show Best even if current is 0
+      streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);">🏅 Best: ${best} days</small>`;
     } else {
       streakHtml = `<small class="streak-msg" style="font-size:0.75rem; color:var(--text-muted);"></small>`;
     }
@@ -248,6 +257,15 @@ function renderList(items, container) {
         item.streak_broken = result.streak_broken;
         item.previous_streak = result.previous_streak;
 
+        // Show Achievement Toasts
+        if (result.new_achievements && result.new_achievements.length > 0) {
+          result.new_achievements.forEach(ach => {
+            showNotification(`🎉 Achievement Unlocked: ${ach.name}`, 'success');
+          });
+          // Notify other views (e.g. Profile > Achievements tab)
+          window.dispatchEvent(new CustomEvent('achievementUnlocked'));
+        }
+
         // Apply updated visuals (IMPORTANT: Using real backend values)
         applyStreakClasses(li, item.current_streak, item.streak_broken);
 
@@ -274,7 +292,11 @@ function renderList(items, container) {
             streakSpan.innerHTML = `💔 You lost your ${result.previous_streak || 0}-day streak!`;
             streakSpan.style.color = 'var(--danger)';
           } else if (item.current_streak > 0) {
-            streakSpan.innerHTML = `🔥 ${item.current_streak} day streak`;
+            let bestInfo = "";
+            if (item.longest_streak > item.current_streak) {
+              bestInfo = ` · 🏅 ${item.longest_streak}`;
+            }
+            streakSpan.innerHTML = `🔥 ${item.current_streak} day streak${bestInfo}`;
             streakSpan.style.color = 'var(--text-muted)';
           } else {
             streakSpan.innerHTML = '';

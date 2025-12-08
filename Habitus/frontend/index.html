@@ -256,6 +256,20 @@
                   <input type="text" id="edit-name" class="form-input" placeholder="Your name" />
                 </div>
                 <div class="form-group">
+                  <label class="form-label">Timezone</label>
+                  <select id="edit-timezone" class="form-input">
+                    <!-- Common Timezones -->
+                    <option value="UTC">UTC (Universal Time)</option>
+                    <option value="America/Bogota">America/Bogota (GMT-5)</option>
+                    <option value="America/New_York">America/New_York (GMT-5/EDT)</option>
+                    <option value="America/Los_Angeles">America/Los_Angeles (GMT-8/PDT)</option>
+                    <option value="Europe/London">Europe/London (GMT/BST)</option>
+                    <option value="Europe/Paris">Europe/Paris (CET)</option>
+                    <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                    <option value="Australia/Sydney">Australia/Sydney (AEST)</option>
+                  </select>
+                </div>
+                <div class="form-group">
                   <label class="form-label">Avatar URL</label>
                   <input type="text" id="edit-avatar" class="form-input" placeholder="https://..." />
                 </div>
@@ -372,20 +386,8 @@
 
       <!-- Stats Tab (Achievements) -->
       <div id="tab-stats" style="display: none;">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">Completion Rate</div>
-            <div class="stat-value" id="stat-completion-rate">0%</div>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">This week</p>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Total Streak</div>
-            <div class="stat-value" id="stat-streak">0</div>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">Days</p>
-          </div>
-        </div>
 
-        <h3 style="margin-bottom: 1rem;">Unlocked Achievements</h3>
+
         <div id="achievements-list" class="achievements-grid">
           <!-- JS will populate -->
         </div>

@@ -11,7 +11,7 @@ from enum import Enum
 
 
 class StreakMode(str, Enum):
-    DAILY = "daily"
+    PRODUCTION = "production"
     TEST = "test"
 
 
@@ -36,7 +36,7 @@ def get_interval_name() -> str:
     """Get human-readable interval name for display."""
     if STREAK_MODE == StreakMode.TEST:
         return f"{STREAK_INTERVAL_SECONDS} seconds"
-    return "24 hours"
+    return "daily until local midnight"
 
 
 # Configuration info for logging

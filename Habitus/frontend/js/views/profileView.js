@@ -7,6 +7,7 @@ import { navigateTo } from '../router.js';
 import { setupProfileModal, setupSettingsTabs } from '../components/profileModal.js';
 import { getSeasonalTheme, applyGlobalTheme, SEASONAL_THEMES, CURRENT_SEASON } from '../config/seasonalThemes.js';
 import { renderDailyChecklist } from './dailyChecklistView.js';
+import { getAchievementIcon, getTierIconClass } from '../achievementIcons.js';
 
 export async function renderProfile(activeTab = 'daily') {
     // 0. Apply Global Theme
@@ -56,8 +57,11 @@ function updateProfileUI(profile) {
     // Update Edit Form inputs
     const editName = document.getElementById('edit-name');
     const editAvatar = document.getElementById('edit-avatar');
+    const editTimezone = document.getElementById('edit-timezone');
+
     if (editName) editName.value = profile.name || '';
     if (editAvatar) editAvatar.value = profile.avatar_url || '';
+    if (editTimezone && profile.timezone) editTimezone.value = profile.timezone;
 }
 
 function setupProfileListeners() {
@@ -68,9 +72,14 @@ function setupProfileListeners() {
             e.preventDefault();
             const newName = document.getElementById('edit-name').value;
             const newAvatar = document.getElementById('edit-avatar').value;
+            const newTimezone = document.getElementById('edit-timezone').value;
 
             try {
-                const updated = await updateProfile({ name: newName, avatar_url: newAvatar });
+                const updated = await updateProfile({
+                    name: newName,
+                    avatar_url: newAvatar,
+                    timezone: newTimezone
+                });
                 updateProfileUI(updated);
                 showNotification("Profile updated!");
             } catch (err) {
@@ -89,6 +98,16 @@ function setupProfileListeners() {
     if (tabStats) {
         tabStats.onclick = () => switchTab('stats');
     }
+
+    // Real-time achievement updates
+    window.addEventListener('achievementUnlocked', () => {
+        // Only refresh if we are currently on the stats tab
+        const statsContent = document.getElementById('tab-stats');
+        if (statsContent && statsContent.style.display !== 'none') {
+            console.log("Real-time achievement update...");
+            renderAchievementsList();
+        }
+    });
 
     // Account Settings Forms
 
@@ -241,6 +260,8 @@ function switchTab(tabName) {
     // Trigger refresh if daily tab is activated
     if (tabName === 'daily') {
         renderDailyChecklist();
+    } else if (tabName === 'stats') {
+        renderAchievementsList();
     }
 }
 
@@ -261,41 +282,192 @@ async function renderAchievementsList() {
     if (!list) return;
 
     try {
-        const achievements = await getAchievements();
-        console.log("Achievements fetch result:", achievements); // Debug log
+        const response = await getAchievements(); // Returns { stats, unlocked, locked }
+        console.log("Achievements fetch result:", response);
 
         list.innerHTML = '';
-        if (!achievements || achievements.length === 0) {
-            list.innerHTML = `
-                <div style="text-align:center; color:var(--text-muted); padding:2rem;">
-                    <p>No achievements unlocked yet.</p>
-                    <small>Keep your streaks going to earn badges!</small>
+
+        // 1. Stats Row (Top)
+        const stats = response.stats;
+        if (stats) {
+            const statsContainer = document.createElement('div');
+            statsContainer.className = 'achievements-header-stats'; // New class for top row
+            statsContainer.innerHTML = `
+                <div class="stat-card compact">
+                    <h3>Completion Rate</h3>
+                    <div class="stat-value">${stats.weekly_completion_rate}%</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+                <div class="stat-card compact">
+                    <h3>Total Streak</h3>
+                    <div class="stat-value">${stats.total_streak_days}</div>
+                    <div class="stat-label">Days</div>
                 </div>
             `;
-            return;
+            list.appendChild(statsContainer);
         }
 
-        achievements.forEach(a => {
-            const div = document.createElement('div');
-            div.className = 'achievement-card';
-            // Use fallback icon if no image provided
-            div.innerHTML = `
-                <div class="achievement-icon">🏆</div>
-                <div class="achievement-info">
-                    <h4>${a.name}</h4>
-                    <p>${a.description}</p>
-                    <small style="color:var(--primary);">${a.awarded_at ? new Date(a.awarded_at).toLocaleDateString() : 'Unlocked'}</small>
-                </div>
+        // 2. Process Unlocked Achievements (Sort & Extract Recent)
+        const unlocked = response.unlocked || [];
+
+        let mostRecent = null;
+        let remainingUnlocked = [];
+
+        if (unlocked.length > 0) {
+            // Sort all by date desc first to find most recent
+            const byDate = [...unlocked].sort((a, b) =>
+                new Date(b.unlocked_at) - new Date(a.unlocked_at)
+            );
+            mostRecent = byDate[0];
+
+            // Remove most recent from list to avoid duplicate
+            const others = unlocked.filter(a => a !== mostRecent &&
+                !(a.id === mostRecent.id && a.habit_id === mostRecent.habit_id)); // Safety check unique ID+Habit
+
+            // Sort others by Tier then Date
+            remainingUnlocked = sortAchievements(others);
+        }
+
+        // 3. Render Unlocked Section
+        const unlockedHeader = document.createElement('h3');
+        unlockedHeader.textContent = "Unlocked Achievements";
+        unlockedHeader.className = "section-header";
+        list.appendChild(unlockedHeader);
+
+        if (unlocked.length === 0) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state-card';
+            emptyState.innerHTML = `
+                <p>No achievements unlocked yet.</p>
+                <small>Keep your streaks going to earn badges!</small>
             `;
-            list.appendChild(div);
-        });
+            list.appendChild(emptyState);
+        } else {
+            // Render Highlighted Card
+            if (mostRecent) {
+                const highlightCard = createAchievementCard(mostRecent, true);
+                list.appendChild(highlightCard);
+            }
+
+            // Render Grid for Remaining
+            if (remainingUnlocked.length > 0) {
+                const grid = document.createElement('div');
+                grid.className = 'achievements-grid';
+                remainingUnlocked.forEach(a => {
+                    grid.appendChild(createAchievementCard(a, false));
+                });
+                list.appendChild(grid);
+            }
+        }
+
+        // 4. Render Locked Section
+        if (response.locked && response.locked.length > 0) {
+            const lockedHeader = document.createElement('h3');
+            lockedHeader.textContent = "Locked Achievements";
+            lockedHeader.className = "section-header locked-header";
+            list.appendChild(lockedHeader);
+
+            const lockedContainer = document.createElement('div');
+            lockedContainer.className = 'achievements-grid';
+
+            response.locked.forEach(a => {
+                lockedContainer.appendChild(createLockedCard(a));
+            });
+            list.appendChild(lockedContainer);
+        }
+
     } catch (err) {
         console.error("Failed to render achievements:", err);
         list.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Could not load achievements.</p>';
     }
 }
 
+// Helper: Sort Achievements
+function sortAchievements(list) {
+    const tierWeight = { 'master': 4, 'gold': 3, 'silver': 2, 'bronze': 1 };
+
+    return list.sort((a, b) => {
+        const wA = tierWeight[(a.tier || '').toLowerCase()] || 0;
+        const wB = tierWeight[(b.tier || '').toLowerCase()] || 0;
+
+        if (wA !== wB) return wB - wA; // Higher tier first
+
+        // If same tier, recent first
+        return new Date(b.unlocked_at) - new Date(a.unlocked_at);
+    });
+}
+
+// Helper: Create Unlocked Card contents
+function createAchievementCard(a, isHighlight) {
+    const div = document.createElement('div');
+    div.className = isHighlight ? 'achievement-card highlighted' : 'achievement-card';
+
+    // Get icon from mapping
+    const iconData = getAchievementIcon(a.code);
+    const tierClass = getTierIconClass(a.tier);
+
+    const habitInfo = a.habit_name ? `<div class="achievement-pill">Habit: ${a.habit_name}</div>` : '';
+    const dateStr = a.unlocked_at ? new Date(a.unlocked_at).toLocaleDateString() : 'Unlocked';
+
+    div.innerHTML = `
+        <div class="achievement-icon ${tierClass}">
+            <span class="${iconData.className}">${iconData.emoji}</span>
+        </div>
+        <div class="achievement-content">
+            <div class="achievement-title-row">
+                <span class="achievement-title">${a.name}</span>
+                ${a.tier ? `<span class="achievement-tier ${a.tier.toLowerCase()}">${a.tier.toUpperCase()}</span>` : ''}
+            </div>
+            <p class="achievement-description">${a.description}</p>
+            <div class="achievement-meta">
+                ${habitInfo}
+                <small class="achievement-date">Unlocked on ${dateStr}</small>
+            </div>
+        </div>
+    `;
+    return div;
+}
+
+// Helper: Create Locked Card contents
+function createLockedCard(a) {
+    const div = document.createElement('div');
+    div.className = 'achievement-card locked';
+
+    // Get icon from mapping
+    const iconData = getAchievementIcon(a.code);
+    const tierClass = getTierIconClass(a.tier);
+
+    let progressHtml = '';
+    if (a.progress) {
+        const pct = Math.min(100, Math.round((a.progress.current / a.progress.target) * 100));
+        progressHtml = `
+            <div class="achievement-progress">
+                <div class="progress-text">Progress: ${a.progress.current} / ${a.progress.target}</div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${pct}%"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    div.innerHTML = `
+        <div class="achievement-icon ${tierClass} locked">
+            <span class="${iconData.className}">${iconData.emoji}</span>
+        </div>
+        <div class="achievement-content">
+            <div class="achievement-title-row">
+                <span class="achievement-title">${a.name}</span>
+                ${a.tier ? `<span class="achievement-tier ${a.tier.toLowerCase()}">${a.tier.toUpperCase()}</span>` : ''}
+            </div>
+            <p class="achievement-description">${a.description}</p>
+            ${progressHtml}
+        </div>
+    `;
+    return div;
+}
+
 function recalcCompletion(items) {
+    // ... kept for compatibility if used elsewhere, though not used here
     const total = items.length;
     if (total === 0) return 0;
     const completed = items.filter(i => i.is_completed).length;

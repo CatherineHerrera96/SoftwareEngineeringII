@@ -112,9 +112,36 @@ class WeeklySummary(BaseModel):
 class AchievementRead(BaseModel):
     id: int
     code: str
-    name: str # Was title
+    name: str 
     description: str | None = None
-    threshold_type: str
-    threshold_value: int
+    category: str | None = None
+    tier: str | None = None
+    icon_emoji: str | None = None
+    unlocked_at: datetime | None = None
+    habit_id: int | None = None
+    habit_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+class AchievementLockedRead(BaseModel):
+    id: int
+    code: str
+    name: str
+    description: str | None = None
+    category: str | None = None
+    tier: str | None = None
+    icon_emoji: str | None = None
+    threshold_type: str
+    threshold_value: int
+    progress: dict | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AchievementStats(BaseModel):
+    weekly_completion_rate: int
+    total_streak_days: int
+
+class AchievementsResponse(BaseModel):
+    stats: AchievementStats
+    unlocked: list[AchievementRead]
+    locked: list[AchievementLockedRead]

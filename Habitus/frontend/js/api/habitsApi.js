@@ -213,6 +213,8 @@ export async function saveCheckin(userHabitId, completed) {
     }
     throw new Error(errorMessage);
   }
+
+  // Return full response including new_achievements
   return await res.json();
 }
 

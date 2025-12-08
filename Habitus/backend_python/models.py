@@ -84,8 +84,12 @@ class Achievement(Base):
     code            = Column(String, unique=True, nullable=False)  # e.g., "STREAK_3"
     name            = Column(String, nullable=False)
     description     = Column(String)
-    threshold_type  = Column(String, nullable=False)  # "streak_length" or "total_completions"
+    category        = Column(String, nullable=True) # streak | consistency | milestone
+    tier            = Column(String, nullable=True) # bronze | silver | gold
+    icon_emoji      = Column(String, nullable=True) 
+    threshold_type  = Column(String, nullable=False)  # "per_habit_streak" or "total_completions"
     threshold_value = Column(Integer, nullable=False)
+    is_active       = Column(Boolean, default=True)
     
     usr_achievements = relationship("UserAchievement", back_populates="achievements")
 

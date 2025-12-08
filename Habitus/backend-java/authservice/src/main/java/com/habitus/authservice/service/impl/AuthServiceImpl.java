@@ -61,6 +61,9 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail().toLowerCase());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
+        // DEFAULT TIMEZONE FOR NEW USERS
+        user.setTimezone("America/Bogota");
+
         userRepository.save(user);
 
         String token = jwtService.generateToken(user.getEmail());
@@ -78,6 +81,41 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token);
+    }
+
+    @Override
+    public UserResponse updateProfile(Integer userId, com.habitus.authservice.dto.UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean updated = false;
+
+        if (request.getName() != null) { // Allow empty string to clear name if needed, or check !isEmpty()
+            user.setName(request.getName());
+            updated = true;
+        }
+
+        if (request.getTimezone() != null && !request.getTimezone().isEmpty()) {
+            user.setTimezone(request.getTimezone());
+            updated = true;
+        }
+
+        if (request.getAvatarUrl() != null && !request.getAvatarUrl().isEmpty()) {
+            user.setAvatarUrl(request.getAvatarUrl());
+            updated = true;
+        }
+
+        if (updated) {
+            userRepository.save(user);
+            log.info("Profile updated for user ID: {}", userId);
+        }
+
+        return new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getAvatarUrl(),
+                user.getTimezone());
     }
 
     @Override

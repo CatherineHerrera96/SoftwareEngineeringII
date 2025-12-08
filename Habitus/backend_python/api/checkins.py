@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from datetime import date, timedelta
 
 from db import get_db
@@ -43,6 +44,36 @@ async def checkin_habit(
                 current_user.id,
                 user_habit.habit_id
             )
+            
+            # --- Unlock Achievements ---
+            try:
+                # Calculate global total completions
+                total_global = (
+                    db.query(func.sum(UserHabit.total_completions))
+                    .filter(UserHabit.user_id == current_user.id)
+                    .scalar()
+                ) or 0
+                
+                new_unlocks = await achievement_logic.evaluate_achievements(
+                    db,
+                    current_user.id,
+                    user_habit.habit_id,
+                    result.current_streak,
+                    total_global
+                )
+                
+                # Update result with new achievements
+                # Note: result is a StreakResult object, we might need to attach it 
+                # or just merge dicts. StreakResult has to_dict().
+                
+                # Check if StreakResult has a field for this, if not we merge after to_dict.
+                # But here we are returning result.to_dict() at the end.
+                # Let's attach it to the dict response.
+                
+            except Exception as e:
+                print(f"Achievement Eval Error: {e}")
+                new_unlocks = []
+                
         else:
             # Undo Check-in (Handle "False" explicit flag)
             from logic.streak_engine import undo_checkin
@@ -51,8 +82,11 @@ async def checkin_habit(
                 current_user.id,
                 user_habit.habit_id
             )
+            new_unlocks = []
         
-        return result.to_dict()
+        response_data = result.to_dict()
+        response_data["new_achievements"] = new_unlocks
+        return response_data
         
     except StreakError as se:
         # Cooldown or other streak-specific error

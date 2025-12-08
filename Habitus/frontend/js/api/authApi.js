@@ -47,13 +47,9 @@
 
 import { setAuth, getToken } from "../state.js";
 
-// URL base del backend de autenticación en Java.
-//
-// BACKEND: ajustar este valor según el puerto/host real.
-// Ejemplos posibles:
-//   - "http://localhost:8080/api/auth"
-//   - "https://mi-servidor.com/api/auth"
-const JAVA_BASE_URL = "http://25.1.31.133:8080/auth";
+// PYTHON API URL - Dynamic Host for Remote/Network Access
+const API_HOST = window.location.hostname; // e.g. 'localhost' or '25.x.x.x'
+const JAVA_BASE_URL = `http://${API_HOST}:8080/auth`;
 
 /**
  * Inicia sesión contra el backend de autenticación.
@@ -278,6 +274,34 @@ export async function changeEmail(currentPassword, newEmail) {
   if (!res.ok) {
     const errorText = await res.text();
     throw new Error(errorText || "Failed to change email");
+  }
+
+  return await res.json();
+}
+
+/**
+ * Update user profile (name, timezone, avatar)
+ * @param {Object} updateData - { name, timezone, avatarUrl }
+ * @returns {Promise<Object>} Updated user data
+ */
+export async function updateProfile(updateData) {
+  const token = getToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const res = await fetch(`${JAVA_BASE_URL}/profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(updateData),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to update profile");
   }
 
   return await res.json();
