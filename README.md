@@ -48,8 +48,8 @@ Contains the project source code.
 | Phase | Progress |
 |-------|----------|
 | ✅ Initialization | Done |
-| 🔄 Requirements Analysis | Done |
-| ⏳ Development | Pending |
+| ✅ Requirements Analysis | Done |
+| ✅ Development | Done |
 | ⏳ Testing | Pending |
 | ⏳ Deployment | Pending |
 
