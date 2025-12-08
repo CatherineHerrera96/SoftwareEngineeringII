@@ -336,7 +336,3 @@ pyvenv.cfg
 # Test output files
 test_output.txt
 verify_output.txt
-
-# Workshop PDFs (optional - team decision)
-# Workshop_*.pdf
-# workshop*.pdf
