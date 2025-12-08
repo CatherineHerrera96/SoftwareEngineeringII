@@ -16,7 +16,7 @@
  * - null         : ALLOW ALL (Automatic detection based on keywords)
  * ----------------------------------------------------------------------
  */
-export const CURRENT_SEASON = null;
+export const CURRENT_SEASON = null; // Change this to enforce a specific season or set to null for automatic detection
 
 /**
  * THEME DEFINITIONS
@@ -90,22 +90,22 @@ export const SEASONAL_THEMES = [
     },
     {
         id: 'christmas',
-        displayName: '🎄 Christmas',
-        keywords: ['christmas', 'santa', 'cocoa', 'gift', 'snow', 'reindeer', 'december'],
+        displayName: '❄️ Winter Holidays',
+        keywords: ['christmas', 'santa', 'cocoa', 'gift', 'snow', 'reindeer', 'december', 'winter', 'holiday'],
         className: 'theme-christmas',
         lightColors: {
-            '--theme-primary': '#dc2626',
-            '--theme-secondary': '#16a34a',
-            '--theme-bg': '#fef2f2',
-            '--theme-header-bg': 'linear-gradient(135deg, #dc2626, #16a34a)',
-            '--theme-text': '#7f1d1d'
+            '--theme-primary': '#0ea5e9',   /* Sky Blue */
+            '--theme-secondary': '#ef4444', /* Holiday Red Accent */
+            '--theme-bg': '#f0f9ff',        /* Alice Blue / Snowy */
+            '--theme-header-bg': 'linear-gradient(135deg, #0ea5e9, #cbd5e1)', /* Blue to Silver */
+            '--theme-text': '#0c4a6e'       /* Dark Navy */
         },
         darkColors: {
-            '--theme-primary': '#f87171',
-            '--theme-secondary': '#4ade80',
-            '--theme-bg': '#1f1414',
-            '--theme-header-bg': 'linear-gradient(135deg, #991b1b, #166534)',
-            '--theme-text': '#fecaca'
+            '--theme-primary': '#38bdf8',   /* Bright Ice Blue */
+            '--theme-secondary': '#f87171', /* Soft Red */
+            '--theme-bg': '#0f172a',        /* Deep Winter Night */
+            '--theme-header-bg': 'linear-gradient(135deg, #0f172a, #1e40af)', /* Night Sky */
+            '--theme-text': '#e0f2fe'       /* Pale Ice */
         }
     },
     {

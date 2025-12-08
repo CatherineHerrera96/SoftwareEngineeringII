@@ -124,6 +124,40 @@ def list_my_achievements(
             "target": ach.threshold_value
         }
         
+        # FIX: Check for retroactive unlock (Self-Healing)
+        if current_val >= ach.threshold_value:
+            # Criteria met but not yet awarded. Award now.
+            try:
+                from datetime import datetime
+                new_ua = UserAchievement(
+                    user_id=current_user.id,
+                    achievement_id=ach.id,
+                    habit_id=None, # Global stats usually don't link to single habit unless specific
+                    awarded_at=datetime.utcnow()
+                )
+                db.add(new_ua)
+                db.commit()
+                db.refresh(new_ua)
+                
+                # Add to unlocked list
+                unlocked_list.append(schemas.AchievementRead(
+                    id=ach.id,
+                    code=ach.code,
+                    name=ach.name,
+                    description=ach.description,
+                    category=ach.category,
+                    tier=ach.tier,
+                    icon_emoji=ach.icon_emoji,
+                    unlocked_at=new_ua.awarded_at,
+                    habit_id=None,
+                    habit_name=None
+                ))
+                continue # Skip adding to locked_list
+            except Exception as e:
+                # If error (e.g. race condition), fallback to showing as locked
+                db.rollback()
+                pass
+
         locked_list.append(schemas.AchievementLockedRead(
             id=ach.id,
             code=ach.code,

@@ -9,6 +9,8 @@ import { getSeasonalTheme, applyGlobalTheme, SEASONAL_THEMES, CURRENT_SEASON } f
 import { renderDailyChecklist } from './dailyChecklistView.js';
 import { getAchievementIcon, getTierIconClass } from '../achievementIcons.js';
 
+let achievementsViewMode = 'overview';
+
 export async function renderProfile(activeTab = 'daily') {
     // 0. Apply Global Theme
     applyGlobalTheme();
@@ -324,135 +326,185 @@ async function renderAchievementsList() {
         `;
         layout.appendChild(topRow);
 
-        // --- 3. Bottom Row: Two Columns ---
-        const bottomRow = document.createElement('div');
-        bottomRow.className = 'achievements-bottom-row';
-
-        // --- Left Column: Unlocked ---
-        const unlockedCol = document.createElement('section');
-        unlockedCol.className = 'achievements-col achievements-col-unlocked';
-
-        // Header
-        const unlockedHeader = document.createElement('header');
-        unlockedHeader.className = 'achievements-column-header';
-        unlockedHeader.innerHTML = `
-            <h3>Unlocked Achievements</h3>
-            <button class="link-button" id="btn-view-unlocked" style="display:none">View all</button>
-        `;
-        unlockedCol.appendChild(unlockedHeader);
-
-        // List Container
-        const unlockedList = document.createElement('div');
-        unlockedList.className = 'achievements-list achievements-list-unlocked';
-        unlockedCol.appendChild(unlockedList);
-
-        // Logic
+        // Data Prep
         const unlocked = response.unlocked || [];
-        let sortedUnlocked = [];
-        if (unlocked.length > 0) {
-            // Sort by Date Descending
-            sortedUnlocked = [...unlocked].sort((a, b) => new Date(b.unlocked_at) - new Date(a.unlocked_at));
-        }
+        // Sort by Date Descending
+        const sortedUnlocked = [...unlocked].sort((a, b) => new Date(b.unlocked_at) - new Date(a.unlocked_at));
 
-        const renderUnlocked = (showAll) => {
-            unlockedList.innerHTML = '';
+        const locked = response.locked || [];
+        // Sort by Progress Ratio Descending
+        const sortedLocked = [...locked].sort((a, b) => {
+            const pA = a.progress ? (a.progress.current / a.progress.target) : 0;
+            const pB = b.progress ? (b.progress.current / b.progress.target) : 0;
+            return pB - pA;
+        });
+
+
+        // --- 3. Render Based on View Mode ---
+        if (achievementsViewMode === 'overview') {
+            const bottomRow = document.createElement('div');
+            bottomRow.className = 'achievements-bottom-row';
+
+            // --- Left Column: Unlocked ---
+            const unlockedCol = document.createElement('section');
+            unlockedCol.className = 'achievements-col achievements-col-unlocked';
+
+            const unlockedHeader = document.createElement('header');
+            unlockedHeader.className = 'achievements-column-header';
+            unlockedHeader.innerHTML = `<h3>Unlocked Achievements</h3>`;
+            unlockedCol.appendChild(unlockedHeader);
+
+            const unlockedList = document.createElement('div');
+            unlockedList.className = 'achievements-list achievements-list-unlocked';
 
             if (sortedUnlocked.length === 0) {
                 unlockedList.innerHTML = `<div class="empty-state-card"><p>No unlocked achievements yet.</p></div>`;
-                return;
-            }
-
-            // Always show Featured (First one)
-            const featured = sortedUnlocked[0];
-            const others = sortedUnlocked.slice(1);
-
-            // Render Featured
-            unlockedList.appendChild(createAchievementCard(featured, true));
-
-            // Render Others
-            const limit = 3;
-            const itemsToShow = showAll ? others : others.slice(0, limit);
-
-            itemsToShow.forEach(a => {
-                unlockedList.appendChild(createAchievementCard(a, false));
-            });
-
-            // Handle Toggle Button Visibility/Text
-            const btn = unlockedHeader.querySelector('#btn-view-unlocked');
-            if (others.length > limit) {
-                btn.style.display = 'block';
-                btn.textContent = showAll ? 'Show less' : 'View all';
-                btn.onclick = () => renderUnlocked(!showAll);
             } else {
-                btn.style.display = 'none';
+                // Show first 3
+                const limit = 3;
+                sortedUnlocked.slice(0, limit).forEach((a, idx) => {
+                    // Feature the first one if it's the very top of the list
+                    const isFeatured = idx === 0;
+                    unlockedList.appendChild(createAchievementCard(a, isFeatured));
+                });
             }
-        };
+            unlockedCol.appendChild(unlockedList);
 
-        // Initial Render
-        renderUnlocked(false);
-        bottomRow.appendChild(unlockedCol);
+            // View All Control
+            if (sortedUnlocked.length > 3) {
+                const toggleDiv = document.createElement('div');
+                toggleDiv.className = 'achievements-view-toggle';
+                const btn = document.createElement('button');
+                btn.className = 'link-button';
+                btn.innerHTML = 'View all unlocked ➜';
+                btn.onclick = () => {
+                    achievementsViewMode = 'unlocked-all';
+                    renderAchievementsList();
+                };
+                toggleDiv.appendChild(btn);
+                unlockedCol.appendChild(toggleDiv);
+            }
+            bottomRow.appendChild(unlockedCol);
 
+            // --- Right Column: Locked ---
+            const lockedCol = document.createElement('section');
+            lockedCol.className = 'achievements-col achievements-col-locked';
 
-        // --- Right Column: Locked ---
-        const lockedCol = document.createElement('section');
-        lockedCol.className = 'achievements-col achievements-col-locked';
+            const lockedHeader = document.createElement('header');
+            lockedHeader.className = 'achievements-column-header';
+            lockedHeader.innerHTML = `<h3>Locked Achievements</h3>`;
+            lockedCol.appendChild(lockedHeader);
 
-        // Header
-        const lockedHeader = document.createElement('header');
-        lockedHeader.className = 'achievements-column-header';
-        lockedHeader.innerHTML = `
-            <h3>Locked Achievements</h3>
-            <button class="link-button" id="btn-view-locked" style="display:none">View all</button>
-        `;
-        lockedCol.appendChild(lockedHeader);
-
-        // List Container
-        const lockedList = document.createElement('div');
-        lockedList.className = 'achievements-list achievements-list-locked';
-        lockedCol.appendChild(lockedList);
-
-        // Logic
-        const locked = response.locked || [];
-        let sortedLocked = [];
-        if (locked.length > 0) {
-            // Sort by Progress Ratio Descending
-            sortedLocked = [...locked].sort((a, b) => {
-                const pA = a.progress ? (a.progress.current / a.progress.target) : 0;
-                const pB = b.progress ? (b.progress.current / b.progress.target) : 0;
-                return pB - pA;
-            });
-        }
-
-        const renderLocked = (showAll) => {
-            lockedList.innerHTML = '';
+            const lockedList = document.createElement('div');
+            lockedList.className = 'achievements-list achievements-list-locked';
 
             if (sortedLocked.length === 0) {
                 lockedList.innerHTML = `<div class="empty-state-card"><p>All achievements unlocked! 🎉</p></div>`;
-                return;
+            } else {
+                // Revert to 3 items as requested
+                const limit = 3;
+                sortedLocked.slice(0, limit).forEach((a) => {
+                    lockedList.appendChild(createLockedCard(a));
+                });
             }
+            lockedCol.appendChild(lockedList);
 
-            const limit = 4;
-            const itemsToShow = showAll ? sortedLocked : sortedLocked.slice(0, limit);
+            // View All Control
+            if (sortedLocked.length > 3) {
+                const toggleDiv = document.createElement('div');
+                toggleDiv.className = 'achievements-view-toggle';
+                const btn = document.createElement('button');
+                btn.className = 'link-button';
+                btn.innerHTML = 'View all locked ➜';
+                btn.onclick = () => {
+                    achievementsViewMode = 'locked-all';
+                    renderAchievementsList();
+                };
+                toggleDiv.appendChild(btn);
+                lockedCol.appendChild(toggleDiv);
+            }
+            bottomRow.appendChild(lockedCol);
 
-            itemsToShow.forEach(a => {
-                lockedList.appendChild(createLockedCard(a));
+            layout.appendChild(bottomRow);
+
+        } else if (achievementsViewMode === 'unlocked-all') {
+            // Back Link
+            const backLink = document.createElement('div');
+            backLink.className = 'achievements-back-link';
+            const backBtn = document.createElement('button');
+            backBtn.className = 'link-button';
+            backBtn.innerHTML = '← Back to overview';
+            backBtn.onclick = () => {
+                achievementsViewMode = 'overview';
+                renderAchievementsList();
+            };
+            backLink.appendChild(backBtn);
+            layout.appendChild(backLink);
+
+            // Title
+            const title = document.createElement('h3');
+            title.className = 'achievements-full-title';
+            title.textContent = 'Achievements – Unlocked';
+            layout.appendChild(title);
+
+            // Full List - Sorted by Tier
+            const fullList = document.createElement('div');
+            fullList.className = 'achievements-full-list';
+
+            // Sort by Tier Order (Master -> Gold -> Silver -> Bronze)
+            const tierOrder = { 'master': 4, 'gold': 3, 'silver': 2, 'bronze': 1 };
+            const tierSorted = [...sortedUnlocked].sort((a, b) => {
+                const tA = tierOrder[(a.tier || '').toLowerCase()] || 0;
+                const tB = tierOrder[(b.tier || '').toLowerCase()] || 0;
+                return tB - tA; // Descending
             });
 
-            // Handle Toggle Button
-            const btn = lockedHeader.querySelector('#btn-view-locked');
-            if (sortedLocked.length > limit) {
-                btn.style.display = 'block';
-                btn.textContent = showAll ? 'Show less' : 'View all';
-                btn.onclick = () => renderLocked(!showAll);
-            } else {
-                btn.style.display = 'none';
-            }
-        };
+            tierSorted.forEach((a) => {
+                // In full grid view, we don't need 'featured' style logic, just standard cards
+                fullList.appendChild(createAchievementCard(a, false));
+            });
 
-        renderLocked(false);
-        bottomRow.appendChild(lockedCol);
+            layout.appendChild(fullList);
 
-        layout.appendChild(bottomRow);
+        } else if (achievementsViewMode === 'locked-all') {
+            // Back Link
+            const backLink = document.createElement('div');
+            backLink.className = 'achievements-back-link';
+            const backBtn = document.createElement('button');
+            backBtn.className = 'link-button';
+            backBtn.innerHTML = '← Back to overview';
+            backBtn.onclick = () => {
+                achievementsViewMode = 'overview';
+                renderAchievementsList();
+            };
+            backLink.appendChild(backBtn);
+            layout.appendChild(backLink);
+
+            // Title
+            const title = document.createElement('h3');
+            title.className = 'achievements-full-title';
+            title.textContent = 'Achievements – Locked';
+            layout.appendChild(title);
+
+            // Full List - Sorted by Tier
+            const fullList = document.createElement('div');
+            fullList.className = 'achievements-full-list';
+
+            // Sort by Tier Order (Master -> Gold -> Silver -> Bronze)
+            const tierOrder = { 'master': 4, 'gold': 3, 'silver': 2, 'bronze': 1 };
+            const tierSorted = [...sortedLocked].sort((a, b) => {
+                const tA = tierOrder[(a.tier || '').toLowerCase()] || 0;
+                const tB = tierOrder[(b.tier || '').toLowerCase()] || 0;
+                return tB - tA; // Descending
+            });
+
+            tierSorted.forEach(a => {
+                fullList.appendChild(createLockedCard(a));
+            });
+
+            layout.appendChild(fullList);
+        }
+
         list.appendChild(layout);
 
     } catch (err) {
@@ -490,9 +542,10 @@ function createAchievementCard(a, isFeatured) {
 }
 
 // Helper: Create Locked Card contents
-function createLockedCard(a) {
+function createLockedCard(a, isFeatured) {
     const div = document.createElement('div');
-    div.className = 'achievement-card locked';
+    // Ensure 'locked' class is preserved along with potentially 'featured'
+    div.className = isFeatured ? 'achievement-card locked featured' : 'achievement-card locked';
 
     const iconData = getAchievementIcon(a.code);
     const tierClass = getTierIconClass(a.tier);
