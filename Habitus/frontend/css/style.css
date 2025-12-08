@@ -441,9 +441,14 @@ a {
     /* Ensure parent container takes full height */
 }
 
-/* Allow cards to expand to fill the column height equally */
-.achievements-list .achievement-card {
+/* Allow cards in LOCKED list to connect/expand to fill column height for symmetry */
+.achievements-list-locked .achievement-card {
     flex-grow: 1;
+}
+
+/* Unlocked cards (especially featured) should keep natural size */
+.achievements-list-unlocked .achievement-card {
+    flex-grow: 0;
 }
 
 .achievement-card {

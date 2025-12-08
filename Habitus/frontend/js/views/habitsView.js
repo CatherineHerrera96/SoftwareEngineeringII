@@ -456,6 +456,13 @@ function renderHabitsGrid(filter = 'all') {
         try {
           if (isSelected) {
             // REMOVE (De-add)
+            // USER REQUEST: Always ask for confirmation before removing
+            const confirmed = await showConfirmDialog(
+              "Remove Habit?",
+              `Are you sure you want to remove "${h.name}" from your profile?`
+            );
+            if (!confirmed) return;
+
             const userHabitId = window.userHabitMap ? window.userHabitMap.get(h.id) : null;
 
             if (userHabitId) {

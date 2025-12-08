@@ -16,8 +16,8 @@ class StreakMode(str, Enum):
 
 
 # Environment variables
-STREAK_MODE = os.getenv("STREAK_MODE", "production").lower()
-STREAK_INTERVAL_SECONDS = int(os.getenv("STREAK_INTERVAL_SECONDS", "60"))
+STREAK_MODE = os.getenv("STREAK_MODE", "test").lower()
+STREAK_INTERVAL_SECONDS = int(os.getenv("STREAK_INTERVAL_SECONDS", "20"))
 
 
 def get_streak_interval() -> timedelta:
