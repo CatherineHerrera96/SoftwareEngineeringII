@@ -178,7 +178,7 @@ function renderList(items, container) {
     li.className = `daily-item ${item.is_completed ? 'completed' : ''}`;
 
     // Seasonal Theme
-    const themeObj = getSeasonalTheme(item.habit_name);
+    const themeObj = getSeasonalTheme(item.habit_name, item.habit_category);
     if (themeObj) li.classList.add(themeObj.className);
 
     li.dataset.id = item.id;
@@ -217,11 +217,11 @@ function renderList(items, container) {
           ${streakHtml}
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:0.5rem;">
-        <button class="btn-check ${item.is_completed ? 'missed' : 'done'}" data-id="${item.id}" data-completed="${item.is_completed}">
+      <div style="display:flex; align-items:center; gap:0.5rem; position: relative; z-index: 10;">
+        <button class="btn-check ${item.is_completed ? 'missed' : 'done'}" data-id="${item.id}" data-completed="${item.is_completed}" style="position:relative; z-index:10;">
           ${item.is_completed ? 'Undo' : '✔ Check'}
         </button>
-        <button class="btn-delete" title="Remove from today" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem; padding:0.5rem;">🗑️</button>
+        <button class="btn-delete" title="Remove from today" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem; padding:0.5rem; position:relative; z-index:10;">🗑️</button>
       </div>
     `;
 

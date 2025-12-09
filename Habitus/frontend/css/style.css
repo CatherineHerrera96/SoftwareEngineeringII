@@ -872,6 +872,8 @@ a {
     justify-content: space-between;
     align-items: center;
     transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
 }
 
 .daily-item.completed {
@@ -972,9 +974,18 @@ a {
     grid-template-columns: 1fr 1fr auto;
     gap: 1rem;
     align-items: end;
+    opacity: 0.8;
 }
 
-@media (max-width: 600px) {
+/* Ensure buttons are ALWAYS above seasonal emojis */
+.daily-item button,
+.daily-item .btn-check,
+.daily-item .btn-delete {
+    position: relative;
+    z-index: 50 !important;
+}
+
+@media (max-width: 768px) {
     .create-habit-form {
         grid-template-columns: 1fr;
     }
@@ -1026,6 +1037,55 @@ a {
     font-size: 0.85rem;
     color: var(--text-muted);
     line-height: 1.3;
+}
+
+/* Stats Trend Circles */
+.stats-trend-circles {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.trend-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-input);
+    /* Default / Invariant */
+    border: 1px solid var(--border);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.trend-circle.completed {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.4);
+}
+
+.trend-circle.lost {
+    background: transparent;
+    border-color: var(--danger);
+    color: var(--danger);
+    font-weight: 800;
+    /* Extra bold for emphasis */
+}
+
+/* Default / Cold / Future / Pre-exist are all matching base style (Gray) */
+
+/* Make stat card content align well with circles */
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Stats */
@@ -1218,19 +1278,22 @@ body[data-season] .logout-btn {
     --theme-text: #fbbf24 !important;
 }
 
-.habit-card.theme-new-year {
+.habit-card.theme-new-year,
+.daily-item.theme-new-year {
     background: linear-gradient(135deg, #000000 0%, #1f2937 100%) !important;
     border: 2px solid #fbbf24 !important;
     color: #fbbf24 !important;
     box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
 }
 
-.habit-card.theme-new-year h3 {
+.habit-card.theme-new-year h3,
+.daily-item.theme-new-year .daily-name {
     color: white !important;
     text-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
 }
 
-.habit-card.theme-new-year p {
+.habit-card.theme-new-year p,
+.daily-item.theme-new-year .streak-msg {
     color: #d1d5db !important;
 }
 
@@ -1242,7 +1305,8 @@ body[data-season] .logout-btn {
 }
 
 /* Fireworks effects */
-.habit-card.theme-new-year::before {
+.habit-card.theme-new-year::before,
+.daily-item.theme-new-year::before {
     content: '🎇';
     position: absolute;
     top: 5px;
@@ -1251,7 +1315,8 @@ body[data-season] .logout-btn {
     opacity: 1;
 }
 
-.habit-card.theme-new-year::after {
+.habit-card.theme-new-year::after,
+.daily-item.theme-new-year::after {
     content: '🥂';
     font-size: 5rem;
     position: absolute;
@@ -1269,19 +1334,22 @@ body[data-season] .logout-btn {
     --success: #15803d !important;
 }
 
-.habit-card.theme-christmas {
+.habit-card.theme-christmas,
+.daily-item.theme-christmas {
     background: linear-gradient(135deg, #166534 0%, #0f172a 100%) !important;
     border: 2px solid #ef4444 !important;
     color: white !important;
     box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
 }
 
-.habit-card.theme-christmas h3 {
+.habit-card.theme-christmas h3,
+.daily-item.theme-christmas .daily-name {
     color: #fca5a5 !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.habit-card.theme-christmas p {
+.habit-card.theme-christmas p,
+.daily-item.theme-christmas .streak-msg {
     color: #e2e8f0 !important;
 }
 
@@ -1291,7 +1359,8 @@ body[data-season] .logout-btn {
     border: none;
 }
 
-.habit-card.theme-christmas::before {
+.habit-card.theme-christmas::before,
+.daily-item.theme-christmas::before {
     content: '❄️';
     position: absolute;
     top: 5px;
@@ -1300,7 +1369,8 @@ body[data-season] .logout-btn {
     opacity: 0.8;
 }
 
-.habit-card.theme-christmas::after {
+.habit-card.theme-christmas::after,
+.daily-item.theme-christmas::after {
     content: '🎄';
     font-size: 6rem;
     position: absolute;
@@ -1317,19 +1387,22 @@ body[data-season] .logout-btn {
     --primary-hover: #e65100 !important;
 }
 
-.habit-card.theme-halloween {
+.habit-card.theme-halloween,
+.daily-item.theme-halloween {
     background: linear-gradient(135deg, #2a0a2e 0%, #000000 100%) !important;
     border: 2px solid #ff6b00 !important;
     color: #ffcc80 !important;
     box-shadow: 0 4px 6px -1px rgba(255, 107, 0, 0.3);
 }
 
-.habit-card.theme-halloween h3 {
+.habit-card.theme-halloween h3,
+.daily-item.theme-halloween .daily-name {
     color: #ffa726 !important;
     text-shadow: 0 1px 4px rgba(255, 107, 0, 0.6);
 }
 
-.habit-card.theme-halloween p {
+.habit-card.theme-halloween p,
+.daily-item.theme-halloween .streak-msg {
     color: #e1bee7 !important;
 }
 
@@ -1340,7 +1413,8 @@ body[data-season] .logout-btn {
     border: none;
 }
 
-.habit-card.theme-halloween::before {
+.habit-card.theme-halloween::before,
+.daily-item.theme-halloween::before {
     content: '🕸️';
     position: absolute;
     top: 10px;
@@ -1349,7 +1423,8 @@ body[data-season] .logout-btn {
     opacity: 0.6;
 }
 
-.habit-card.theme-halloween::after {
+.habit-card.theme-halloween::after,
+.daily-item.theme-halloween::after {
     content: '🎃';
     font-size: 5rem;
     position: absolute;
@@ -1365,18 +1440,21 @@ body[data-season] .logout-btn {
     --primary: #00b4d8 !important;
 }
 
-.habit-card.theme-summer {
+.habit-card.theme-summer,
+.daily-item.theme-summer {
     background: linear-gradient(135deg, #fffbed 0%, #daf4fa 100%) !important;
     border: 2px solid #ffd60a !important;
     color: #0077b6 !important;
     box-shadow: 0 4px 10px rgba(0, 180, 216, 0.2);
 }
 
-.habit-card.theme-summer h3 {
+.habit-card.theme-summer h3,
+.daily-item.theme-summer .daily-name {
     color: #023e8a !important;
 }
 
-.habit-card.theme-summer p {
+.habit-card.theme-summer p,
+.daily-item.theme-summer .streak-msg {
     color: #0077b6 !important;
 }
 
@@ -1386,7 +1464,8 @@ body[data-season] .logout-btn {
     border: none;
 }
 
-.habit-card.theme-summer::before {
+.habit-card.theme-summer::before,
+.daily-item.theme-summer::before {
     content: '🌤️';
     position: absolute;
     top: 5px;
@@ -1394,7 +1473,8 @@ body[data-season] .logout-btn {
     font-size: 1.2rem;
 }
 
-.habit-card.theme-summer::after {
+.habit-card.theme-summer::after,
+.daily-item.theme-summer::after {
     content: '🏖️';
     font-size: 5rem;
     position: absolute;
@@ -1404,23 +1484,34 @@ body[data-season] .logout-btn {
     pointer-events: none;
 }
 
+/* Global Safety: Ensure ALL decorative pseudo-elements are non-clickable */
+.habit-card::before,
+.habit-card::after,
+.daily-item::before,
+.daily-item::after {
+    pointer-events: none !important;
+}
+
 /* --- 4. VALENTINE --- */
 .theme-valentine {
     --primary: #ff4d6d !important;
     --bg-card: #fff0f3 !important;
 }
 
-.habit-card.theme-valentine {
+.habit-card.theme-valentine,
+.daily-item.theme-valentine {
     background: linear-gradient(135deg, #fff0f3 0%, #ffe5ec 100%) !important;
     border: 2px solid #ff4d6d !important;
     color: #590d22 !important;
 }
 
-.habit-card.theme-valentine h3 {
+.habit-card.theme-valentine h3,
+.daily-item.theme-valentine .daily-name {
     color: #a4133c !important;
 }
 
-.habit-card.theme-valentine p {
+.habit-card.theme-valentine p,
+.daily-item.theme-valentine .streak-msg {
     color: #800f2f !important;
 }
 
@@ -1430,7 +1521,25 @@ body[data-season] .logout-btn {
     border: none;
 }
 
-.habit-card.theme-valentine::before {
+/* Fix readable buttons */
+.habit-card.theme-valentine .btn-selection-toggle,
+.daily-item.theme-valentine .btn-check {
+    background: #ff4d6d !important;
+    color: white !important;
+    border: 1px solid #d90429 !important;
+}
+
+.habit-card.theme-valentine .btn-selection-toggle.added {
+    background: #bd0f4d !important;
+}
+
+.habit-card.theme-valentine .btn-selection-toggle:hover,
+.daily-item.theme-valentine .btn-check:hover {
+    background: #e01e37 !important;
+}
+
+.habit-card.theme-valentine::before,
+.daily-item.theme-valentine::before {
     content: '💌';
     position: absolute;
     top: 5px;
@@ -1438,7 +1547,8 @@ body[data-season] .logout-btn {
     font-size: 1.2rem;
 }
 
-.habit-card.theme-valentine::after {
+.habit-card.theme-valentine::after,
+.daily-item.theme-valentine::after {
     content: '💖';
     font-size: 5rem;
     position: absolute;
@@ -1453,18 +1563,21 @@ body[data-season] .logout-btn {
     --primary: #9b5de5 !important;
 }
 
-.habit-card.theme-april-fools {
+.habit-card.theme-april-fools,
+.daily-item.theme-april-fools {
     background: #fff !important;
     border: 2px dashed #9b5de5 !important;
     transform: rotate(1deg);
 }
 
-.habit-card.theme-april-fools h3 {
+.habit-card.theme-april-fools h3,
+.daily-item.theme-april-fools .daily-name {
     color: #9b5de5 !important;
     font-family: 'Comic Sans MS', cursive, sans-serif !important;
 }
 
-.habit-card.theme-april-fools::after {
+.habit-card.theme-april-fools::after,
+.daily-item.theme-april-fools::after {
     content: '🤡';
     font-size: 4rem;
     position: absolute;
@@ -1478,13 +1591,15 @@ body[data-season] .logout-btn {
     --primary: #70e000 !important;
 }
 
-.habit-card.theme-spring {
+.habit-card.theme-spring,
+.daily-item.theme-spring {
     background: linear-gradient(135deg, #f7fff7 0%, #e6ffe6 100%) !important;
     border: 2px solid #70e000 !important;
     color: #0f4d0f !important;
 }
 
-.habit-card.theme-spring h3 {
+.habit-card.theme-spring h3,
+.daily-item.theme-spring .daily-name {
     color: #38b000 !important;
 }
 
@@ -1493,7 +1608,8 @@ body[data-season] .logout-btn {
     color: white !important;
 }
 
-.habit-card.theme-spring::after {
+.habit-card.theme-spring::after,
+.daily-item.theme-spring::after {
     content: '🌸';
     font-size: 5rem;
     position: absolute;
@@ -1554,14 +1670,16 @@ textarea {
     --text-muted: #94a3b8 !important;
 }
 
-.habit-card.theme-the100 {
+.habit-card.theme-the100,
+.daily-item.theme-the100 {
     background: linear-gradient(135deg, #052e16 0%, #000000 100%) !important;
     border: 1px solid #22c55e !important;
     color: #bbf7d0 !important;
     box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
 }
 
-.habit-card.theme-the100 h3 {
+.habit-card.theme-the100 h3,
+.daily-item.theme-the100 .daily-name {
     color: #4ade80 !important;
     font-family: 'Courier New', monospace;
     text-transform: uppercase;
@@ -1574,7 +1692,8 @@ textarea {
     border: 1px solid #4ade80;
 }
 
-.habit-card.theme-the100::before {
+.habit-card.theme-the100::before,
+.daily-item.theme-the100::before {
     content: '☣️';
     position: absolute;
     top: 10px;
@@ -1583,7 +1702,8 @@ textarea {
     opacity: 0.7;
 }
 
-.habit-card.theme-the100::after {
+.habit-card.theme-the100::after,
+.daily-item.theme-the100::after {
     content: '♾️';
     font-size: 6rem;
     position: absolute;
@@ -1606,14 +1726,16 @@ textarea {
     --text-muted: #94a3b8 !important;
 }
 
-.habit-card.theme-cosmere {
+.habit-card.theme-cosmere,
+.daily-item.theme-cosmere {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
     border: 1px solid #38bdf8 !important;
     color: #e0f2fe !important;
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
 }
 
-.habit-card.theme-cosmere h3 {
+.habit-card.theme-cosmere h3,
+.daily-item.theme-cosmere .daily-name {
     color: #38bdf8 !important;
     font-family: 'Times New Roman', serif;
     text-transform: uppercase;
@@ -1627,7 +1749,8 @@ textarea {
     border: 1px solid #0ea5e9;
 }
 
-.habit-card.theme-cosmere::before {
+.habit-card.theme-cosmere::before,
+.daily-item.theme-cosmere::before {
     content: '⚔️';
     position: absolute;
     top: 10px;
@@ -1636,7 +1759,8 @@ textarea {
     opacity: 0.8;
 }
 
-.habit-card.theme-cosmere::after {
+.habit-card.theme-cosmere::after,
+.daily-item.theme-cosmere::after {
     content: '🌪️';
     font-size: 6rem;
     position: absolute;

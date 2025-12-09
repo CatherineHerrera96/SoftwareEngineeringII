@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from db import get_db
 import schemas, crud
 from auth_deps import get_current_user
-from models import User, UserHabit
+from models import User, UserHabit, Checkin
 
 router = APIRouter(tags=["user-habits"])
 
@@ -71,21 +71,30 @@ def list_my_habits(
     # and doesn't handle Test Mode intervals correctly.
     for habits_info, _ in crud.list_user_habits(db, user_id=current_user.id):
         
+
         # SEASONAL FILTERING:
         # 1. If habit has no season_id (Permanent) -> ALWAYS SHOW
         # 2. If habit has season_id (Seasonal):
         #    - matches CURRENT_SEASON -> SHOW
         #    - does NOT match (or CURRENT_SEASON is None) -> HIDE
         if habits_info.habits.season_id is not None:
+             # Debugging log
+             # Debugging log
+             # print(f"Habit {habits_info.habits.name}: Season {habits_info.habits.season_id} vs Current {CURRENT_SEASON}")
+             
              if CURRENT_SEASON != habits_info.habits.season_id:
                  # WRONG SEASON:
-                 # 1. Reset streak to 0 (so it starts fresh next year)
-                 if habits_info.current_streak > 0:
-                     habits_info.current_streak = 0
-                     habits_info.next_available_checkin_at = None # Unlock
-                     db.commit()
+                 # Auto-cleanup: Delete the UserHabit association
+                 # Because the user shouldn't satisfy a seasonal habit if the season is over.
                  
-                 # 2. Hide from list
+                 # 1. Delete associated Checkins first
+                 db.query(Checkin).filter(Checkin.user_habit_id == habits_info.id).delete()
+                 
+                 # 2. Delete the UserHabit
+                 db.delete(habits_info)
+                 db.commit()
+                 
+                 # 3. Skip adding to results
                  continue
         
         # Determine strict completion status for current interval
@@ -137,7 +146,10 @@ def list_my_habits(
             last_completed_at=habits_info.last_completed_at,
             is_completed=is_completed,
             streak_broken=streak_broken,
-            previous_streak=previous_streak
+            previous_streak=previous_streak,
+            habit_name=habits_info.habits.name,
+            habit_category=habits_info.habits.category,
+            season_id=habits_info.habits.season_id
         ))
         
     return results

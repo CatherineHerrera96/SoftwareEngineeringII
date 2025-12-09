@@ -16,9 +16,14 @@
  * - null         : ALLOW ALL (Automatic detection based on keywords)
  * ----------------------------------------------------------------------
  */
-export const CURRENT_SEASON = null; // Change this to enforce a specific season or set to null for automatic detection
+export let CURRENT_SEASON = null; // Default to null, will be fetched from backend
+export const updateCurrentSeason = (newSeason) => {
+    console.log('[Season Config] Updating current season to:', newSeason);
+    CURRENT_SEASON = newSeason;
+    applyGlobalTheme();
+};
 
-/**
+/** 
  * THEME DEFINITIONS
  * - id: Unique identifier
  * - displayName: The text label to show on the habit card
@@ -251,7 +256,7 @@ export const applyGlobalTheme = (mode) => {
  */
 export const getSeasonalTheme = (name, category = '') => {
     const n = name.toLowerCase();
-    const c = category ? category.toLowerCase() : '';
+    const c = category ? category.toLowerCase().replace(/\s+/g, '') : '';
 
     for (const theme of SEASONAL_THEMES) {
         // STRICT: If a global season is set, ONLY return that theme.
@@ -264,6 +269,7 @@ export const getSeasonalTheme = (name, category = '') => {
         const isMatch = theme.keywords.some(k => n.includes(k)) || theme.id === c;
 
         if (isMatch) {
+            // console.log(`[Theme Match] ${name} (${c}) -> ${theme.id}`);
             return { className: theme.className, displayName: theme.displayName };
         }
     }

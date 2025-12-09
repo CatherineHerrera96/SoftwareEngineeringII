@@ -421,9 +421,9 @@ function renderHabitsGrid(filter = 'all') {
     // Button Logic
     let actionBtnHtml = '';
     if (isSelected) {
-      actionBtnHtml = `<button class="btn-selection-toggle added" style="padding: 0.4rem 0.8rem; font-size:0.8rem; border-radius: 20px; background: var(--success); color: white; border: none; cursor:pointer;" title="Click to remove">✓ Added</button>`;
+      actionBtnHtml = `<button class="btn-selection-toggle added" style="padding: 0.4rem 0.8rem; font-size:0.8rem; border-radius: 20px; background: var(--success); color: white; border: none; cursor:pointer; position:relative; z-index:10;" title="Click to remove">✓ Added</button>`;
     } else {
-      actionBtnHtml = `<button class="btn-selection-toggle" style="padding: 0.4rem 0.8rem; font-size:0.8rem; border-radius: 20px; background: var(--bg-body); border: 1px solid var(--primary); color: var(--primary); cursor:pointer;">+ Add</button>`;
+      actionBtnHtml = `<button class="btn-selection-toggle" style="padding: 0.4rem 0.8rem; font-size:0.8rem; border-radius: 20px; background: var(--bg-body); border: 1px solid var(--primary); color: var(--primary); cursor:pointer; position:relative; z-index:10;">+ Add</button>`;
     }
 
     // Edit/Delete Controls: STRICTLY only for custom habits
@@ -498,6 +498,7 @@ function renderHabitsGrid(filter = 'all') {
           } else {
             // ADD
             const res = await saveUserHabits([h.id]);
+            // console.log("[saveUserHabits] Response:", res);
             if (res && res.length > 0) {
               const uh = res[0];
               selectedHabitIds.add(h.id);
@@ -505,6 +506,9 @@ function renderHabitsGrid(filter = 'all') {
               window.userHabitMap.set(h.id, uh.id);
               showNotification("Added to habits");
               await refreshDailyChecklistIfActive();
+            } else {
+              console.warn("[saveUserHabits] Response was empty or invalid", res);
+              showNotification("Failed to add - Server returned no confirmation", "warning");
             }
           }
           renderHabitsGrid(filter);

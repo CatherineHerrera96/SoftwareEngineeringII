@@ -63,7 +63,14 @@ function updateProfileUI(profile) {
 
     if (editName) editName.value = profile.name || '';
     if (editAvatar) editAvatar.value = profile.avatar_url || '';
-    if (editTimezone && profile.timezone) editTimezone.value = profile.timezone;
+    if (editTimezone && profile.timezone) {
+        // Map legacy NY to Bogota (Merged in UI)
+        if (profile.timezone === 'America/New_York') {
+            editTimezone.value = 'America/Bogota';
+        } else {
+            editTimezone.value = profile.timezone;
+        }
+    }
 }
 
 function setupProfileListeners() {
@@ -83,7 +90,11 @@ function setupProfileListeners() {
                     timezone: newTimezone
                 });
                 updateProfileUI(updated);
+                updateProfileUI(updated);
                 showNotification("Profile updated!");
+
+                // Refresh Daily Checklist to reflect new timezone immediately
+                renderDailyChecklist();
             } catch (err) {
                 showNotification("Failed to update profile", "error");
             }
@@ -144,6 +155,7 @@ function setupProfileListeners() {
                 showNotification('Email updated! Please log in with your new email.');
 
                 // Log out user (JWT token is now invalid with old email)
+                resetProfileViewState();
                 clearAuth();
 
                 // Close modal
@@ -236,6 +248,7 @@ function setupProfileListeners() {
                 deleteFinalBtn.onclick = async () => {
                     try {
                         await deleteAccount(currentPassword);
+                        resetProfileViewState();
                         clearAuth();
                         showNotification('Account deleted.');
                         setTimeout(() => navigateTo('login'), 2000);
@@ -265,6 +278,49 @@ function switchTab(tabName) {
     } else if (tabName === 'stats') {
         renderAchievementsList();
     }
+}
+
+export function resetProfileViewState() {
+    achievementsViewMode = 'overview'; // Reset achievements view
+
+    // Close Modals
+    const editModal = document.getElementById('edit-profile-modal');
+    if (editModal) editModal.style.display = 'none';
+
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    if (deleteModal) deleteModal.style.display = 'none';
+
+    // Clear Forms
+    const forms = [
+        'profile-edit-form',
+        'change-email-form',
+        'change-password-form',
+        'delete-account-form'
+    ];
+    forms.forEach(id => {
+        const f = document.getElementById(id);
+        if (f) f.reset();
+    });
+
+    // Reset Settings Tabs (Default to first tab)
+    const tabs = document.querySelectorAll('.profile-tab');
+    const contents = document.querySelectorAll('.profile-tab-content');
+    if (tabs.length > 0) {
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+
+        tabs[0].classList.add('active');
+        // Activate corresponding content
+        const firstTabName = tabs[0].getAttribute('data-settings-tab');
+        const firstContent = document.getElementById(`tab-${firstTabName}`);
+        if (firstContent) firstContent.classList.add('active');
+    }
+
+    // Collapse any separate details/accordions if they exist in the DOM
+    document.querySelectorAll('details').forEach(d => d.open = false);
+
+    // Clear any error messages
+    document.querySelectorAll('.form-error').forEach(e => e.style.display = 'none');
 }
 
 async function renderDailyList() {
@@ -314,10 +370,37 @@ async function renderAchievementsList() {
         else if (streakTotal >= 7) { streakClass = 'silver'; }
         else if (streakTotal >= 3) { streakClass = 'bronze'; }
 
+        // Generate circles HTML for Weekly Consistency (Fixed Sun-Sat Window)
+        const trend = stats.trend || [];
+        let circlesHtml = '<div class="stats-trend-circles">';
+
+        trend.forEach(day => {
+            // day.status came from backend: 'completed', 'lost', 'cold', 'future', 'pre_exist'
+            // Map statuses to CSS classes
+            // completed -> .completed (Green)
+            // lost -> .lost (Red)
+            // others (cold, future, pre_exist) -> default (Gray)
+
+            let cssClass = '';
+            if (day.status === 'completed') cssClass = 'completed';
+            else if (day.status === 'lost') cssClass = 'lost';
+
+            // Get Day Letter (safe parsing)
+            // Append T12:00:00 to avoid timezone shift on plain dates
+            const dateObj = new Date(day.date + 'T12:00:00');
+            const letter = dateObj.toLocaleDateString('en-US', { weekday: 'narrow' });
+
+            const fullDate = dateObj.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+
+            circlesHtml += `<div class="trend-circle ${cssClass}" title="${fullDate}: ${day.status}">${letter}</div>`;
+        });
+        circlesHtml += '</div>';
+
         topRow.innerHTML = `
-            <div class="stat-card ${rateClass}">
-                <div class="stat-value">${weeklyRate}%</div>
-                <div class="stat-label">Completion Rate</div>
+            <div class="stat-card">
+                ${circlesHtml}
+                <div class="stat-value" style="font-size: 1.5rem;">${weeklyRate}%</div>
+                <div class="stat-label">Weekly Consistency</div>
             </div>
             <div class="stat-card ${streakClass}">
                 <div class="stat-value">${streakTotal}</div>

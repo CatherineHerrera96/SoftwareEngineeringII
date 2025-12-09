@@ -61,7 +61,9 @@ function updateSeasonalHero() {
 }
 
 function getSeasonalMessages(seasonId) {
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
+    // If we are in the second half of the year (e.g. Dec), we are celebrating the UPCOMING new year.
+    const displayYear = now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
 
     const seasonalMessages = {
         'christmas': {
@@ -69,7 +71,7 @@ function getSeasonalMessages(seasonId) {
             subtitle: 'Make this holiday season your best yet with healthy habits and festive traditions.'
         },
         'new_year': {
-            title: '🎆 Happy New Year ' + currentYear + '!',
+            title: '🎆 Happy New Year ' + displayYear + '!',
             subtitle: 'Start the year strong with fresh goals and powerful habits. Your best year starts now!'
         },
         'halloween': {

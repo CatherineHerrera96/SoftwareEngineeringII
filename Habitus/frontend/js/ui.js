@@ -42,7 +42,14 @@ export function showNotification(msg, type = 'success') {
  * @returns {string} - 'light' or 'dark'
  */
 export function loadThemePreference() {
-    return localStorage.getItem('theme-preference') || 'light';
+    const stored = localStorage.getItem('theme-preference');
+    if (stored) return stored;
+
+    // Fallback to system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+    }
+    return 'light';
 }
 
 /**

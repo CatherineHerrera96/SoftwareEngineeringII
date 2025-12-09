@@ -24,6 +24,7 @@ class User(Base):
     name = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     timezone = Column(String, nullable=True)
+    created_at = Column(DateTime, nullable=True) # Added for stats logic
 
     usr_achievements = relationship("UserAchievement", back_populates="user")
 

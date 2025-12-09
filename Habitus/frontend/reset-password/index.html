@@ -23,7 +23,11 @@
 
 <body>
 
-    <section class="view-card login-card" style="display: block;">
+    <section class="view-card login-card" style="display: block; position: relative;">
+        <!-- Theme Toggle -->
+        <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Dark Mode"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer;">🌙</button>
+
         <img src="../favicon.svg" alt="Habitus" style="width: 64px; height: 64px; margin-bottom: 1rem;">
         <h1 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Set New Password</h1>
         <p style="color: var(--text-muted); margin-bottom: 2rem;">Enter your new password below</p>
@@ -53,6 +57,10 @@
 
     <script type="module">
         import { resetPassword } from '../js/api/authApi.js';
+        import { initTheme } from '../js/ui.js';
+
+        // Initialize theme (applies preference + sets up toggle)
+        initTheme();
 
         // Simple Notification Helper since we are outside main app
         function showNotification(message, type = 'success') {

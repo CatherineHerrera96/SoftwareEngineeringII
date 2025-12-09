@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from db import Base, engine
-from api import habits, user_habits, checkins, stats, achievements, profile, streak_window
+from api import habits, user_habits, checkins, stats, achievements, profile, streak_window, config_api
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,5 +26,6 @@ main_router.include_router(stats.router, prefix="/stats")
 main_router.include_router(achievements.router, prefix="/achievements")
 main_router.include_router(profile.router, prefix="/profile")
 main_router.include_router(streak_window.router, prefix="")
+main_router.include_router(config_api.router, prefix="/config")
 
 app.include_router(main_router, prefix="/api")

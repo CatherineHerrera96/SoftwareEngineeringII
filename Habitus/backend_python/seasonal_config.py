@@ -3,4 +3,4 @@
 
 # Set to None for no seasonal filtering (show all habits)
 # Set to 'christmas', 'halloween', 'summer', etc. to filter seasonal habits
-CURRENT_SEASON = None  # Change this to match frontend setting
+CURRENT_SEASON = None # Change this to match frontend setting

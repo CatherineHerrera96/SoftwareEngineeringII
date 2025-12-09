@@ -58,6 +58,9 @@ class UserHabitRead(BaseModel):
     id: int
     user_id: int
     habit_id: int
+    habit_name: str | None = None
+    habit_category: str | None = None
+    season_id: str | None = None
     is_active: bool
     current_streak: int = 0
     longest_streak: int = 0
@@ -141,6 +144,7 @@ class AchievementLockedRead(BaseModel):
 class AchievementStats(BaseModel):
     weekly_completion_rate: int
     total_streak_days: int
+    trend: list[dict] | None = None
 
 class AchievementsResponse(BaseModel):
     stats: AchievementStats

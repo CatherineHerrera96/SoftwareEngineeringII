@@ -154,6 +154,15 @@ export function initLoginView() {
 }
 
 export function renderLogin() {
-  // Logic to run when entering login view (e.g. clear inputs)
-  console.log("Rendering login view");
+  console.log("Rendering login view - resetting forms");
+
+  const forms = [
+    document.getElementById("login-form"),
+    document.getElementById("register-form"),
+    document.getElementById("forgot-password-form")
+  ];
+
+  forms.forEach(f => {
+    if (f) f.reset();
+  });
 }

@@ -49,11 +49,13 @@
       <form id="login-form">
         <div class="form-group">
           <label class="form-label">Email Address</label>
-          <input type="email" id="login-email" class="form-input" placeholder="your.email@example.com" required />
+          <input type="email" id="login-email" class="form-input" placeholder="your.email@example.com" required
+            autocomplete="username email" />
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required />
+          <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required
+            autocomplete="current-password" />
         </div>
 
         <div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
@@ -83,7 +85,8 @@
       <form id="forgot-password-form">
         <div class="form-group">
           <label class="form-label">Email Address</label>
-          <input type="email" id="forgot-email" class="form-input" placeholder="your.email@example.com" required />
+          <input type="email" id="forgot-email" class="form-input" placeholder="your.email@example.com" required
+            autocomplete="email" />
         </div>
         <button type="submit" class="btn-primary" id="forgot-submit-btn">Send Reset Link</button>
       </form>
@@ -102,12 +105,12 @@
         <div class="form-group">
           <label class="form-label">New Password</label>
           <input type="password" id="reset-password" class="form-input" placeholder="Enter new password" required
-            minlength="6" />
+            minlength="6" autocomplete="new-password" />
         </div>
         <div class="form-group">
           <label class="form-label">Confirm Password</label>
           <input type="password" id="reset-password-confirm" class="form-input" placeholder="Confirm new password"
-            required minlength="6" />
+            required minlength="6" autocomplete="new-password" />
         </div>
         <button type="submit" class="btn-primary" id="reset-submit-btn">Reset Password</button>
       </form>
@@ -125,17 +128,18 @@
       <form id="register-form">
         <div class="form-group">
           <label class="form-label">Email Address</label>
-          <input type="email" id="register-email" class="form-input" placeholder="your.email@example.com" required />
+          <input type="email" id="register-email" class="form-input" placeholder="your.email@example.com" required
+            autocomplete="email" />
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" id="register-password" class="form-input" placeholder="At least 8 characters"
-            required />
+          <input type="password" id="register-password" class="form-input" placeholder="At least 8 characters" required
+            autocomplete="new-password" />
         </div>
         <div class="form-group">
           <label class="form-label">Confirm Password</label>
           <input type="password" id="register-password-confirm" class="form-input" placeholder="Confirm your password"
-            required />
+            required autocomplete="new-password" />
         </div>
         <div class="form-group" style="text-align: left;">
           <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
@@ -247,15 +251,14 @@
               <form id="profile-edit-form">
                 <div class="form-group">
                   <label class="form-label">Display Name</label>
-                  <input type="text" id="edit-name" class="form-input" placeholder="Your name" />
+                  <input type="text" id="edit-name" class="form-input" placeholder="Your name" autocomplete="name" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Timezone</label>
                   <select id="edit-timezone" class="form-input">
                     <!-- Common Timezones -->
                     <option value="UTC">UTC (Universal Time)</option>
-                    <option value="America/Bogota">America/Bogota (GMT-5)</option>
-                    <option value="America/New_York">America/New_York (GMT-5/EDT)</option>
+                    <option value="America/Bogota">America/Bogota, New York (GMT-5)</option>
                     <option value="America/Los_Angeles">America/Los_Angeles (GMT-8/PDT)</option>
                     <option value="Europe/London">Europe/London (GMT/BST)</option>
                     <option value="Europe/Paris">Europe/Paris (CET)</option>
@@ -265,7 +268,8 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label">Avatar URL</label>
-                  <input type="text" id="edit-avatar" class="form-input" placeholder="https://..." />
+                  <input type="text" id="edit-avatar" class="form-input" placeholder="https://..."
+                    autocomplete="photo" />
                 </div>
                 <button type="submit" class="btn-primary">Save Changes</button>
               </form>
@@ -279,13 +283,13 @@
                 <div class="form-group">
                   <label class="form-label">Current Password</label>
                   <input type="password" id="email-current-password" class="form-input" required
-                    placeholder="Enter current password" />
+                    placeholder="Enter current password" autocomplete="current-password" />
                   <span class="form-error" id="email-current-password-error"></span>
                 </div>
                 <div class="form-group">
                   <label class="form-label">New Email Address</label>
                   <input type="email" id="new-email" class="form-input" required
-                    placeholder="your.new.email@example.com" />
+                    placeholder="your.new.email@example.com" autocomplete="email" />
                   <span class="form-error" id="new-email-error"></span>
                 </div>
                 <button type="submit" class="btn-primary">Update Email</button>
@@ -300,19 +304,19 @@
                 <div class="form-group">
                   <label class="form-label">Current Password</label>
                   <input type="password" id="password-current" class="form-input" required
-                    placeholder="Enter current password" />
+                    placeholder="Enter current password" autocomplete="current-password" />
                   <span class="form-error" id="password-current-error"></span>
                 </div>
                 <div class="form-group">
                   <label class="form-label">New Password</label>
                   <input type="password" id="password-new" class="form-input" required
-                    placeholder="Enter new password (min 8 characters)" />
+                    placeholder="Enter new password (min 8 characters)" autocomplete="new-password" />
                   <span class="form-error" id="password-new-error"></span>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Confirm New Password</label>
                   <input type="password" id="password-confirm" class="form-input" required
-                    placeholder="Confirm new password" />
+                    placeholder="Confirm new password" autocomplete="new-password" />
                   <span class="form-error" id="password-confirm-error"></span>
                 </div>
                 <button type="submit" class="btn-primary">Update Password</button>
@@ -330,7 +334,7 @@
                   <div class="form-group">
                     <label class="form-label">Current Password</label>
                     <input type="password" id="delete-current-password" class="form-input" required
-                      placeholder="Enter current password" />
+                      placeholder="Enter current password" autocomplete="current-password" />
                     <span class="form-error" id="delete-current-password-error"></span>
                   </div>
                   <div class="form-group">

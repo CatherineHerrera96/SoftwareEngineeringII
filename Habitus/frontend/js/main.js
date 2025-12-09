@@ -6,6 +6,7 @@ import { clearAuth, getToken } from "./state.js";
 import { initTheme, loadThemePreference, applyTheme } from "./ui.js";
 import { applyGlobalTheme } from "./config/seasonalThemes.js";
 import { setupConfirmModal } from "./views/habitsView.js";
+import { resetProfileViewState } from "./views/profileView.js";
 
 // Apply saved theme IMMEDIATELY to prevent flash
 const savedTheme = loadThemePreference();
@@ -49,12 +50,39 @@ function initLogout() {
   if (!btn) return;
 
   btn.addEventListener("click", () => {
+    resetProfileViewState();
     clearAuth();
     navigateTo("login");
   });
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+import { updateCurrentSeason } from "./config/seasonalThemes.js";
+
+// Helper to get API base
+function getApiBase() {
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  // If not localhost (e.g. Hamachi), assume port 8000 for backend
+  if (!isLocalhost) {
+    return `http://${window.location.hostname}:8000`; // Dynamically use the same IP as frontend
+  }
+  return 'http://localhost:8000'; // Default Dev
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  // 0. Fetch Backend Season Configuration (Sync Frontend <-> Backend)
+  try {
+    const API_BASE = getApiBase();
+    const res = await fetch(`${API_BASE}/api/config/season`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.season) {
+        updateCurrentSeason(data.season);
+      }
+    }
+  } catch (e) {
+    console.warn("Could not fetch seasonal config, using default:", e);
+  }
+
   applyGlobalTheme(); // Apply seasonal theme (will use already-set data-theme)
   initTheme(); // Initialize theme toggle button
   setupConfirmModal(); // Setup global confirmation modal
@@ -67,7 +95,44 @@ window.addEventListener("DOMContentLoaded", () => {
   // Initial View
   if (getToken()) {
     navigateTo("home"); // Start at home if logged in
+    startSeasonPolling(); // Start polling
   } else {
     navigateTo("login");
   }
 });
+
+// Polling interval (5 seconds for responsive UX during showcase)
+function startSeasonPolling() {
+  setInterval(async () => {
+    try {
+      const API_BASE = getApiBase();
+      const res = await fetch(`${API_BASE}/api/config/season`);
+      if (res.ok) {
+        const data = await res.json();
+        const { CURRENT_SEASON } = await import("./config/seasonalThemes.js");
+
+        // Only update if changed
+        if (data.season !== CURRENT_SEASON) {
+          console.log(`[Season Polling] Change detected: ${CURRENT_SEASON} -> ${data.season}`);
+          updateCurrentSeason(data.season);
+          applyGlobalTheme();
+
+          // Refresh current view to reflect changes (e.g. habits list)
+          const currentView = document.querySelector('.view-page:not(.hidden)');
+          if (currentView) {
+            const viewName = currentView.getAttribute('data-view');
+            if (viewName) navigateTo(viewName);
+          }
+
+          // Optional: Show toast
+          import('./ui.js').then(({ showNotification }) => {
+            const seasonName = data.season ? data.season.replace('_', ' ').toUpperCase() : 'DEFAULT';
+            showNotification(`Season updated to: ${seasonName}`, 'info');
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Season polling failed", e);
+    }
+  }, 5000);
+}
