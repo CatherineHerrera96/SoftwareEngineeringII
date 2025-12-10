@@ -13,6 +13,9 @@ ALTER TABLE habits ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE 
 
 -- Update user_habits table
 ALTER TABLE user_habits ADD COLUMN IF NOT EXISTS longest_streak INT NOT NULL DEFAULT 0;
+ALTER TABLE user_habits ADD COLUMN IF NOT EXISTS total_completions INT DEFAULT 0;
+ALTER TABLE user_habits ADD COLUMN IF NOT EXISTS last_completed_at DATE;
+ALTER TABLE user_habits ADD COLUMN IF NOT EXISTS next_available_checkin_at DATE;
 ALTER TABLE user_habits ALTER COLUMN current_streak SET DEFAULT 0;
 ALTER TABLE user_habits ALTER COLUMN current_streak SET NOT NULL;
 
