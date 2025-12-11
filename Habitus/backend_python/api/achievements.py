@@ -84,7 +84,18 @@ def list_my_achievements(
             
             seen_keys.add(unique_key)
             seen_achievement_ids.add(ach_def.id)
-
+            # print(
+            #     f"""{ach_def.id=!r}
+            #     {ach_def.code=!r}
+            #     {ach_def.name=!r}
+            #     {ach_def.description=!r}
+            #     {ach_def.category=!r}
+            #     {ach_def.tier=!r}
+            #     {ach_def.icon_emoji=!r}
+            #     {ach_def.awarded_at=!r}
+            #     {ach_def.habit_id=!r}
+            #     {h_name=!r}"""
+            # )
             unlocked_list.append(schemas.AchievementRead(
                 id=ach_def.id,
                 code=ach_def.code,
@@ -128,12 +139,12 @@ def list_my_achievements(
         if current_val >= ach.threshold_value:
             # Criteria met but not yet awarded. Award now.
             try:
-                from datetime import datetime
+                from datetime import datetime, timezone
                 new_ua = UserAchievement(
                     user_id=current_user.id,
                     achievement_id=ach.id,
                     habit_id=None, # Global stats usually don't link to single habit unless specific
-                    awarded_at=datetime.utcnow()
+                    awarded_at=datetime.now(timezone.utc)
                 )
                 db.add(new_ua)
                 db.commit()

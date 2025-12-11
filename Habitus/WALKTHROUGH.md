@@ -10,11 +10,11 @@ Before you start, ensure you have the following installed:
 
 - **Git**: For version control.
 - **Docker Desktop**: For running the PostgreSQL database and pgAdmin.
-- **Java 17+**: Required for the Authentication Service (Spring Boot).
-- **Python 3.10+**: Required for the Habits Service (FastAPI).
 - **Web Browser**: Chrome, Firefox, or Edge.
 
 ### Environment Variables
+When running the service through Docker you may declare the variables in a `.env` file within `./Habitus`. These variables will be passed to individual containers.
+
 The application uses default values for development, but you should be aware of:
 
 - **Database**:
@@ -26,6 +26,18 @@ The application uses default values for development, but you should be aware of:
     - `spring.mail.host`: Defaults to Mailtrap for dev.
 - **Habits Service (Python)**:
     - `STREAK_MODE`: `production` (default) or `test`.
+- **Docker Ports**:
+    - `DB_PORT`: `5432`
+    - `PGA_PORT`: `5050`
+    - `PY_PORT`: `8000`
+    - `JAVA_PORT`: `8080`
+    - `FRONT_PORT`: `8001`
+ 
+Check that these ports are free or use a .env to avoid conflicts. To check a port use:
+- Windows (powershell): 
+    ```powershell
+    netstat -aon | findstr ":<Port to check>"
+    ```
 
 ---
 
@@ -38,106 +50,29 @@ git clone <your-repo-url>
 cd Habitus
 ```
 
-### 2.2. Start the Database
+### 2.2. Start App
 
-We use Docker Compose to spin up PostgreSQL and pgAdmin.
+The proyect is setup with Docker to spin up PostgreSQL, pgAdmin, python backend, java backend and html5 frontend. All at the same time automaticaly.
 
 ```bash
 docker-compose up -d
 ```
-
-- **PostgreSQL** runs on port `5432`.
-- **pgAdmin** runs on port `5050` (http://localhost:5050).
-    - Default login: `admin@admin.com`
-    - Default password: `admin`
-
-**Note:** The database schema is initialized automatically via the volume mapping in `docker-compose.yml` (`./db:/docker-entrypoint-initdb.d`), which runs `habitusTables.sql` and `seedData.sql` on the first run.
-
-If you ever need to reset the DB:
+To shutdown the app use:
 ```bash
 docker-compose down -v
-docker-compose up -d
 ```
 
-### 2.3. Run Java Auth Service
+### 2.3 Updating changes
+Docker will cache the containers after beign built. This means that shutting it down and then back up won't update changes made to files.
 
-This service handles login, registration, and user profiles.
-
-1. Open a terminal in `backend-java/authservice`.
-2. **Create a `.env` file** in this directory:
-    ```properties
-    DB_URL=jdbc:postgresql://localhost:5432/habitus
-    DB_USERNAME=postgres
-    DB_PASSWORD=password
-    FRONTEND_URL=http://localhost:8001
-    ```
-    *Note: This file is required for the application to start.*
-
-3. Run the application using the Maven wrapper:
-
+For this use:
 ```bash
-cd backend-java/authservice
-# Windows
-.\mvnw.cmd spring-boot:run
-# Mac/Linux
-./mvnw spring-boot:run
+docker-compose down -v <Service>
+docker-compose up -d --build <Service>
 ```
+Where service is the specific service you wish to update, i.e. postgres for the database, python for python backend and so on.
 
-- **Port**: `8080`
-- **Verification**: Go to http://localhost:8080/auth/health (if endpoint exists) or just check console for "Started AuthApplication".
-
-### 2.4. Run Python Habits Service
-
-This service handles habits, check-ins, streaks, and achievements.
-
-1. Open a terminal in `backend_python`.
-2. Create and activate a virtual environment (recommended):
-
-```bash
-cd backend_python
-
-# Create venv
-python -m venv venv
-
-# Activate venv
-# Windows:
-.\venv\Scripts\Activate
-# Mac/Linux:
-source venv/bin/activate
-```
-
-3. Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-*Note: If you encounter issues with `psycopg2`, try installing `psycopg2-binary` manually.*
-
-4. Run the server:
-
-```bash
-# This command ensures it listens on all interfaces (important for some network setups)
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-- **Port**: `8000`
-- **Docs**: Visit http://localhost:8000/docs to see the Swagger UI.
-
-### 2.5. Run the Frontend
-
-The frontend is a vanilla JS application. You just need to serve the static files.
-
-1. Open a terminal in `frontend`.
-2. Serves files using Python's built-in HTTP server:
-
-```bash
-cd frontend
-python -m http.server 8001
-```
-
-- **Access URL**: http://localhost:8001
-
----
+If you don't put a service it will reload the whole service, taking more time to refresh.
 
 ## 3. Using the App
 

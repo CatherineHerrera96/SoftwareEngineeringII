@@ -43,8 +43,6 @@ For a detailed step-by-step setup guide, please refer to **[WALKTHROUGH.md](./WA
 ### Prerequisites
 - **Git**
 - **Docker Desktop**
-- **Java 17+**
-- **Python 3.9+**
 
 ### Minimal Setup Commands
 
@@ -54,30 +52,13 @@ For a detailed step-by-step setup guide, please refer to **[WALKTHROUGH.md](./WA
    cd Habitus
    ```
 
-2. **Start Database (Docker)**
+2. **Run Docker**
    ```bash
+   cd Habitus
    docker-compose up -d
    ```
 
-3. **Run Java Auth Service**
-   ```bash
-   cd backend-java/authservice
-   ./mvnw spring-boot:run
-   ```
-
-4. **Run Python Habit Service**
-   ```bash
-   cd backend_python
-   # (Create/Activate venv first - see WALKTHROUGH.md)
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-5. **Serve Frontend**
-   ```bash
-   cd frontend
-   python -m http.server 8001
-   ```
-   Access the app at `http://localhost:8001`.
+All done!
 
 ## 📂 Project Structure
 

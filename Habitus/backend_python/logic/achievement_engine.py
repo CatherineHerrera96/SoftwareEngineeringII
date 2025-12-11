@@ -6,7 +6,7 @@ Handles:
 - Unlocking new achievements
 - Preventing duplicate awards
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from sqlalchemy.orm import Session
 
@@ -84,7 +84,7 @@ async def evaluate_achievements(
                 "tier": achievement.tier,
                 "icon_emoji": achievement.icon_emoji,
                 "habit_id": target_habit_id,
-                "unlocked_at": datetime.utcnow().isoformat()
+                "unlocked_at": datetime.now(timezone.utc).isoformat()
             })
     
     if new_achievements:

@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from sqlalchemy import (
     Column,
     String,
@@ -50,16 +50,16 @@ class UserHabit(Base):
         UniqueConstraint("user_id", "habit_id", name="uq_user_habit"),
     )
 
-    id                        = Column(Integer, primary_key=True)
-    user_id                   = Column(Integer, ForeignKey("users.id"), nullable=False)
-    habit_id                  = Column(Integer, ForeignKey("habits.id"), nullable=False)
-    is_active                 = Column(Boolean, nullable=False, default=True)
-    current_streak            = Column(Integer, default=0)
-    longest_streak            = Column(Integer, default=0)
-    total_completions         = Column(Integer, default=0)
-    last_completed_at         = Column(DateTime(timezone=True), nullable=True)
+    id              = Column(Integer, primary_key=True)
+    user_id         = Column(Integer, ForeignKey("users.id"), nullable=False)
+    habit_id        = Column(Integer, ForeignKey("habits.id"), nullable=False)
+    is_active       = Column(Boolean, nullable=False, default=True)
+    current_streak  = Column(Integer, default=0)
+    longest_streak  = Column(Integer, default=0)
+    total_completions = Column(Integer, default=0)
+    last_completed_at = Column(DateTime(timezone=True), nullable=True)
     next_available_checkin_at = Column(DateTime(timezone=True), nullable=True)
-    activated_at              = Column(Date, default=date.today)
+    activated_at    = Column(Date, default=date.today)
 
     habits = relationship("Habit", back_populates="user_habits")
     checkins = relationship("Checkin", back_populates="user_habits")
@@ -86,7 +86,7 @@ class Achievement(Base):
     code            = Column(String, unique=True, nullable=False)  # e.g., "STREAK_3"
     name            = Column(String, nullable=False)
     description     = Column(String)
-    category        = Column(String, nullable=True) # streak | consistency | milestone
+    # category column removed as it does not exist in DB
     tier            = Column(String, nullable=True) # bronze | silver | gold
     icon_emoji      = Column(String, nullable=True) 
     threshold_type  = Column(String, nullable=False)  # "per_habit_streak" or "total_completions"
@@ -106,7 +106,7 @@ class UserAchievement(Base):
     user_id         = Column(Integer, ForeignKey("users.id"), nullable=False)
     achievement_id  = Column(Integer, ForeignKey("achievements.id"), nullable=False)
     habit_id        = Column(Integer, ForeignKey("habits.id"), nullable=True)  # For per-habit achievements
-    awarded_at      = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    awarded_at      = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     
     user = relationship("User", back_populates="usr_achievements")
     achievements = relationship("Achievement", back_populates="usr_achievements")
