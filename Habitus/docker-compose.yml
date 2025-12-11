@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -40,6 +38,7 @@ services:
       - postgres
     networks:
       - database
+      - frontend
 
   java:
     build: ./backend-java/

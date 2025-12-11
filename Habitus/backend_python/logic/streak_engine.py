@@ -8,7 +8,7 @@ Handles:
 - Timezone-aware datetime handling
 """
 import pytz
-from datetime import datetime, timedelta, timezone, time
+from datetime import datetime, timedelta, timezone, time, date as _date
 from typing import Tuple, Optional
 
 from sqlalchemy.orm import Session
@@ -104,15 +104,29 @@ def get_interval_index(dt: datetime, target_tz=None) -> int:
     - Production (Daily): Returns Ordinal Date in USER LOCALE.
     - Test: Returns bucket index based on Seconds from Epoch in UTC.
     """
+    # Normalize date objects (from older migrations) into datetimes.
+    if not isinstance(dt, datetime) and isinstance(dt, _date):
+        # Interpret a plain date as the start of that day (00:00) in the user's local zone
+        dt = datetime.combine(dt, time.min)
+
     if config.STREAK_MODE == config.StreakMode.PRODUCTION:
         # PRODUCTION: Day Indices based on Local Time
         # Ensure dt is in the target timezone (User's TZ)
         if target_tz:
-            if dt.tzinfo:
+            if getattr(dt, "tzinfo", None):
                 local_dt = dt.astimezone(target_tz)
             else:
-                # Naive to Aware... assume UTC if unknown, then convert
-                local_dt = dt.replace(tzinfo=timezone.utc).astimezone(target_tz)
+                # If dt is naive, assume it represents the user's local midnight
+                # when a target timezone is provided. Use tz.localize when available
+                try:
+                    # pytz timezone objects implement localize
+                    if hasattr(target_tz, "localize"):
+                        local_dt = target_tz.localize(dt)
+                    else:
+                        local_dt = dt.replace(tzinfo=target_tz)
+                except Exception:
+                    # Fallback: assume UTC
+                    local_dt = dt.replace(tzinfo=timezone.utc).astimezone(target_tz)
         else:
              # Look at dt's own tz info, fallback to UTC
              local_dt = dt
@@ -122,7 +136,11 @@ def get_interval_index(dt: datetime, target_tz=None) -> int:
     else:
         # TEST MODE: Absolute Seconds / Interval (UTC Based)
         epoch = datetime(2020, 1, 1, tzinfo=timezone.utc)
-        dt_utc = dt.astimezone(timezone.utc) if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        # Ensure dt is a datetime with tzinfo
+        if getattr(dt, "tzinfo", None):
+            dt_utc = dt.astimezone(timezone.utc)
+        else:
+            dt_utc = dt.replace(tzinfo=timezone.utc)
         seconds_since_epoch = (dt_utc - epoch).total_seconds()
         interval_seconds = config.STREAK_INTERVAL_SECONDS
         return int(seconds_since_epoch // interval_seconds)
