@@ -8,7 +8,7 @@ from ..db import Base, get_db
 from ..main import app
 from ..models import User
 
-# Usamos SQLite en memoria compartida entre conexiones
+# Use an in-memory SQLite database shared across connections
 SQLALCHEMY_DATABASE_URL = "sqlite://"
 
 engine = create_engine(
@@ -22,7 +22,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 def override_get_db():
     """
-    Sustituye la dependencia get_db de la app para usar la DB de pruebas.
+    Override the app's get_db dependency to use the test database.
     """
     db = TestingSessionLocal()
     try:
@@ -31,14 +31,14 @@ def override_get_db():
         db.close()
 
 
-# Hacemos que TODOS los endpoints usen la DB de pruebas
+# Make ALL endpoints use the test database
 app.dependency_overrides[get_db] = override_get_db
 
 
 def override_get_current_user():
     """
-    Sustituye la dependencia de autenticación para tests.
-    Crea/obtiene un usuario de pruebas y lo devuelve como usuario actual.
+    Override auth dependency for tests.
+    Create/fetch a test user and return it as the current user.
     """
     db = TestingSessionLocal()
     try:
@@ -59,22 +59,22 @@ app.dependency_overrides[get_current_user] = override_get_current_user
 @pytest.fixture(autouse=True)
 def prepare_database():
     """
-    Se ejecuta ANTES de cada test:
-    - Borra todas las tablas (si existen)
-    - Las vuelve a crear
-    Así cada test arranca con una BD limpia.
+    Runs BEFORE each test:
+    - Drops all tables (if they exist)
+    - Recreates them
+    Ensures every test starts with a clean database.
     """
     from backend_python import models  # asegura que los modelos están registrados en Base.metadata
 
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
-    # No hace falta drop_all aquí; el siguiente test lo hará al empezar.
+    # No need to drop_all here; the next test will do it at start.
 
 
 @pytest.fixture
 def client():
     """
-    Devuelve un TestClient que usa la app con la BD de pruebas.
+    Return a TestClient bound to the app using the test database.
     """
     return TestClient(app)
