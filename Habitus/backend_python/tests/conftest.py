@@ -14,7 +14,7 @@ SQLALCHEMY_DATABASE_URL = "sqlite://"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
-    poolclass=StaticPool,  # una sola conexión para todos
+    poolclass=StaticPool, # Ensures the in-memory DB persists across connections
 )
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -64,7 +64,7 @@ def prepare_database():
     - Recreates them
     Ensures every test starts with a clean database.
     """
-    from backend_python import models  # asegura que los modelos están registrados en Base.metadata
+    from backend_python import models # Import models to register them with Base
 
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
