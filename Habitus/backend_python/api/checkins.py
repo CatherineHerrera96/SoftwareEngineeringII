@@ -29,7 +29,7 @@ async def checkin_habit(
     """
     try:
         # Import streak engine
-        from logic.streak_engine import process_checkin, StreakError
+        from ..logic.streak_engine import process_checkin, StreakError
         
         # Verify user owns this user_habit
         user_habit = db.query(UserHabit).filter(UserHabit.id == checkin_in.user_habit_id).first()
@@ -76,7 +76,7 @@ async def checkin_habit(
                 
         else:
             # Undo Check-in (Handle "False" explicit flag)
-            from logic.streak_engine import undo_checkin
+            from ..logic.streak_engine import undo_checkin
             result = await undo_checkin(
                 db,
                 current_user.id,
