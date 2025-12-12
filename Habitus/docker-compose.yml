@@ -39,6 +39,7 @@ services:
     networks:
       - database
       - frontend
+    restart: on-failure
 
   java:
     build: ./backend-java/
