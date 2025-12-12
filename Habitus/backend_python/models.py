@@ -86,7 +86,7 @@ class Achievement(Base):
     code            = Column(String, unique=True, nullable=False)  # e.g., "STREAK_3"
     name            = Column(String, nullable=False)
     description     = Column(String)
-    # category column removed as it does not exist in DB
+    category        = Column(String)
     tier            = Column(String, nullable=True) # bronze | silver | gold
     icon_emoji      = Column(String, nullable=True) 
     threshold_type  = Column(String, nullable=False)  # "per_habit_streak" or "total_completions"
