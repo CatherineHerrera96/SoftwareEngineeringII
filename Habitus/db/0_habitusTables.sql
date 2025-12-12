@@ -52,12 +52,13 @@ CREATE TABLE habit_tracker (
 
 CREATE TABLE achievements (
     id               SERIAL PRIMARY KEY,
-    code             VARCHAR NOT NULL UNIQUE,
+    code             VARCHAR(50) NOT NULL UNIQUE,
     name             VARCHAR(255) NOT NULL,
     description      TEXT,
+    category         VARCHAR(100),
     tier             VARCHAR,
     icon_emoji       VARCHAR NOT NULL,
-    threshold_type   VARCHAR NOT NULL,
+    threshold_type   VARCHAR(50) NOT NULL,
     threshold_value  INT NOT NULL,
     is_active        BOOLEAN NOT NULL DEFAULT TRUE,
     created_at       TIMESTAMP DEFAULT NOW()
@@ -68,6 +69,6 @@ CREATE TABLE user_achievements (
     user_id         INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     achievement_id  INT NOT NULL REFERENCES achievements(id) ON DELETE CASCADE,
     habit_id        INT REFERENCES habits(id) ON DELETE CASCADE DEFAULT NULL,
-    awarded_at      TIMESTAMP DEFAULT NOW(),
+    awarded_at      TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(user_id, achievement_id, habit_id)
 );
