@@ -1,22 +1,5 @@
-/**
- * SEASONAL THEMES CONFIGURATION
- * 
- * ----------------------------------------------------------------------
- * GLOBAL SEASON SETTING
- * Change this value to enforce a specific season for the entire app.
- * 
- * SUPPORTED VALUES:
- * - 'christmas'  : Enforce Christmas themes
- * - 'new_year'   : Enforce New Year themes (Gold/Fireworks)
- * - 'halloween'  : Enforce Halloween themes
- * - 'summer'     : Enforce Summer themes
- * - 'valentine'  : Enforce Valentine's Day themes
- * - 'april_fools': Enforce April Fool's themes
- * - 'spring'     : Enforce Spring themes
- * - null         : ALLOW ALL (Automatic detection based on keywords)
- * ----------------------------------------------------------------------
- */
-export let CURRENT_SEASON = null; // Default to null, will be fetched from backend
+// Config managed by backend_python/seasonal_config.py
+export let CURRENT_SEASON = null;
 export const updateCurrentSeason = (newSeason) => {
     console.log('[Season Config] Updating current season to:', newSeason);
     CURRENT_SEASON = newSeason;
