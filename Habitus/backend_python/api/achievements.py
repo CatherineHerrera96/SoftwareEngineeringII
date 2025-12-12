@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from ..db import get_db
 from .. import schemas, crud
 from ..auth_deps import get_current_user
-from ..auth_deps import get_current_user
 from ..models import User, Achievement, UserAchievement, Habit, UserHabit
 
 router = APIRouter(tags=["achievements"])

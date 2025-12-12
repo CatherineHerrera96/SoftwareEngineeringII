@@ -105,7 +105,7 @@ class StatsWeeklyRead(BaseModel):
 
 
 class WeeklySummary(BaseModel):
-    user_id: int
+    user_id: str
     week_start: DateType
     completion_rate: float
     streak_global: int
