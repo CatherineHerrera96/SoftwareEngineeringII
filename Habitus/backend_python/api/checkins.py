@@ -42,12 +42,21 @@ async def checkin_habit(
             is_completed=checkin_in.is_completed,
         )
 
-        # Minimal payload for tests
+        # Evaluate achievements after successful check-in
+        new_achievements = []
+        if checkin_in.is_completed:
+            try:
+                new_achievements = evaluate_achievements(db, current_user.id, user_habit.habit_id)
+            except Exception as e:
+                print(f"Achievement evaluation error: {e}")
+
+        # Return response with checkin data and new achievements
         return {
             "id": checkin.id,
             "user_habit_id": checkin.user_habit_id,
             "log_date": checkin.log_date.isoformat(),
             "is_completed": checkin.is_completed,
+            "new_achievements": new_achievements
         }
     except HTTPException as he:
         raise he

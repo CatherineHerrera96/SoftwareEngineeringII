@@ -8,7 +8,7 @@ Handles:
 - Timezone-aware datetime handling
 """
 import pytz
-from datetime import datetime, timedelta, timezone, time
+from datetime import datetime, timedelta, timezone, time, date
 from typing import Tuple, Optional
 
 from sqlalchemy.orm import Session

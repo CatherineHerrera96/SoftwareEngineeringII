@@ -2,7 +2,7 @@
 export let CURRENT_SEASON = null;
 export const updateCurrentSeason = (newSeason) => {
     console.log('[Season Config] Updating current season to:', newSeason);
-    CURRENT_SEASON = newSeason;
+    CURRENT_SEASON = newSeason ? newSeason.toLowerCase() : null;
     applyGlobalTheme();
 };
 
