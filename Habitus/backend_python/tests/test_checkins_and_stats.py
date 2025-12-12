@@ -2,6 +2,10 @@ from datetime import date, timedelta
 
 
 def setup_user_and_habit(client, user_id: str):
+    """Helper: create a habit and assign it to the current user.
+
+    Returns one `user_habit` object suitable for check-in tests.
+    """
     # Create a habit
     resp = client.post(
         "/api/habits/",
@@ -24,6 +28,12 @@ def setup_user_and_habit(client, user_id: str):
 
 
 def test_checkins_are_idempotent_and_update_stats(client):
+    """Duplicate check-ins update the same record and weekly stats reflect it.
+
+    First check-in completes, second marks missed for the same day — the
+    endpoint must update, not create duplicates. Then weekly stats should
+    include at least one check-in and a non-negative completion rate.
+    """
     user_id = "user-456"
     user_habit = setup_user_and_habit(client, user_id)
     today = date.today()
@@ -67,6 +77,11 @@ def test_checkins_are_idempotent_and_update_stats(client):
 
 
 def test_weekly_stats_with_multiple_days_and_streak(client):
+    """Three consecutive days completed yields 100% rate and streak=3.
+
+    Verifies weekly totals, completed count, completion rate and global
+    streak for consecutive daily completions.
+    """
     user_id = "user-789"
     user_habit = setup_user_and_habit(client, user_id)
     base_day = date.today()

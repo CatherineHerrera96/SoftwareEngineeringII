@@ -1,4 +1,9 @@
 def test_create_and_list_habits(client):
+    """Create a custom habit and verify it appears in the list.
+
+    Ensures POST /api/habits returns 201 and the created habit fields,
+    and GET /api/habits includes the created habit for the current user.
+    """
     payload = {
         "description": "Drink every day some water",
         "name": "Drink water",
@@ -18,6 +23,11 @@ def test_create_and_list_habits(client):
 
 
 def test_assign_user_habit_and_list(client):
+    """Assign a habit to the current user and list user habits.
+
+    Verifies POST /api/user-habits assigns the habit and GET /api/user-habits
+    includes the assignment for the current user.
+    """
     # First create a habit
     payload = {
         "description": "Study once a day for one hour at least",
@@ -45,7 +55,11 @@ def test_assign_user_habit_and_list(client):
     assert any(item["habit_id"] == habit["id"] for item in lst)
 
 def test_habit_activation_toggle(client):
-    """Código 6.x: Test de activación de hábito."""
+    """Habit activation (Code 6.x): assign then deactivate.
+
+    Confirms a UserHabit is active upon assignment and that DELETE
+    /api/user-habits/{id} deactivates or removes it from the listing.
+    """
     resp = client.post(
         "/api/habits/",
         json={
