@@ -4,7 +4,7 @@ from datetime import date, timedelta
 def setup_user_and_habit(client, user_id: str):
     # Create a habit
     resp = client.post(
-        "/habits/",
+        "/api/habits/",
         json={
             "description": "Exercise once a day for at least 30 minutes",
             "name": "Exercise 30 minutes",
@@ -16,16 +16,11 @@ def setup_user_and_habit(client, user_id: str):
 
     # Assign to user
     resp = client.post(
-        "/user-habits/",
-        json=[
-            {
-                "user_id": user_id,
-                "habit_id": habit["id"]
-            },
-        ],
+        "/api/user-habits/",
+        json={"habit_ids": [str(habit["id"])]},
     )
-    user_habit = resp.json()
-    return user_habit[0]
+    user_habits = resp.json()
+    return user_habits[0]
 
 
 def test_checkins_are_idempotent_and_update_stats(client):
@@ -35,7 +30,7 @@ def test_checkins_are_idempotent_and_update_stats(client):
 
     # First checkin completed
     resp = client.post(
-        "/checkins/",
+        "/api/checkins/",
         json={
             "user_habit_id": user_habit["id"],
             "date": today.isoformat(),
@@ -48,10 +43,10 @@ def test_checkins_are_idempotent_and_update_stats(client):
 
     # Second checkin same day but missed -> should update, not create duplicate
     resp = client.post(
-        "/checkins/",
+        "/api/checkins/",
         json={
             "user_habit_id": user_habit["id"],
-            "log_date": today.isoformat(),
+            "date": today.isoformat(),
             "is_completed": False,
         },
     )
@@ -62,10 +57,10 @@ def test_checkins_are_idempotent_and_update_stats(client):
 
     # Weekly stats endpoint
     week_start = today.isoformat()
-    resp = client.get(f"/stats/weekly/{user_id}?week_start={week_start}")
+    resp = client.get(f"/api/stats/weekly?week_start={week_start}")
     assert resp.status_code == 200
     summary = resp.json()
-    assert summary["user_id"] == user_id
+    assert str(summary["user_id"]) == str(user_habit["user_id"])
     assert summary["checkins_total"] >= 1
     # Since last status is "missed", completion_rate could be 0
     assert summary["completion_rate"] >= 0.0
@@ -80,7 +75,7 @@ def test_weekly_stats_with_multiple_days_and_streak(client):
     for i in range(3):
         day = base_day + timedelta(days=i)
         resp = client.post(
-            "/checkins/",
+            "/api/checkins/",
             json={
                 "user_habit_id": user_habit["id"],
                 "date": day.isoformat(),
@@ -90,7 +85,7 @@ def test_weekly_stats_with_multiple_days_and_streak(client):
         assert resp.status_code == 201
 
     week_start = base_day.isoformat()
-    resp = client.get(f"/stats/weekly/{user_id}?week_start={week_start}")
+    resp = client.get(f"/api/stats/weekly?week_start={week_start}")
     assert resp.status_code == 200
     summary = resp.json()
     assert summary["checkins_total"] == 3

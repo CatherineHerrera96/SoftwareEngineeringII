@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter
-from seasonal_config import CURRENT_SEASON
+from ..seasonal_config import CURRENT_SEASON
 
 router = APIRouter(tags=["config"])
 

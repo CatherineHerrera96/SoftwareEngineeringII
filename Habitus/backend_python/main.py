@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from db import Base, engine
-from api import habits, user_habits, checkins, stats, achievements, profile, streak_window, config_api
+from .db import Base, engine
+from .api import habits, user_habits, checkins, stats, achievements, profile, streak_window, config_api
 
 Base.metadata.create_all(bind=engine)
 

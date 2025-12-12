@@ -5,8 +5,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_
 
-import models, schemas
-from stats_service import compute_weekly_stats, get_week_bounds
+from . import models, schemas
+from .stats_service import compute_weekly_stats, get_week_bounds
 
 
 # ----- User -----

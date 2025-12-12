@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from db import get_db
-from auth_deps import get_current_user
-from models import User
-from logic import streak_engine
+from ..db import get_db
+from ..auth_deps import get_current_user
+from ..models import User
+from ..logic import streak_engine
 
 router = APIRouter(tags=["streak"])
 

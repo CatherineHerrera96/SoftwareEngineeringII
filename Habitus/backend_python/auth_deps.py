@@ -2,8 +2,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
-from db import get_db
-import crud
+from .db import get_db
+from . import crud
 
 # MVP: Same secret as in Java backend
 SECRET_KEY = "my_super_secret_key_for_habitus_mvp_123456789"

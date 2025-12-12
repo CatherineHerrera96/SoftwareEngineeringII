@@ -15,8 +15,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
 
-from models import User, UserHabit, Checkin
-import config
+from ..models import User, UserHabit, Checkin
+from .. import config
 
 
 class StreakStatus:
@@ -212,7 +212,7 @@ async def process_checkin(
     user_id: int,
     habit_id: int
 ) -> StreakResult:
-    from logic.achievement_engine import evaluate_achievements
+    from .achievement_engine import evaluate_achievements
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user: raise StreakError("USER_NOT_FOUND", "User not found")

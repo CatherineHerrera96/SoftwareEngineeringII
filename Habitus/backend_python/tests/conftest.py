@@ -6,6 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from ..db import Base, get_db
 from ..main import app
+from ..models import User
 
 # Usamos SQLite en memoria compartida entre conexiones
 SQLALCHEMY_DATABASE_URL = "sqlite://"
@@ -32,6 +33,27 @@ def override_get_db():
 
 # Hacemos que TODOS los endpoints usen la DB de pruebas
 app.dependency_overrides[get_db] = override_get_db
+
+
+def override_get_current_user():
+    """
+    Sustituye la dependencia de autenticación para tests.
+    Crea/obtiene un usuario de pruebas y lo devuelve como usuario actual.
+    """
+    db = TestingSessionLocal()
+    try:
+        user = db.query(User).filter(User.email == "test@example.com").first()
+        if not user:
+            user = User(email="test@example.com", name="Test User", password_hash="test")
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        return user
+    finally:
+        db.close()
+
+from ..auth_deps import get_current_user
+app.dependency_overrides[get_current_user] = override_get_current_user
 
 
 @pytest.fixture(autouse=True)

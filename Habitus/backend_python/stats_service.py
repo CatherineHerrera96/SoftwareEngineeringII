@@ -3,8 +3,8 @@ from typing import Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 
-from models import Checkin, UserHabit
-from schemas import WeeklySummary
+from .models import Checkin, UserHabit
+from .schemas import WeeklySummary
 
 
 def get_week_bounds(week_start: date) -> Tuple[date, date]:
@@ -27,7 +27,6 @@ def compute_weekly_stats(db: Session, user_id: str, week_start: date) -> WeeklyS
             UserHabit.user_id == user_id,
             Checkin.log_date >= start,
             Checkin.log_date < end,
-            Checkin.is_completed == True
         )
     )
     checkins = q.all()
@@ -55,7 +54,7 @@ def compute_weekly_stats(db: Session, user_id: str, week_start: date) -> WeeklyS
 
 
     return WeeklySummary(
-        user_id=user_id,
+        user_id=str(user_id),
         week_start=start,
         completion_rate=completion_rate,
         streak_global=streak,

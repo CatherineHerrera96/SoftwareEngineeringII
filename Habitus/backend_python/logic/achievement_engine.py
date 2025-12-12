@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from typing import List
 from sqlalchemy.orm import Session
 
-from models import Achievement, UserAchievement
+from ..models import Achievement, UserAchievement
 
 
 async def evaluate_achievements(

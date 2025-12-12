@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends, Body, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from db import get_db
-import schemas, crud
-from auth_deps import get_current_user
-from models import User, UserHabit, Checkin
+from ..db import get_db
+from .. import schemas, crud
+from ..auth_deps import get_current_user
+from ..models import User, UserHabit, Checkin
 
 router = APIRouter(tags=["user-habits"])
 
@@ -56,8 +56,8 @@ def assign_user_habit(
     ]
 
 
-from logic import streak_engine
-from seasonal_config import CURRENT_SEASON
+from ..logic import streak_engine
+from ..seasonal_config import CURRENT_SEASON
 
 @router.get("/", response_model=List[schemas.UserHabitRead])
 def list_my_habits(
