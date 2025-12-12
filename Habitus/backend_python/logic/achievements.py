@@ -1,8 +1,8 @@
 # Logic for achievements
 from sqlalchemy.orm import Session
 from datetime import date
-from models import UserAchievement, Achievement, UserHabit, Checkin
-import schemas
+from ..models import UserAchievement, Achievement, UserHabit, Checkin
+from .. import schemas
 
 def check_and_unlock_achievements(user_id: int, db: Session):
     """

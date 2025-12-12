@@ -3,11 +3,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import date, timedelta
 
-from db import get_db
-import schemas, crud
-from auth_deps import get_current_user
-from models import User, Checkin, UserHabit
-from logic import achievements as achievement_logic
+from ..db import get_db
+from .. import schemas, crud
+from ..auth_deps import get_current_user
+from ..models import User, Checkin, UserHabit
+from ..logic import achievements as achievement_logic
 
 router = APIRouter(tags=["checkins"])
 

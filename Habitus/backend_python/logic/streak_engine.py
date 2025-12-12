@@ -15,8 +15,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
 
-from models import User, UserHabit, Checkin
-import config
+from ..models import User, UserHabit, Checkin
+from .. import config
 
 
 class StreakStatus:

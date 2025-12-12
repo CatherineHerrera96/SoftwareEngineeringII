@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from db import get_db
-import schemas, crud
-from auth_deps import get_current_user
-from models import User, Habit, UserHabit, Checkin
+from ..db import get_db
+from .. import schemas, crud
+from ..auth_deps import get_current_user
+from ..models import User, Habit, UserHabit, Checkin
 
 router = APIRouter(tags=["habits"])
 

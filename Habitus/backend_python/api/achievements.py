@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from db import get_db
-import schemas, crud
-from auth_deps import get_current_user
-from auth_deps import get_current_user
-from models import User, Achievement, UserAchievement, Habit, UserHabit
+from ..db import get_db
+from .. import schemas, crud
+from ..auth_deps import get_current_user
+from ..auth_deps import get_current_user
+from ..models import User, Achievement, UserAchievement, Habit, UserHabit
 
 router = APIRouter(tags=["achievements"])
 
@@ -33,7 +33,7 @@ def list_my_achievements(
     current_user: User = Depends(get_current_user)
 ):
     # 1. Get Stats
-    from stats_service import calculate_global_stats
+    from ..stats_service import calculate_global_stats
     stats_data = calculate_global_stats(db, current_user.id)
     
     # 2. Get All Achievements

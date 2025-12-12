@@ -3,8 +3,8 @@ from typing import Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 
-from models import Checkin, UserHabit
-from schemas import WeeklySummary
+from .models import Checkin, UserHabit
+from .schemas import WeeklySummary
 
 
 def get_week_bounds(week_start: date) -> Tuple[date, date]:
@@ -71,8 +71,8 @@ def calculate_global_stats(db: Session, user_id: int) -> dict:
     - Total streak days
     - 7-Day Trend (fixed Sun-Sat window) with Status (completed/lost/cold/future)
     """
-    import config
-    from models import User
+    from . import config
+    from .models import User
     
     # 1. Fetch User for created_at
     user = db.query(User).filter(User.id == user_id).first()
