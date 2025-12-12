@@ -1,0 +1,15 @@
+name: Test Proyect
+run-name: Run tests of ${{ inputs.deploy_target }} by @${{ github.actor }}
+on: pull_request
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    container: python:3.10-slim
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          python-version: 3.10
+      - run: cd ./Habitus
+      - run: pip install pytest
+      - run: pip install -r ./backend_python/requirements.txt
+      - run: pytest
