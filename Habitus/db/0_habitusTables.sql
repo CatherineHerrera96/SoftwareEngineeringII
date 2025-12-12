@@ -15,6 +15,13 @@ CREATE TABLE users (
     created_at     TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE password_reset_token (
+    id           SERIAL PRIMARY KEY,
+    token_hash   VARCHAR(255) NOT NULL UNIQUE,
+    user_id      INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expiry_date  TIMESTAMP NOT NULL
+);
+
 CREATE TABLE habits (
     id           SERIAL PRIMARY KEY,
     user_id      INT REFERENCES users(id) ON DELETE CASCADE, -- Nullable for system habits

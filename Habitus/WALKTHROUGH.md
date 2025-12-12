@@ -15,6 +15,14 @@ Before you start, ensure you have the following installed:
 ### Environment Variables
 When running the service through Docker you may declare the variables in a `.env` file within `./Habitus`. These variables will be passed to individual containers.
 
+For example, to configure the SMTP password securely:
+1. Create a file named `.env` in the root `Habitus` directory.
+2. Add the password:
+   ```
+   MAIL_PASSWORD=your_gmail_app_password
+   ```
+3. This variable will be automatically injected into the Java authentication service.
+
 The application uses default values for development, but you should be aware of:
 
 - **Database**:

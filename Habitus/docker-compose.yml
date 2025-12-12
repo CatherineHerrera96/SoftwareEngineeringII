@@ -27,7 +27,7 @@ services:
     restart: always
     networks:
       - database
-  
+
   python:
     build: ./backend_python/
     environment:
@@ -56,6 +56,8 @@ services:
     networks:
       - database
       - frontend
+    env_file:
+      - .env
 
   frontend:
     build: ./frontend/
