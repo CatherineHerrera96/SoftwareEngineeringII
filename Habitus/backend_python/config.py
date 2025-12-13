@@ -16,7 +16,7 @@ class StreakMode(str, Enum):
 
 
 # Environment variables
-STREAK_MODE = os.getenv("STREAK_MODE", "test").lower()
+STREAK_MODE = os.getenv("STREAK_MODE", "production").lower()
 STREAK_INTERVAL_SECONDS = int(os.getenv("STREAK_INTERVAL_SECONDS", "7"))
 
 

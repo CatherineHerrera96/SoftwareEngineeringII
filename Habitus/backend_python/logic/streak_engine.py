@@ -17,6 +17,7 @@ from sqlalchemy import desc
 
 from ..models import User, UserHabit, Checkin
 from .. import config
+from ..utils_time import get_user_now, get_user_timezone
 
 
 class StreakStatus:
@@ -78,23 +79,6 @@ class StreakResult:
             "debug": self.debug_info
         }
 
-
-def get_user_now(user: User) -> datetime:
-    """
-    Get current time in user's timezone.
-    """
-    if user.timezone:
-        try:
-            return datetime.now(pytz.timezone(user.timezone))
-        except Exception as e:
-            print(f"ERROR: Failed to load timezone '{user.timezone}': {e}")
-            # Manual fallback for the user's known timezone if system database is missing
-            if user.timezone == "America/Bogota":
-                return datetime.now(timezone(timedelta(hours=-5)))
-
-    # Default to UTC if no valid timezone
-    print(f"WARNING: Defaulting to UTC for user {user.id}")
-    return datetime.now(timezone.utc)
 
 
 def get_interval_index(dt: datetime, target_tz=None) -> int:

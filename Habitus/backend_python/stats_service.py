@@ -1,10 +1,13 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone
 from typing import Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 
 from .models import Checkin, UserHabit
 from .schemas import WeeklySummary
+from .utils_time import get_user_today, get_user_timezone
+
+# Removed local definition of get_user_today
 
 
 def get_week_bounds(week_start: date) -> Tuple[date, date]:
@@ -75,9 +78,16 @@ def calculate_global_stats(db: Session, user_id: int) -> dict:
     
     # 1. Fetch User for created_at
     user = db.query(User).filter(User.id == user_id).first()
-    created_at_date = user.created_at.date() if user and user.created_at else date.min
+    
+    created_at_date = date.min
+    if user and user.created_at:
+        # created_at is likely Naive UTC in Postgres/SQLAlchemy
+        # Localize it to User Timezone to determine the "User's First Day"
+        dt_utc = user.created_at.replace(tzinfo=timezone.utc) if not user.created_at.tzinfo else user.created_at
+        user_tz = get_user_timezone(user)
+        created_at_date = dt_utc.astimezone(user_tz).date()
 
-    today = date.today()
+    today = get_user_today(user)
     
     # Determine Calendar Week Start (Sunday)
     # weekday(): Mon=0, Sun=6
