@@ -1,0 +1,21 @@
+name: Deploy Proyect
+run-name: Deploy
+on:
+  push:
+    branches: main
+jobs:
+  deploy:
+    name: Deploy Proyect Locally
+    runs-on: self-hosted
+    steps:
+      - name: Run on Checkout Code
+        uses: actions/checkout@v3
+      - name: Shutdown and Remove Active Containers
+        working-directory: ./Habitus
+        run: docker-compose down -v
+      - name: add .env
+        working-directory: ./Habitus
+        run: wsl touch .env
+      - name: Build and Run Docker Containers
+        working-directory: ./Habitus
+        run: docker-compose up -d --build
