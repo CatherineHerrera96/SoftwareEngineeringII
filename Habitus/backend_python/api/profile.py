@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import models, schemas, db
+from .. import models, schemas
+from ..db import get_db
 from ..auth_deps import get_current_user
 
 router = APIRouter(tags=["profile"])
@@ -8,7 +9,7 @@ router = APIRouter(tags=["profile"])
 @router.get("/", response_model=schemas.UserRead)
 def get_profile(
     current_user: models.User = Depends(get_current_user),
-    db: Session = Depends(db.get_db)
+    db: Session = Depends(get_db)
 ):
     # Refresh user from DB to get latest fields
     db.refresh(current_user)
@@ -18,7 +19,7 @@ def get_profile(
 def update_profile(
     profile_update: schemas.UserUpdate,
     current_user: models.User = Depends(get_current_user),
-    db: Session = Depends(db.get_db)
+    db: Session = Depends(get_db)
 ):
     # Update fields if provided
     if profile_update.name is not None:

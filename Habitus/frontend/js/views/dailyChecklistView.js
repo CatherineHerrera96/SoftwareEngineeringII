@@ -260,7 +260,7 @@ function renderList(items, container) {
         // Show Achievement Toasts
         if (result.new_achievements && result.new_achievements.length > 0) {
           result.new_achievements.forEach(ach => {
-            showNotification(`🎉 Achievement Unlocked: ${ach.name}`, 'success');
+            showSuccess(`🎉 Achievement Unlocked: ${ach.name}`);
           });
           // Notify other views (e.g. Profile > Achievements tab)
           window.dispatchEvent(new CustomEvent('achievementUnlocked'));

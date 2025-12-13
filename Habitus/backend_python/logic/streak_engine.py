@@ -8,7 +8,7 @@ Handles:
 - Timezone-aware datetime handling
 """
 import pytz
-from datetime import datetime, timedelta, timezone, time
+from datetime import datetime, timedelta, timezone, time, date
 from typing import Tuple, Optional
 
 from sqlalchemy.orm import Session
@@ -212,7 +212,7 @@ async def process_checkin(
     user_id: int,
     habit_id: int
 ) -> StreakResult:
-    from logic.achievement_engine import evaluate_achievements
+    from .achievement_engine import evaluate_achievements
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user: raise StreakError("USER_NOT_FOUND", "User not found")

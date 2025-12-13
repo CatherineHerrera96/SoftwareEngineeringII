@@ -75,9 +75,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     const res = await fetch(`${API_BASE}/api/config/season`);
     if (res.ok) {
       const data = await res.json();
-      if (data.season) {
-        updateCurrentSeason(data.season);
-      }
+      // Always update, even if null (to allow backend to unset default)
+      updateCurrentSeason(data.season);
     }
   } catch (e) {
     console.warn("Could not fetch seasonal config, using default:", e);
