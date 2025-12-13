@@ -8,7 +8,7 @@ from ..db import get_db
 from .. import schemas, crud
 from ..auth_deps import get_current_user
 from ..models import User, Checkin, UserHabit
-from ..logic.achievement_engine import evaluate_achievements
+from ..logic.streak_engine import process_checkin, undo_checkin, StreakError
 
 router = APIRouter(tags=["checkins"])
 
@@ -34,30 +34,20 @@ async def checkin_habit(
         if not user_habit or user_habit.user_id != current_user.id:
             raise HTTPException(status_code=404, detail="User habit not found")
 
-        # Idempotent create/update of the checkin for given date
-        checkin = crud.create_or_update_checkin(
-            db,
-            user_habit_id=user_habit.id,
-            date_=checkin_in.date,
-            is_completed=checkin_in.is_completed,
-        )
-
-        # Evaluate achievements after successful check-in
-        new_achievements = []
+        # Delegate to Streak Engine
         if checkin_in.is_completed:
-            try:
-                new_achievements = evaluate_achievements(db, current_user.id, user_habit.habit_id)
-            except Exception as e:
-                print(f"Achievement evaluation error: {e}")
+            result = await process_checkin(db, current_user.id, user_habit.habit_id)
+        else:
+            result = await undo_checkin(db, current_user.id, user_habit.habit_id)
 
-        # Return response with checkin data and new achievements
-        return {
-            "id": checkin.id,
-            "user_habit_id": checkin.user_habit_id,
-            "log_date": checkin.log_date.isoformat(),
-            "is_completed": checkin.is_completed,
-            "new_achievements": new_achievements
-        }
+        return result.to_dict()
+
+    except StreakError as se:
+        # Map StreakErrors to HTTP exceptions
+        if se.code == "COOLDOWN":
+            raise HTTPException(status_code=409, detail=se.message)
+        else:
+            raise HTTPException(status_code=400, detail=se.message)
     except HTTPException as he:
         raise he
     except Exception as e:
